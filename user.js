@@ -3,7 +3,6 @@
 
 const pbkdf2 = require('native-crypto/pbkdf2');
 const Web3 = require('web3');
-const axios = require('axios');
 
 class User {
 
@@ -59,10 +58,7 @@ class User {
         } catch (err) {
             if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
                 // User doens't exist, so create
-                response = await axios.post(this._app.config.serverUrl + "user/create", {
-                    did: this.did,
-                    password: this.password
-                });
+                response = await this._app.client.createUser(this.did);
             }
             else {
                 // Unknown error

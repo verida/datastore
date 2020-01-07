@@ -14,6 +14,13 @@ class Client {
         return this.getAxios().get(this._app.config.serverUrl + "user/get?did=" + did);
     }
 
+    async createUser(did, password) {
+        return this.getAxios().post(this._app.config.serverUrl + "user/create", {
+            did: did,
+            password: password
+        });
+    }
+
     async createDatabase(did, databaseName) {
         this.getAxios().post(this._app.config.serverUrl + "user/createDatabase", {
             did: did,
