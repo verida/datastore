@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Birth Certificate",
+  "type": "object",
+  "properties": {
+    "firstName": {
+      "title": "First Name",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 60
+    },
+    "lastName": {
+      "title": "Last Name",
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 60
+    },
+    "gender": {
+      "title": "Gender",
+      "type": "string",
+      "enum":[ "Male", "Female" ]
+    },
+    "dateOfBirth": {
+      "title": "Date of Birth",
+      "type": "datetime"
+    },
+    "country": {
+      "title": "Country Of Origin",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 40
+    },
+    "residence": {
+      "title": "Country Of Residence",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 40
+    },
+    "father": {
+      "title": "Father",
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 10
+    },
+    "mother": {
+      "title": "Mother",
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 10
+    },
+    "No": {
+      "title": "No",
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 20
+    }
+  },
+  "required": ["firstName", "lastName", "gender", "passport", "father", "mother", "No", "dateOfBirth"]
+}

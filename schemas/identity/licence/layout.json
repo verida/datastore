@@ -1,0 +1,51 @@
+{
+  "list": [
+    "name",
+    "type",
+    "metricValue",
+    "datetimeStart",
+    "duration"
+  ],
+  "view": [
+    "name",
+    "type",
+    "metricValue",
+    "metricType",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "create": [
+    "firstName",
+    "lastName",
+    "gender",
+    "passport",
+    "country",
+    "residence"
+  ],
+  "update": [
+    "firstName",
+    "lastName",
+    "gender",
+    "metricType",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "search": [
+    "name",
+    "type",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "export": [
+    "name",
+    "type",
+    "metricValue",
+    "metricType",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ]
+}

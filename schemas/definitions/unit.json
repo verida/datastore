@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "$id": "http://example.com/definitions/schema.json",
+  "definitions": {
+    "measure": {
+      "$id": "#measure",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10000
+        },
+        "unit": {
+          "type": "string",
+          "enum": [
+            "mi",
+            "km",
+            "cm",
+            "kg"
+          ]
+        }
+      },
+      "required": ["value"]
+    }
+  },
+  "properties": {
+    "measure": {
+      "$ref": "#measure"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "identity": [
+    {
+      "title": "Drivers License",
+      "type": "warning",
+      "icon": "DriverLicense"
+    },
+    {
+      "title": "Valid Passport",
+      "type": "error",
+      "to": "passport",
+      "icon": "DriverLicense"
+    },
+    {
+      "title": "Birth Certificate",
+      "type": "info",
+      "icon": "DriverLicense"
+    }
+  ],
+  "health": [
+    {
+      "title": "Measurement",
+      "type": "error",
+      "icon": "Measurement"
+    },
+    {
+      "title": "Activities",
+      "type": "error",
+      "icon": "StretchingExercises"
+    },
+    {
+      "title": "Results",
+      "type": "error",
+      "icon": "WaterTest"
+    },
+    {
+      "title": "Notes",
+      "type": "error",
+      "icon": "Notes"
+    }
+  ],
+  "employment": [
+    {
+      "title": "McDonalds",
+      "type": "warning",
+      "icon": "McDonalds"
+    },
+    {
+      "title": "Telstra",
+      "type": "warning",
+      "icon": "Telstra"
+    },
+    {
+      "title": "PwC",
+      "type": "warning",
+      "icon": "PwC"
+    }
+  ],
+  "finance": [
+    {
+      "title": "Crypto",
+      "type": "info",
+      "icon": "Crypto"
+    },
+    {
+      "title": "Credit Card",
+      "type": "info",
+      "icon": "CreditCard"
+    },
+    {
+      "title": "Bank",
+      "type": "info",
+      "icon": "Bank"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "verida-datastore",
+  "version": "0.0.1",
+  "description": "Verida Datastore",
+  "main": "app.js",
+  "author": "Verida",
+  "license": "Apache-2.0",
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "dependencies": {
+    "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
+    "json-schema-ref-parser": "^7.1.2",
+    "lodash": "^4.17.15",
+    "pouchdb-browser": "^7.1.1",
+    "pouchdb-find": "^7.1.1",
+    "uuid": "^3.3.3",
+    "web3": "^1.2.4"
+  }
+}

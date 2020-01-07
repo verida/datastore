@@ -1,0 +1,38 @@
+{
+  "list": [
+    "img",
+    "name",
+    "metric",
+    "date"
+  ],
+  "view": [
+    "img",
+    "name",
+    "metric",
+    "date"
+  ],
+  "create": [
+    "img",
+    "name",
+    "metric",
+    "dateOfMeasurement"
+  ],
+  "update": [
+    "img",
+    "name",
+    "metric",
+    "date"
+  ],
+  "search": [
+    "img",
+    "name",
+    "metric",
+    "date"
+  ],
+  "export": [
+    "img",
+    "name",
+    "metric",
+    "date"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "list": [
+    "img",
+    "name",
+    "distance",
+    "cal",
+    "date"
+  ],
+  "view": [
+    "img",
+    "name",
+    "type",
+    "metric",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "create": [
+    "img",
+    "name",
+    "type",
+    "metric",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "update": [
+    "img",
+    "name",
+    "type",
+    "metric",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "search": [
+    "name",
+    "type",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ],
+  "export": [
+    "name",
+    "type",
+    "metric",
+    "datetimeStart",
+    "datetimeEnd",
+    "duration"
+  ]
+}

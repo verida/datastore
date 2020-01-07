@@ -1,0 +1,26 @@
+{
+  "list": [
+
+  ],
+  "view": [
+
+  ],
+  "create": [
+    "No",
+    "firstName",
+    "lastName",
+    "gender",
+    "dateOfBirth",
+    "father",
+    "mother"
+  ],
+  "update": [
+
+  ],
+  "search": [
+
+  ],
+  "export": [
+
+  ]
+}

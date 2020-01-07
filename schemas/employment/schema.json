@@ -1,0 +1,34 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "schemas/employment/schema.json",
+    "title": "Employment",
+    "description": "A record of employment at an organistion",
+    "type": "object",
+    "database": {
+        "name": "document"
+    },
+    "allOf": [
+        {"$ref": "/schemas/base/schema.json"},
+        {
+            "properties": {
+                "organisationName": {
+                    "title": "Organisation name",
+                    "type": "string"
+                },
+                "position": {
+                    "title": "Position",
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "endDate": {
+                    "type": "string",
+                    "format": "date"
+                }
+            },
+            "required": ["organisationName", "position", "startDate", "endDate"]
+        }
+    ]
+  }

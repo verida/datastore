@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "identity/passport/schema.json",
+  "title": "Passport",
+  "description": "A passport document",
+  "type": "object",
+  "allOf": [
+    {"$ref": "base/schema.json"},
+    {
+      "properties": {
+        "firstName": {
+          "title": "First Name",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "lastName": {
+          "title": "Last Name",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "gender": {
+          "title": "Gender",
+          "type": "string",
+          "enum": ["Male", "Female"]
+        },
+        "dateOfBirth": {
+          "title": "Date of birth",
+          "type": "string",
+          "format": "date"
+        },
+        "placeOfBirth": {
+          "title": "Place of birth",
+          "type": "string"
+        },
+        "passportNumber": {
+          "title": "Passport Number",
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 15
+        },
+        "dateOfIssue": {
+          "title": "Date of issue",
+          "type": "string",
+          "format": "date"
+        },
+        "dateOfExpiry": {
+          "title": "Date of expiry",
+          "type": "string",
+          "format": "date"
+        },
+        "nationality": {
+          "title": "Nationality",
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40
+        },
+        "issuingAuthority": {
+          "title": "Issuing authority",
+          "type": "string"
+        },
+        "verifiedBy": {
+          "title": "Verified by",
+          "type": "string"
+        },
+        "verifiedAt": {
+          "title": "Verified at",
+          "type": "string"
+        }
+      },
+      "required": ["firstName", "lastName", "gender", "passport", "countryOfOrigin", "residence"]
+    }
+  ]
+}

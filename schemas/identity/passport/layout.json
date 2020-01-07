@@ -1,0 +1,23 @@
+{
+  "list": [],
+  "view": [
+
+  ],
+  "create": [
+    "firstName",
+    "lastName",
+    "gender",
+    "passport",
+    "country",
+    "residence"
+  ],
+  "update": [
+
+  ],
+  "search": [
+
+  ],
+  "export": [
+
+  ]
+}
