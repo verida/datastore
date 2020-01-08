@@ -161,6 +161,7 @@ class Base extends EventEmitter {
      * @param {*} id 
      */
     async get(docId, options) {
+        console.log("get()");
         let db = await this.getDb();
 
         let defaults = {};

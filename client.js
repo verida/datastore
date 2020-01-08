@@ -36,7 +36,8 @@ class Client {
                     password: this.password
                 },
                 headers: {
-                    "Application-Name": this._app.name
+                    "Application-Name": this._app.name,
+                    "Application-Host": this._app.config.host
                 }
             });
         }

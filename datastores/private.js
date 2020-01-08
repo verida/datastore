@@ -6,6 +6,7 @@ import Base from "./base";
 import PouchDBCrypt from 'pouchdb-browser';
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
+import Utils from "../utils";
 
 PouchDBCrypt.plugin(PouchDBFind);
 PouchDB.plugin(PouchDBFind);
@@ -48,24 +49,26 @@ class Private extends Base {
         });
 
         this._remoteDbEncrypted = new PouchDB(this._user.dsn + databaseName);
-
-        // TODO:
-        //  - implement security checks
-        //  - create keyring
-
         
         try {
             await this._remoteDbEncrypted.info();
         } catch(err) {
             await this._app.client.createDatabase(this._user.did, databaseName);
+            // There's an odd timing issue that needs a deeper investigation
+            await Utils.sleep(1000);
         }
 
         // Start syncing the local encrypted database with the remote encrypted database
         PouchDB.sync(this._localDbEncrypted, this._remoteDbEncrypted, {
             live: true,
             retry: true
+        }).on("error", function(err) {
+            console.log("sync error");
+            console.log(err);
+        }).on("denied", function(err) {
+            console.log("denied error");
+            console.log(err);
         });
-
     }
 
     async getDb() {

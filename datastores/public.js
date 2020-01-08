@@ -5,6 +5,7 @@ import Base from "./base";
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 PouchDB.plugin(PouchDBFind);
+import Utils from "../utils";
 
 /*
  * DataStore that is public to read and write
@@ -35,11 +36,20 @@ class Public extends Base {
             await this._remoteDb.info();
         } catch(err) {
             await this._app.client.createDatabase(this._user.did, databaseName);
+            // There's an odd timing issue that needs a deeper investigation
+            await Utils.sleep(1000);
         }
 
         // Start syncing the local encrypted database with the remote encrypted database
         PouchDB.sync(this._localDb, this._remoteDb, {
-            live: true
+            live: true,
+            retry: true
+        }).on("error", function(err) {
+            console.log("sync error");
+            console.log(err);
+        }).on("denied", function(err) {
+            console.log("denied error");
+            console.log(err);
         });
     }
 
