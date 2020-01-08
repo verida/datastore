@@ -14,9 +14,9 @@ The Verida Datastore is the first component in a broader ecosystem of open sourc
 
 ## Getting Started
 
-### [Datastore library](http://www.github.com/verida/datastore/lib)
+### [Datastore library](http://www.github.com/verida/datastore)
 
-A nodejs library which provides a drop in self sovereign data storage solution for any application.
+This nodejs library which provides a drop in self sovereign data storage solution for any web application.
 
 Install into your application:
 
@@ -29,7 +29,8 @@ Create an application instance and ask the user to authorize your application:
 ```
 import VeridaApp from 'verida/datastore';
 
-let myApp = new VeridaApp("My Application Name");
+let config = {};
+let myApp = new VeridaApp("My Application Name", config);
 await myApp.connectUser();
 ```
 
@@ -63,21 +64,6 @@ Example: Fetch employment documents where the user had the position `Product Man
 let profileData = myApp.getMany("profile");
 let employmentData = myApp.getMany("employment", {position: "Product Manager"});
 ```
-
-### [Datastore demo](http://www.github.com/verida/datastore/lib)
-
-This is a basic demo application showing how to use the Verida Datastore:
-
-- Creating an application instance
-- Creating and updating data
-- Deleting data
-- Querying data
-- Dynamically updating the UI when data changes
-- Creating custom schemas for your application data
-
-### [Datastore demo](http://www.github.com/verida/datastore/schemas)
-
-This is a folder containing all the (alpha draft) base schemas supported by Verida Datastore.
 
 # Architecture
 
@@ -192,3 +178,10 @@ let employmentData = myApp.getMany("health/activity", {
 });
 ```
 
+# Verida Projects
+
+Also see:
+
+- [Verida Datastore Demo](http://www.github.com/verida/datastore-demo)
+- [Verida Schemas](http://www.github.com/verida/schemas)
+- [Verida Datastore Server](https://github.com/verida/datastore-server)
