@@ -70,7 +70,7 @@ class Datastore {
      */
     async _getDataStore(name, dataStoreConfig) {
         let dataStore = null;
-        let syncToWallet = dataStoreConfig[syncToWallet] ? true : false;
+        let syncToWallet = dataStoreConfig["syncToWallet"] ? true : false;
 
         switch (dataStoreConfig.privacy) {
             case "private":
