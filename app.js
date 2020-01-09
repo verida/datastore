@@ -7,7 +7,6 @@ import VeridaUser from "./user";
 import VeridaSchema from "./schema";
 import Client from "./client";
 import Wallet from './wallet';
-import Profile from './profile';
 import Datastore from './datastore';
 
 const _ = require('lodash');
@@ -21,7 +20,6 @@ class App {
         
         this.client = new Client(this);
         this.wallet = new Wallet(this);
-        this.profile = new Profile(this);
 
         this.user = null;
         this.errors = null;
