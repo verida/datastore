@@ -22,6 +22,16 @@ class Profile {
     }
 
     /**
+     * Get many profile values
+     * 
+     * @param {string} key 
+     */
+    async getMany(filter, options) {
+        await this._init();
+        return this._store.getMany(filter, options);
+    }
+
+    /**
      * Set a profile value by key
      * 
      * @param {string} key 
@@ -29,7 +39,10 @@ class Profile {
      */
     async set(key, value) {
         await this._init();
-        return this._store.save(key, value);
+        return this._store.save({
+            "key": key,
+            "value": value
+        });
     }
 
     _init() {
