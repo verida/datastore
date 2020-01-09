@@ -39,9 +39,7 @@ class Client {
                     password: this.password
                 },
                 headers: {
-                    "Application-Name": this._dataserver.appName,
-                    "Application-Host": this._dataserver.appHost,
-                    "Application-Sign-Type": this.isUser ? "user" : "application"
+                    "Application-Name": this.isUser ? "Verida Wallet" : this._dataserver.appName
                 }
             });
         }

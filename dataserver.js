@@ -98,11 +98,8 @@ class DataServer {
     }
 
     _getSignMessage() {
-        if (this.config.isUser) {
-            return "\""+this.app.name+"\" (" + window.location.hostname +") is requesting access to your Public Profile.\n\n" + this.app.user.did;
-        }
-
-        return "\""+this.app.name+"\" (" + window.location.hostname +") is requesting access to your Application Data.\n\n" + this.app.user.did;
+        let appName = this.config.isUser ? "Verida Wallet" : this.app.name;
+        return "Do you approve access to \""+appName+"\"?\n\n" + this.app.user.did;
     }
 
 }
