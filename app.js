@@ -5,9 +5,8 @@ import Config from './config';
 
 import VeridaUser from "./user";
 import VeridaSchema from "./schema";
-import Client from "./client";
 import Wallet from './wallet';
-import Datastore from './datastore';
+import DataServer from './dataserver';
 
 const _ = require('lodash');
 
@@ -18,25 +17,24 @@ class App {
         this.config = {};
         _.merge(this.config, Config, config);
         
-        this.client = new Client(this);
-        this.wallet = new Wallet(this);
-
         this.user = null;
+        this.wallet = new Wallet(this);
         this.errors = null;
 
-        this._datastores = {};
         this._schemas = {};
-    }
-
-    /**
-     * Set the credentials for this user
-     * 
-     * @param {*} username 
-     * @param {*} password 
-     */
-    setCredentials(username, password) {
-        this.client.username = username;
-        this.client.password = password;
+        this._dataservers = {
+            app: new DataServer(this, {
+                datastores: this.config.datastores,
+                serverUrl: this.config.appServerUrl,
+                appHost: this.config.appHost,
+                isUser: false
+            }),
+            user: new DataServer(this, {
+                serverUrl: this.config.userServerUrl,
+                dsn: this.config.walletDsn,
+                isUser: true
+            }),
+        };
     }
 
     /**
@@ -48,17 +46,12 @@ class App {
         }
 
         this.user = new VeridaUser(this);
-        await this.user.connect();
+        await this._dataservers.app.connect();
+        await this._dataservers.user.connect();
     }
 
     openDatastore(name) {
-        if (this._datastores[name]) {
-            return this._datastores[name];
-        }
-
-        this._datastores[name] = new Datastore(this, name);
-
-        return this._datastores[name];
+        return this._dataservers.app.openDatastore(name);
     }
 
     async getSchema(schemaName) {
@@ -67,18 +60,6 @@ class App {
         }
 
         return this._schemas[schemaName];
-    }
-
-    getDataStoreConfig(schemaName, extraConfig) {
-        let config = {};
-        extraConfig = extraConfig ? extraConfig : {};
-        _.merge(config, this.config.datastores.default, extraConfig);
-
-        if (typeof(this.config.datastores[schemaName]) !== 'undefined') {
-            _.merge(config, this.config.datastores[schemaName]);
-        }
-
-        return config;
     }
 
 }

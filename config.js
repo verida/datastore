@@ -1,8 +1,10 @@
 
 module.exports = {
-    serverUrl: "http://localhost:5000/",
+    appServerUrl: "http://localhost:5000/",
+    appHost: "localhost",
+    userServerUrl: "http://localhost:5000/",
     dbHashKey: "9c2b7826978f2c49678",
-    host: "localhost",
+    walletDsn: 'http://localhost:5984/',
     datastores: {
         default: {
             privacy: "private"

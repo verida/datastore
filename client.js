@@ -2,29 +2,32 @@ const axios = require('axios');
 
 class Client {
 
-    constructor(app) {
-        this._app = app;
+    constructor(dataserver) {
+        this._dataserver = dataserver;
         this._axios = null;
 
         this.username = null;
         this.password = null;
+        this.isUser =  this._dataserver.config.isUser;
     }
 
     async getUser(did) {
-        return this.getAxios().get(this._app.config.serverUrl + "user/get?did=" + did);
+        return this.getAxios().get(this._dataserver.serverUrl + "user/get?did=" + did);
     }
 
     async createUser(did, password) {
-        return this.getAxios().post(this._app.config.serverUrl + "user/create", {
+        return this.getAxios().post(this._dataserver.serverUrl + "user/create", {
             did: did,
             password: password
         });
     }
 
-    async createDatabase(did, databaseName) {
-        this.getAxios().post(this._app.config.serverUrl + "user/createDatabase", {
+    async createDatabase(did, databaseName, options) {
+        options = options ? options : {};
+        this.getAxios().post(this._dataserver.serverUrl + "user/createDatabase", {
             did: did,
-            databaseName: databaseName
+            databaseName: databaseName,
+            options: options
         });
     }
 
@@ -36,8 +39,9 @@ class Client {
                     password: this.password
                 },
                 headers: {
-                    "Application-Name": this._app.name,
-                    "Application-Host": this._app.config.host
+                    "Application-Name": this._dataserver.appName,
+                    "Application-Host": this._dataserver.appHost,
+                    "Application-Sign-Type": this.isUser ? "user" : "application"
                 }
             });
         }

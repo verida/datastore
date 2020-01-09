@@ -15,7 +15,7 @@ class Wallet {
      * @param {string} name 
      */
     openDataStore(name) {
-        return new Datastore(this._app, name, {
+        return new Datastore(this._app._dataservers.user, name, {
             privacy: "public",
             syncToWallet: true
         });

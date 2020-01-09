@@ -13,10 +13,11 @@ const crypto = require('crypto');
  */
 class Base extends EventEmitter {
 
-    constructor(dbName, app, config) {
+    constructor(dbName, dataserver, config) {
         super();
         this.dbName = dbName;
-        this._app = app;            // TODO: move to class
+        this._dataserver = dataserver;
+        this._app = this._dataserver.app;
         this._config = config;
         this._dbHash = null;
     }
@@ -30,14 +31,12 @@ class Base extends EventEmitter {
             return this._dbHash;
         }
 
-        let appName = this._config.useWallet ? "Verida Wallet" : this._app.name;
-
         // Set hashkey based on wallet config
-        let hashKey = this._config.privacy == "private" ? this._app.user.password : (this._app.name + "/" + this._app.config.dbHashKey);
+        let hashKey = this._config.privacy == "private" ? this._dataserver.signature : (this._app.name + "/" + this._dataserver.dbHashKey);
         hashKey = this._config.useWallet ? "Verida Wallet" : hashKey;
         
 
-        let text = this._app.user.did + '/' + appName + '/' + this.dbName + '/' + this._config.privacy + '/' + (this._config.publicWrite ? 1 : 0);
+        let text = this._app.user.did + '/' + this._app.name + '/' + this.dbName + '/' + this._config.privacy + '/' + (this._config.publicWrite ? 1 : 0);
         let hash = crypto.createHmac('sha256', hashKey);
         hash.update(text);
         this._dbHash = hash.digest('hex');

@@ -50,8 +50,9 @@ class Profile {
             return;
         }
 
-        this._store = new Datastore(this._app, "profile", {
-            privacy: "public"
+        this._store = new Datastore(this._app._dataservers.user, "profile", {
+            privacy: "public",
+            useWallet: true
         });
     }
 

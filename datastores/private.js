@@ -21,8 +21,8 @@ PouchDBCrypt.plugin(CryptoPouch);
  */
 class Private extends Base {
 
-    constructor(dbName, app, config) {
-        super(dbName, app, config);
+    constructor(dbName, dataserver, config) {
+        super(dbName, dataserver, config);
 
         // Local copy of the database encrypted
         this._localDbEncrypted = null;
@@ -39,8 +39,8 @@ class Private extends Base {
 
         this._localDbEncrypted = new PouchDB(databaseName);
         this._localDb = new PouchDBCrypt(databaseName);
-        this._localDb.crypto(this._app.user.password, {
-            "key": this._app.user.key,
+        this._localDb.crypto(this._dataserver.signature, {
+            "key": this._dataserver.key,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');
@@ -49,12 +49,12 @@ class Private extends Base {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(this._app.user.dsn + databaseName);
+        this._remoteDbEncrypted = new PouchDB(this._dataserver.dsn + databaseName);
         
         try {
             await this._remoteDbEncrypted.info();
         } catch(err) {
-            await this._app.client.createDatabase(this._app.user.did, databaseName);
+            await this._dataserver.client.createDatabase(this._app.user.did, databaseName);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }

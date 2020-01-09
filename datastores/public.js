@@ -12,8 +12,8 @@ import Utils from "../utils";
  */
 class Public extends Base {
 
-    constructor(dbName, app, config) {
-        super(dbName, app, config);
+    constructor(dbName, dataserver, config) {
+        super(dbName, dataserver, config);
 
         this._localDb = null;
         this._remoteDb = null;
@@ -21,8 +21,9 @@ class Public extends Base {
 
     async _init() {
         let databaseName = this.getDatabaseHash();
+        let dsn = this._dataserver.dsn;
 
-        this._remoteDb = new PouchDB(this._app.user.dsn + databaseName, {
+        this._remoteDb = new PouchDB(dsn + databaseName, {
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to remote DB');
@@ -36,7 +37,7 @@ class Public extends Base {
         } catch(err) {
             let options = {};
             options.publicWrite = this._config.publicWrite ? true : false;
-            await this._app.client.createDatabase(this._app.user.did, databaseName, options);
+            await this._dataserver.client.createDatabase(this._app.user.did, databaseName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }

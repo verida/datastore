@@ -8,8 +8,9 @@ const _ = require('lodash');
  */
 class Datastore {
 
-    constructor(app, schemaName, config) {
-        this._app = app;
+    constructor(dataserver, schemaName, config) {
+        this._dataserver = dataserver;
+        this._app = this._dataserver.app;
         this.name = schemaName;
         this.errors = {};
         this.config = config;
@@ -68,22 +69,19 @@ class Datastore {
      * options.privacy = public,private,restricted
      */
     async _getDataStore(name, dataStoreConfig) {
-        if (!this._app.user) {
-            throw "User not connected";
-        }
-
         let dataStore = null;
         let syncToWallet = dataStoreConfig[syncToWallet] ? true : false;
 
         switch (dataStoreConfig.privacy) {
             case "private":
-                dataStore = new PrivateDataStore(name, this._app, {
+                dataStore = new PrivateDataStore(name, this._dataserver, {
                     syncToWallet: syncToWallet
                 });
                 break;
             case "public":
-                dataStore = new PublicDataStore(name, this._app, {
-                    syncToWallet: syncToWallet
+                dataStore = new PublicDataStore(name, this._dataserver, {
+                    syncToWallet: syncToWallet,
+                    useWallet: this.config.useWallet
                 });
                 break;
         }
@@ -100,7 +98,8 @@ class Datastore {
 
         let specification = await this.schema.getSpecification();
         let databaseName = specification.database.name;
-        let dataStoreConfig = this._app.getDataStoreConfig(this.name);
+        let dataStoreConfig = this._dataserver.getDataStoreConfig(this.name);
+        _.merge(dataStoreConfig, this.config);
         this._store = await this._getDataStore(databaseName, dataStoreConfig);
     }
 
