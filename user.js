@@ -8,18 +8,25 @@ class User {
 
     constructor(app) {
         this._app = app;
-
-        this.address = null;
         this._web3 = null;
 
+        // User's global DID and address
         this.did = null;
+        this.address = null;
+
+        // Application username and password
         this.username = null;
         this.password = null;
+
+        // Application DSN
         this.dsn = null;
         this.salt = null;
+
+        // User's wallet DSN
+        this.walletDsn = this._app.config.walletDsn ? this._app.config.walletDsn : 'http://localhost:5984/';
     }
 
-    async connect(applicationName) {
+    async connect() {
         let web3Provider = null;
         if (window.ethereum) {
             // Modern dapp browsers...
@@ -46,7 +53,7 @@ class User {
         this.address = this.address.toString();
         this.did = 'did:ethr:'+this.address;
 
-        let signMessage = "\""+applicationName+"\" (" + window.location.hostname +") is requesting access to " + this.did;
+        let signMessage = "\""+this._app.name+"\" (" + window.location.hostname +") is requesting access to " + this.did;
         this.password = await this._web3.eth.personal.sign(signMessage, this.address);
 
 
@@ -57,7 +64,7 @@ class User {
             response = await this._app.client.getUser(this.did);
         } catch (err) {
             if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
-                // User doens't exist, so create
+                // User doesn't exist, so create
                 response = await this._app.client.createUser(this.did);
             }
             else {
@@ -67,7 +74,7 @@ class User {
         }
 
         // Populate the rest of this user object
-        this.username = response.data.user.username;
+        this.username = response.data.user.username;    // not required as it's not used
         this.dsn = response.data.user.dsn;
         this.salt = response.data.user.salt;
         this.key = await pbkdf2(this.password, new Buffer(this.salt, 'hex'), 100000, 256 / 8, "sha512");

@@ -13,15 +13,16 @@ PouchDB.plugin(PouchDBFind);
 
 const CryptoPouch = require('crypto-pouch');
 PouchDBCrypt.plugin(CryptoPouch);
-const crypto = require('crypto');
 
 /*
- * DataStore that is private
+ * DataStore that is private.
+ *
+ * All data is encrypted using the user's encryption keys.
  */
 class Private extends Base {
 
-    constructor(dbName, user, app) {
-        super(dbName, user, app);
+    constructor(dbName, app, config) {
+        super(dbName, app, config);
 
         // Local copy of the database encrypted
         this._localDbEncrypted = null;
@@ -38,8 +39,8 @@ class Private extends Base {
 
         this._localDbEncrypted = new PouchDB(databaseName);
         this._localDb = new PouchDBCrypt(databaseName);
-        this._localDb.crypto(this._user.password, {
-            "key": this._user.key,
+        this._localDb.crypto(this._app.user.password, {
+            "key": this._app.user.key,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');
@@ -48,12 +49,12 @@ class Private extends Base {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(this._user.dsn + databaseName);
+        this._remoteDbEncrypted = new PouchDB(this._app.user.dsn + databaseName);
         
         try {
             await this._remoteDbEncrypted.info();
         } catch(err) {
-            await this._app.client.createDatabase(this._user.did, databaseName);
+            await this._app.client.createDatabase(this._app.user.did, databaseName);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }
@@ -77,27 +78,6 @@ class Private extends Base {
         }
 
         return this._localDb;
-    }
-
-    /**
-     * Create a database hash based on the user's DID,
-     * the application name and the database name.
-     * 
-     * Use the user's password as a key for creating the hash
-     * as this is a private DB.
-     */
-    getDatabaseHash() {
-        if (this._dbHash) {
-            return this._dbHash;
-        }
-
-        let text = this._user.did + '/' + this._app.name + '/' + this.dbName;
-        let hash = crypto.createHmac('sha256', this._user.password);
-        hash.update(text);
-        this._dbHash = hash.digest('hex');
-
-        // Database name must start with a letter
-        return "v"+this._dbHash;
     }
 }
 

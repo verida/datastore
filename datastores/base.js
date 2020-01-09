@@ -1,7 +1,6 @@
 /*eslint no-unused-vars: "off"*/
 /*eslint no-console: "off"*/
 
-import Config from '../config';
 const uuidv1 = require('uuid/v1');
 const EventEmitter = require('events');
 const _ = require('lodash');
@@ -14,12 +13,11 @@ const crypto = require('crypto');
  */
 class Base extends EventEmitter {
 
-    constructor(dbName, user, app) {
+    constructor(dbName, app, config) {
         super();
         this.dbName = dbName;
-        this._user = user;          // TODO: move to class
         this._app = app;            // TODO: move to class
-        this._config = Config;
+        this._config = config;
         this._dbHash = null;
     }
 
@@ -32,8 +30,15 @@ class Base extends EventEmitter {
             return this._dbHash;
         }
 
-        let text = this._user.did + '/' + this._app.name + '/' + this.dbName;
-        let hash = crypto.createHmac('sha256', this._app.name + "/" + this._config.dbHashKey);
+        let appName = this._config.useWallet ? "Verida Wallet" : this._app.name;
+
+        // Set hashkey based on wallet config
+        let hashKey = this._config.privacy == "private" ? this._app.user.password : (this._app.name + "/" + this._app.config.dbHashKey);
+        hashKey = this._config.useWallet ? "Verida Wallet" : hashKey;
+        
+
+        let text = this._app.user.did + '/' + appName + '/' + this.dbName + '/' + this._config.privacy + '/' + (this._config.publicWrite ? 1 : 0);
+        let hash = crypto.createHmac('sha256', hashKey);
         hash.update(text);
         this._dbHash = hash.digest('hex');
 
@@ -161,7 +166,6 @@ class Base extends EventEmitter {
      * @param {*} id 
      */
     async get(docId, options) {
-        console.log("get()");
         let db = await this.getDb();
 
         let defaults = {};
