@@ -22,7 +22,6 @@ class Public extends Base {
     async _init() {
         let databaseName = this.getDatabaseHash();
 
-        this._localDb = new PouchDB(databaseName);
         this._remoteDb = new PouchDB(this._app.user.dsn + databaseName, {
             cb: function(err) {
                 if (err) {
@@ -41,26 +40,14 @@ class Public extends Base {
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }
-
-        // Start syncing the local encrypted database with the remote encrypted database
-        PouchDB.sync(this._localDb, this._remoteDb, {
-            live: true,
-            retry: true
-        }).on("error", function(err) {
-            console.log("sync error");
-            console.log(err);
-        }).on("denied", function(err) {
-            console.log("denied error");
-            console.log(err);
-        });
     }
 
     async getDb() {
-        if (!this._localDb) {
+        if (!this._remoteDb) {
             await this._init();
         }
 
-        return this._localDb;
+        return this._remoteDb;
     }
 
 }
