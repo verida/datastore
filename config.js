@@ -1,10 +1,10 @@
 
 module.exports = {
-    appServerUrl: "http://localhost:5000/",
+    appServerUrl: "http://datastore.dev.verida.io:5000/",
     appHost: "localhost",
-    userServerUrl: "http://localhost:5000/",
+    userServerUrl: "http://datastore.dev.verida.io:5000/",
     dbHashKey: "9c2b7826978f2c49678",
-    walletDsn: 'http://localhost:5984/',
+    walletDsn: 'http://datastore.dev.verida.io:5984/',
     datastores: {
         default: {
             privacy: "private"
