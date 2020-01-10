@@ -27,6 +27,7 @@ class DataServer {
         this.salt = null;
         this.key = null;
 
+        this._publicCredentials = {};
         this._datastores = {};
     }
 
@@ -56,8 +57,22 @@ class DataServer {
         // Populate the rest of this user object
         this.dsn = response.data.user.dsn;
         this.salt = response.data.user.salt;
-
         this.key = await pbkdf2(this.signature, new Buffer(this.salt, 'hex'), 100000, 256 / 8, "sha512");
+    }
+
+    async getPublicCredentials() {
+        if (this._publicCredentials) {
+            return this._publicCredentials;
+        }
+
+        let response = await this.client.getPublicUser();
+
+        this._publicCredentials = {
+            username: response.data.user.username,
+            password: response.data.user.password
+        }
+
+        return this._publicCredentials;
     }
 
     openDatastore(name) {
@@ -99,7 +114,7 @@ class DataServer {
 
     _getSignMessage() {
         let appName = this.config.isUser ? "Verida Wallet" : this.app.name;
-        return "Do you approve access to \""+appName+"\"?\n\n" + this.app.user.did;
+        return "Do you approve access to view and update \""+appName+"\"?\n\n" + this.app.user.did;
     }
 
 }

@@ -22,7 +22,7 @@ class App {
         this.errors = null;
 
         this._schemas = {};
-        this._dataservers = {
+        this.dataservers = {
             app: new DataServer(this, {
                 datastores: this.config.datastores,
                 serverUrl: this.config.appServerUrl,
@@ -46,12 +46,35 @@ class App {
         }
 
         this.user = new VeridaUser(this);
+
         await this._dataservers.app.connect();
+
+        // TODO: Only call `connect` on user when "set()" is called
         await this._dataservers.user.connect();
     }
 
-    openDatastore(name) {
-        return this._dataservers.app.openDatastore(name);
+    openDatastore(name, config) {
+        // TODO: Add schema specific config from app config
+
+        return this._dataservers.user.openDatastore(name, this.user.did, this.name, config);
+    }
+
+    /**
+     * Opens the profile of another user in read only mode
+     * 
+     * @param {*} did 
+     */
+    async openProfile(did) {
+        // TODO: Create smart contract that maps DID's to dataservers and
+        // dynamically build a dataserver specific for the requested user
+
+        return this._dataservers.user.openDatastore("profile", did, "Verida Wallet", {
+            permissions: {
+                read: "public",
+                write: "owner"
+            },
+            readOnly: true
+        });
     }
 
     async getSchema(schemaName) {

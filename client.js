@@ -14,6 +14,9 @@ class Client {
     async getUser(did) {
         return this.getAxios().get(this._dataserver.serverUrl + "user/get?did=" + did);
     }
+    async getPublicUser() {
+        return this.getAxios().get(this._dataserver.serverUrl + "user/public");
+    }
 
     async createUser(did, password) {
         return this.getAxios().post(this._dataserver.serverUrl + "user/create", {

@@ -26,10 +26,11 @@ class Inbox {
             return;
         }
 
-        this._store = new Datastore(this._app, "inbox", {
-            privacy: "public",
-            useWallet: true,
-            publicWrite: true
+        this._store = new Datastore("inbox", this._app.user.did, "Verida Wallet", this._app.dataservers.public, {
+            permissions: {
+                write: "public",
+                read: "public"
+            }
         });
     }
 

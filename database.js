@@ -1,42 +1,55 @@
 /*eslint no-unused-vars: "off"*/
 /*eslint no-console: "off"*/
+/**
+ * Permissioned database
+ */
 
+const crypto = require('crypto');
 const uuidv1 = require('uuid/v1');
 const EventEmitter = require('events');
 const _ = require('lodash');
-const crypto = require('crypto');
 
-/**
- * Abstract base class for a DataStore instance
- * 
- * This class must be extended with getDb() implemented at a minimum
- */
-class Base extends EventEmitter {
+import EncryptedDatabase from "databases/encrypted";
+import PublicDatabase from "databases/public";
 
-    constructor(dbName, dataserver, config) {
-        super();
+class Database extends EventEmitter {
+
+    constructor(dbName, did, appName, dataserver, config) {
         this.dbName = dbName;
-        this._dataserver = dataserver;
-        this._app = this._dataserver.app;
-        this._config = config;
+        this.did = did;
+        this.appName = appName;
+        this.dataserver = dataserver;
+        this.config = config;
+        this.permissions = {};
+
+        _.merge(this.permissions, {
+            read: "owner",
+            write: "owner",
+            readUsers: [],
+            writeUsers: []
+        }, this.config.permissions ? this.config.permissions : {});
+
+        this.readOnly = this.config.readOnly ? true : false;
+        this.syncToWallet = this.config.syncToWallet ? true : false;
+
         this._dbHash = null;
+        this._db = null;
     }
 
-    /**
-     * Create a database hash based on the user's DID,
-     * the application name and the database name.
-     */
+    // DID + AppName + DB Name + readPerm + writePerm
     getDatabaseHash() {
         if (this._dbHash) {
             return this._dbHash;
         }
 
-        // Set hashkey based on wallet config
-        let hashKey = this._config.privacy == "private" ? this._dataserver.signature : (this._app.name + "/" + this._dataserver.dbHashKey);
-        hashKey = this._config.useWallet ? "Verida Wallet" : hashKey;
-        
+        let text = [
+            this.did,
+            this.appName,
+            this.dbName,
+            this.permissions.read,
+            this.permissions.write
+        ].join("/");
 
-        let text = this._app.user.did + '/' + this._app.name + '/' + this.dbName + '/' + this._config.privacy + '/' + (this._config.publicWrite ? 1 : 0);
         let hash = crypto.createHmac('sha256', hashKey);
         hash.update(text);
         this._dbHash = hash.digest('hex');
@@ -55,10 +68,13 @@ class Base extends EventEmitter {
      * @param {*} options 
      */
     async save(data, options) {
+        await this._init();
+        if (this.readOnly) {
+            throw "Unable to save. Read only.";
+        }
+
         let defaults = {};
         options = _.merge(defaults, options);
-        
-        let db = await this.getDb();
 
         let insert = false;
 
@@ -76,7 +92,7 @@ class Base extends EventEmitter {
             this.emit("beforeUpdate", data);
         }
 
-        let response = await db.put(data, options);
+        let response = await this._db.put(data, options);
 
         if (insert) {
             this._afterInsert();
@@ -95,7 +111,7 @@ class Base extends EventEmitter {
      * @param {*} options 
      */
     async getMany(filter, options) {
-        let db = await this.getDb();
+        await this._init();
 
         let defaults = {
             include_docs: true,
@@ -119,7 +135,7 @@ class Base extends EventEmitter {
             }
 
             try {
-                let docs = await db.find(request);
+                let docs = await this._db.find(request);
                 if (docs) {
                     return docs.docs;
                 }
@@ -146,6 +162,10 @@ class Base extends EventEmitter {
      * @param {*} id 
      */
     async delete(doc, options) {
+        if (this.readOnly) {
+            throw "Unable to delete. Read only.";
+        }
+        
         let defaults = {};
         options = _.merge(defaults, options);
 
@@ -160,26 +180,44 @@ class Base extends EventEmitter {
     }
 
     /**
-     * 
+     * i
      * @param {*} schema 
      * @param {*} id 
      */
     async get(docId, options) {
-        let db = await this.getDb();
+        await this._init();
 
         let defaults = {};
         options = _.merge(defaults, options);
 
-        return await db.get(docId, options);
+        return await this._db.get(docId, options);
     }
 
     /**
      * Get a database.
-     * 
-     * This must be implemented by the extended implementation
      */
-    async getDb() {
-        throw new Error("getDB() must be implemented");
+    async _init() {
+        if (this._db) {
+            return this._db;
+        }
+
+        // private data (owner, owner) -- use private
+        // public profile (readOnly) -- use public
+        // public inbox (public, private) -- is that even possible? may need to be public, public
+        // group data -- (users, users)
+
+        if (this.permissions.read == "owner" && this.permissions.write == "owner") {
+            // Create encrypted database
+            this._db = new EncryptedDatabase(this.dbName, this.dataServer, this.did, this.permissions).getDb();
+        } else if (this.permissions.read == "public") {
+            // Create non-encrypted database
+            this._db = new PublicDatabase().getDb(this.dbName, this.dataServer, this.did, this.permissions);
+        } else if (this.permissions.read == "users") {
+            throw "User group permissions are not yet supported";
+        }
+        else {
+            throw "Unknown database permissions requested";
+        }
     }
 
     _beforeInsert(data) {
@@ -200,4 +238,4 @@ class Base extends EventEmitter {
 
 }
 
-export default Base;
+ export default Database;

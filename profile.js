@@ -1,14 +1,12 @@
 import Datastore from "./datastore";
 
 /**
- * 
+ * Public profile for this user
  */
 class Profile {
 
     constructor(app) {
         this._app = app;
-
-        this._initialised = false;
     }
 
     /**
@@ -46,13 +44,15 @@ class Profile {
     }
 
     _init() {
-        if (this._initialised) {
+        if (this._store) {
             return;
         }
 
-        this._store = new Datastore(this._app._dataservers.user, "profile", {
-            privacy: "public",
-            useWallet: true
+        this._store = new Datastore(this._app._dataservers.user, "profile", this._app.user.did, "Verida Wallet", {
+            permissions: {
+                read: "public",
+                write: "owner"
+            }
         });
     }
 
