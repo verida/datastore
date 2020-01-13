@@ -1,3 +1,4 @@
+/*eslint no-console: "off"*/
 /**
  * Public profile for this user
  */
@@ -17,6 +18,11 @@ class Profile {
         return this._store.get(key, options);
     }
 
+    async delete(key) {
+        await this._init();
+        return this._store.delete(key);
+    }
+
     /**
      * Get many profile values
      * 
@@ -33,12 +39,30 @@ class Profile {
      * @param {string} key 
      * @param {*} value 
      */
-    async set(key, value) {
+    async set(doc, value) {
         await this._init();
-        return this._store.save({
-            "key": key,
-            "value": value
-        });
+
+        if (typeof doc == "string") {
+            doc = {
+                "_id": doc,
+                "key": doc
+            }
+        }
+
+        // Try to find the original document and do an update if it exists
+        if (doc._rev === undefined) {
+            try {
+                let oldDoc = await this.get(doc._id);
+                if (oldDoc) {
+                    doc = oldDoc;
+                }
+            } catch (err) {
+                // not found, so let the insert continue
+            }
+        }
+
+        doc.value = value;
+        return this._store.save(doc);
     }
 
     _init() {
@@ -52,6 +76,11 @@ class Profile {
                 write: "owner"
             }
         });
+    }
+
+    async getDatastore() {
+        await this._init();
+        return this._store;
     }
 
 }
