@@ -1,7 +1,4 @@
 /*eslint no-console: "off"*/
-"use strict"
-
-import Base from "./base";
 
 import PouchDBCrypt from 'pouchdb-browser';
 import PouchDB from 'pouchdb-browser';
@@ -14,33 +11,25 @@ PouchDB.plugin(PouchDBFind);
 const CryptoPouch = require('crypto-pouch');
 PouchDBCrypt.plugin(CryptoPouch);
 
-/*
- * DataStore that is private.
- *
- * All data is encrypted using the user's encryption keys.
- */
-class Private extends Base {
+class EncryptedDatabase {
 
-    constructor(dbName, dataserver, config) {
-        super(dbName, dataserver, config);
-
-        // Local copy of the database encrypted
-        this._localDbEncrypted = null;
-
-        // Local copy of the database un-encrypted
-        this._localDb = null;
-
-        // Remote database connection encrypted
-        this._remoteDbEncrypted = null;
+    constructor(dbName, dataserver, did, permissions) {
+        this.dbName = dbName;
+        this.dataserver = dataserver;
+        this.did = did;
+        this.permissions = permissions;
     }
 
     async _init() {
-        let databaseName = this.getDatabaseHash();
+        this._localDbEncrypted = new PouchDB(this.dbName);
+        this._localDb = new PouchDBCrypt(this.dbName);
 
-        this._localDbEncrypted = new PouchDB(databaseName);
-        this._localDb = new PouchDBCrypt(databaseName);
-        this._localDb.crypto(this._dataserver.signature, {
-            "key": this._dataserver.key,
+        let signature = await this.dataserver.getSignature();
+        let key = await this.dataserver.getKey();
+        let dsn = await this.dataserver.getDsn();
+
+        this._localDb.crypto(signature, {
+            "key": key,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');
@@ -49,12 +38,17 @@ class Private extends Base {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(this._dataserver.dsn + databaseName);
+        this._remoteDbEncrypted = new PouchDB(dsn + this.dbName);
         
         try {
             await this._remoteDbEncrypted.info();
         } catch(err) {
-            await this._dataserver.client.createDatabase(this._app.user.did, databaseName);
+            let options = {
+                permissions: this.permissions
+            };
+
+            let client = await this.dataserver.getClient();
+            await client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }
@@ -79,6 +73,7 @@ class Private extends Base {
 
         return this._localDb;
     }
+
 }
 
-export default Private;
+export default EncryptedDatabase;

@@ -22,7 +22,7 @@ class App {
         this.errors = null;
 
         this._schemas = {};
-        this._dataservers = {
+        this.dataservers = {
             app: new DataServer(this, {
                 datastores: this.config.datastores,
                 serverUrl: this.config.appServerUrl,
@@ -40,18 +40,37 @@ class App {
     /**
      * Look for web3 to connect user
      */
-    async connectUser() {
+    async connect() {
         if (this.user) {
             throw "User already exists, disconnect first";
         }
 
         this.user = new VeridaUser(this);
-        await this._dataservers.app.connect();
-        await this._dataservers.user.connect();
+        await this.dataservers.app.connect();
     }
 
-    openDatastore(name) {
-        return this._dataservers.app.openDatastore(name);
+    async openDatastore(name, config) {
+        // TODO: Add schema specific config from app config or do it in openDatastore?
+
+        return this.dataservers.user.openDatastore(name, this.user.did, this.name, config);
+    }
+
+    /**
+     * Opens the profile of another user in read only mode
+     * 
+     * @param {*} did 
+     */
+    async openProfile(did) {
+        // TODO: Create smart contract that maps DID's to dataservers and
+        // dynamically build a dataserver specific for the requested user
+
+        return this.dataservers.user.openDatastore("profile", did, "Verida Wallet", {
+            permissions: {
+                read: "public",
+                write: "owner"
+            },
+            readOnly: true
+        });
     }
 
     async getSchema(schemaName) {

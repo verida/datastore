@@ -1,29 +1,23 @@
 /*eslint no-console: "off"*/
-"use strict"
 
-import Base from "./base";
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
 PouchDB.plugin(PouchDBFind);
 import Utils from "../utils";
 
-/*
- * DataStore that is public to read, but only the user can write
- */
-class Public extends Base {
+class PublicDatabase {
 
-    constructor(dbName, dataserver, config) {
-        super(dbName, dataserver, config);
-
-        this._localDb = null;
-        this._remoteDb = null;
+    constructor(dbName, dataserver, did, permissions) {
+        this.dbName = dbName;
+        this.dataserver = dataserver;
+        this.did = did;
+        this.permissions = permissions;
     }
 
     async _init() {
-        let databaseName = this.getDatabaseHash();
-        let dsn = this._dataserver.dsn;
-
-        this._remoteDb = new PouchDB(dsn + databaseName, {
+        let dsn = await this.dataserver.getDsn();
+        
+        this._remoteDb = new PouchDB(dsn + this.dbName, {
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to remote DB');
@@ -35,9 +29,12 @@ class Public extends Base {
         try {
             await this._remoteDb.info();
         } catch(err) {
-            let options = {};
-            options.publicWrite = this._config.publicWrite ? true : false;
-            await this._dataserver.client.createDatabase(this._app.user.did, databaseName, options);
+            let options = {
+                permissions: this.permissions
+            };
+
+            let client = await this.dataserver.getClient();
+            await client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }
@@ -53,4 +50,4 @@ class Public extends Base {
 
 }
 
-export default Public;
+export default PublicDatabase;

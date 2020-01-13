@@ -1,14 +1,11 @@
-import Datastore from "./datastore";
-
+/*eslint no-console: "off"*/
 /**
- * 
+ * Public profile for this user
  */
 class Profile {
 
     constructor(app) {
         this._app = app;
-
-        this._initialised = false;
     }
 
     /**
@@ -19,6 +16,11 @@ class Profile {
     async get(key, options) {
         await this._init();
         return this._store.get(key, options);
+    }
+
+    async delete(key) {
+        await this._init();
+        return this._store.delete(key);
     }
 
     /**
@@ -37,23 +39,48 @@ class Profile {
      * @param {string} key 
      * @param {*} value 
      */
-    async set(key, value) {
+    async set(doc, value) {
         await this._init();
-        return this._store.save({
-            "key": key,
-            "value": value
-        });
+
+        if (typeof doc == "string") {
+            doc = {
+                "_id": doc,
+                "key": doc
+            }
+        }
+
+        // Try to find the original document and do an update if it exists
+        if (doc._rev === undefined) {
+            try {
+                let oldDoc = await this.get(doc._id);
+                if (oldDoc) {
+                    doc = oldDoc;
+                }
+            } catch (err) {
+                // not found, so let the insert continue
+            }
+        }
+
+        doc.value = value;
+        return this._store.save(doc);
     }
 
-    _init() {
-        if (this._initialised) {
+    async _init() {
+        if (this._store) {
             return;
         }
 
-        this._store = new Datastore(this._app._dataservers.user, "profile", {
-            privacy: "public",
-            useWallet: true
+        this._store = await this._app.dataservers.user.openDatastore("profile", this._app.user.did, "Verida Wallet", {
+            permissions: {
+                read: "public",
+                write: "owner"
+            }
         });
+    }
+
+    async getDatastore() {
+        await this._init();
+        return this._store;
     }
 
 }

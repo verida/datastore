@@ -1,5 +1,5 @@
-import Datastore from "./datastore";
 import Profile from "./profile";
+//const _ = require('lodash');
 
 class Wallet {
 
@@ -14,11 +14,8 @@ class Wallet {
      * 
      * @param {string} name 
      */
-    openDataStore(name) {
-        return new Datastore(this._app._dataservers.user, name, {
-            privacy: "public",
-            syncToWallet: true
-        });
+    async openDataStore(name, config) {
+        return this._app.dataservers.user.openDatastore(name, this._app.user.did, "Verida Wallet", config);
     }
 
 }

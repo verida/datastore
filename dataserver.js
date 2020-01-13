@@ -19,33 +19,35 @@ class DataServer {
         this.serverUrl = config.serverUrl;
         this.hashKey = app.config.dbHashKey;
 
-        this.client = new Client(this);
-        this.client.hostName = this.appHost;
+        this._client = new Client(this);
+        this._client.hostName = this.appHost;
         
-        this.signature = null;
-        this.dsn = null;
-        this.salt = null;
-        this.key = null;
+        this._signature = null;
+        this._dsn = null;
+        this._salt = null;
+        this._key = null;
 
+        this._publicCredentials = {};
         this._datastores = {};
+        this._init = false;
     }
 
     async connect() {
         let user = this.app.user;
         let web3 = await user.getWeb3Provider();
         let signMessage = this._getSignMessage();
-        this.signature = await web3.eth.personal.sign(signMessage, user.address);
+        this._signature = await web3.eth.personal.sign(signMessage, user.address);
 
         // Fetch user details from server
         let response;
         try {
-            this.client.username = user.did;
-            this.client.password = this.signature;
-            response = await this.client.getUser(user.did);
+            this._client.username = user.did;
+            this._client.password = this._signature;
+            response = await this._client.getUser(user.did);
         } catch (err) {
             if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
                 // User doesn't exist, so create
-                response = await this.client.createUser(user.did);
+                response = await this._client.createUser(user.did);
             }
             else {
                 // Unknown error
@@ -54,52 +56,87 @@ class DataServer {
         }
 
         // Populate the rest of this user object
-        this.dsn = response.data.user.dsn;
-        this.salt = response.data.user.salt;
-
-        this.key = await pbkdf2(this.signature, new Buffer(this.salt, 'hex'), 100000, 256 / 8, "sha512");
+        this._dsn = response.data.user.dsn;
+        this._salt = response.data.user.salt;
+        this._key = await pbkdf2(this._signature, new Buffer(this._salt, 'hex'), 100000, 256 / 8, "sha512");
+        
+        this._init = true;
     }
 
-    openDatastore(name) {
-        if (!this.app.user) {
-            throw "User not connected";
+    async getPublicCredentials() {
+        if (this._publicCredentials) {
+            return this._publicCredentials;
         }
 
-        if (this._datastores[name]) {
-            return this._datastores[name];
+        let response = await this._client.getPublicUser();
+
+        this._publicCredentials = {
+            username: response.data.user.username,
+            password: response.data.user.password
         }
 
-        this._datastores[name] = new Datastore(this, name, this.config);
-
-        return this._datastores[name];
+        return this._publicCredentials;
     }
 
-    getDataStoreConfig(schemaName, extraConfig) {
-        let config = {};
-        extraConfig = extraConfig ? extraConfig : {};
-        _.merge(config, this.config.datastores.default, extraConfig);
-
-        if (typeof(this.config.datastores[schemaName]) !== 'undefined') {
-            _.merge(config, this.config.datastores[schemaName]);
+    async openDatastore(schemaName, did, appName, config) {
+        if (!this._init) {
+            await this.connect();
         }
 
-        return config;
-    }
+        if (this._datastores[schemaName]) {
+            return this._datastores[schemaName];
+        }
 
-    /**
-     * Set the credentials for this user
-     * 
-     * @param {*} username 
-     * @param {*} password 
-     */
-    setCredentials(username, password) {
-        this.client.username = username;
-        this.client.password = password;
+        // merge config with this.config?
+
+        this._datastores[schemaName] = new Datastore(this, schemaName, did, appName, config);
+
+        return this._datastores[schemaName];
     }
 
     _getSignMessage() {
         let appName = this.config.isUser ? "Verida Wallet" : this.app.name;
-        return "Do you approve access to \""+appName+"\"?\n\n" + this.app.user.did;
+        return "Do you approve access to view and update \""+appName+"\"?\n\n" + this.app.user.did;
+    }
+
+    async getKey() {
+        if (!this._init) {
+            await this.connect();
+        }
+
+        return this._key;
+    }
+
+    async getHash() {
+        if (!this._init) {
+            await this.connect();
+        }
+
+        return this._hash;
+    }
+
+    async getSignature() {
+        if (!this._init) {
+            await this.connect();
+        }
+
+        return this._signature;
+    }
+
+    async getClient() {
+        if (!this._init) {
+            await this.connect();
+        }
+
+        return this._client;
+    }
+
+    async getDsn() {
+        if (!this._init) {
+            await this.connect();
+        }
+
+        return this._dsn;
     }
 
 }
