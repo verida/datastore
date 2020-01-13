@@ -47,16 +47,16 @@ class App {
 
         this.user = new VeridaUser(this);
 
-        await this._dataservers.app.connect();
+        await this.dataservers.app.connect();
 
         // TODO: Only call `connect` on user when "set()" is called
-        await this._dataservers.user.connect();
+        await this.dataservers.user.connect();
     }
 
     openDatastore(name, config) {
-        // TODO: Add schema specific config from app config
+        // TODO: Add schema specific config from app config or do it in openDatastore?
 
-        return this._dataservers.user.openDatastore(name, this.user.did, this.name, config);
+        return this.dataservers.user.openDatastore(name, this.user.did, this.name, config);
     }
 
     /**
@@ -68,7 +68,7 @@ class App {
         // TODO: Create smart contract that maps DID's to dataservers and
         // dynamically build a dataserver specific for the requested user
 
-        return this._dataservers.user.openDatastore("profile", did, "Verida Wallet", {
+        return this.dataservers.user.openDatastore("profile", did, "Verida Wallet", {
             permissions: {
                 read: "public",
                 write: "owner"

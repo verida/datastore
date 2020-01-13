@@ -75,21 +75,19 @@ class DataServer {
         return this._publicCredentials;
     }
 
-    openDatastore(name) {
-        if (!this.app.user) {
-            throw "User not connected";
+    openDatastore(schemaName, did, appName, config) {
+        if (this._datastores[schemaName]) {
+            return this._datastores[schemaName];
         }
 
-        if (this._datastores[name]) {
-            return this._datastores[name];
-        }
+        // merge config with this.config?
 
-        this._datastores[name] = new Datastore(this, name, this.config);
+        this._datastores[schemaName] = new Datastore(this, schemaName, did, appName, config);
 
-        return this._datastores[name];
+        return this._datastores[schemaName];
     }
 
-    getDataStoreConfig(schemaName, extraConfig) {
+    /*getDataStoreConfig(schemaName, extraConfig) {
         let config = {};
         extraConfig = extraConfig ? extraConfig : {};
         _.merge(config, this.config.datastores.default, extraConfig);
@@ -99,7 +97,7 @@ class DataServer {
         }
 
         return config;
-    }
+    }*/
 
     /**
      * Set the credentials for this user

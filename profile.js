@@ -1,5 +1,3 @@
-import Datastore from "./datastore";
-
 /**
  * Public profile for this user
  */
@@ -48,7 +46,7 @@ class Profile {
             return;
         }
 
-        this._store = new Datastore(this._app._dataservers.user, "profile", this._app.user.did, "Verida Wallet", {
+        this._store = this._app.dataservers.app.openDatastore("profile", this._app.user.did, "Verida Wallet", {
             permissions: {
                 read: "public",
                 write: "owner"

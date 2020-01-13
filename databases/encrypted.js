@@ -1,3 +1,4 @@
+/*eslint no-console: "off"*/
 
 import PouchDBCrypt from 'pouchdb-browser';
 import PouchDB from 'pouchdb-browser';
@@ -12,18 +13,16 @@ PouchDBCrypt.plugin(CryptoPouch);
 
 class EncryptedDatabase {
 
-    constructor(databaseName, dataServer, did, permissions) {
-        this.databaseName = databaseName;
-        this.dataServer = dataServer;
+    constructor(dbName, dataserver, did, permissions) {
+        this.dbName = dbName;
+        this.dataserver = dataserver;
         this.did = did;
-        this.permissions;
+        this.permissions = permissions;
     }
 
     async _init() {
-        let databaseName = this.getDatabaseHash();
-
-        this._localDbEncrypted = new PouchDB(this.databaseName);
-        this._localDb = new PouchDBCrypt(this.databaseName);
+        this._localDbEncrypted = new PouchDB(this.dbName);
+        this._localDb = new PouchDBCrypt(this.dbName);
         this._localDb.crypto(this.dataserver.signature, {
             "key": this.dataserver.key,
             cb: function(err) {
@@ -34,7 +33,7 @@ class EncryptedDatabase {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(this.dataserver.dsn + this.databaseName);
+        this._remoteDbEncrypted = new PouchDB(this.dataserver.dsn + this.dbName);
         
         try {
             await this._remoteDbEncrypted.info();
@@ -43,7 +42,7 @@ class EncryptedDatabase {
                 permissions: this.permissions
             };
 
-            await this.dataserver.client.createDatabase(this.did, this.databaseName, options);
+            await this.dataserver.client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }

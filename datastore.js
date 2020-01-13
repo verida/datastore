@@ -66,31 +66,6 @@ class DataStore {
         return this._db;
     }
 
-    /**
-     * Get a datastore by name. Creates a new datastore if it doesn't exist.
-     * options.privacy = public,private,restricted
-     */
-    async _getDatabase(name, dataStoreConfig) {
-        let dataStore = null;
-        let syncToWallet = dataStoreConfig["syncToWallet"] ? true : false;
-
-        switch (dataStoreConfig.privacy) {
-            case "private":
-                dataStore = new PrivateDataStore(name, this._dataserver, {
-                    syncToWallet: syncToWallet
-                });
-                break;
-            case "public":
-                dataStore = new PublicDataStore(name, this._dataserver, {
-                    syncToWallet: syncToWallet,
-                    useWallet: this.config.useWallet
-                });
-                break;
-        }
-
-        return dataStore;
-    }
-
     async _init() {
         if (this._db) {
             return;
@@ -105,7 +80,7 @@ class DataStore {
         //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);
         //_.merge(dataStoreConfig, this.config);
 
-        this._db = new Database(dbName, this.did, appName, dataserver, config);
+        this._db = new Database(dbName, this.did, this.appName, this._dataserver, this.config);
     }
 
 }

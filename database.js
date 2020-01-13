@@ -9,17 +9,19 @@ const uuidv1 = require('uuid/v1');
 const EventEmitter = require('events');
 const _ = require('lodash');
 
-import EncryptedDatabase from "databases/encrypted";
-import PublicDatabase from "databases/public";
+import EncryptedDatabase from "./databases/encrypted";
+import PublicDatabase from "./databases/public";
 
 class Database extends EventEmitter {
 
     constructor(dbName, did, appName, dataserver, config) {
+        super();
         this.dbName = dbName;
         this.did = did;
         this.appName = appName;
         this.dataserver = dataserver;
-        this.config = config;
+
+        this.config = config ? config : {};
         this.permissions = {};
 
         _.merge(this.permissions, {
@@ -50,12 +52,12 @@ class Database extends EventEmitter {
             this.permissions.write
         ].join("/");
 
-        let hash = crypto.createHmac('sha256', hashKey);
+        let hash = crypto.createHmac('sha256', this.dataserver.hashKey);
         hash.update(text);
-        this._dbHash = hash.digest('hex');
+        this._dbHash = "v" + hash.digest('hex');
 
         // Database name must start with a letter
-        return "v"+this._dbHash;
+        return this._dbHash;
     }
 
     /**
@@ -146,7 +148,7 @@ class Database extends EventEmitter {
             return;
         }
         else {
-            let docs = await db.allDocs(options);
+            let docs = await this._db.allDocs(options);
 
             if (docs) {
                 return docs.rows;
@@ -198,7 +200,7 @@ class Database extends EventEmitter {
      */
     async _init() {
         if (this._db) {
-            return this._db;
+            return;
         }
 
         // private data (owner, owner) -- use private
@@ -208,10 +210,12 @@ class Database extends EventEmitter {
 
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
-            this._db = new EncryptedDatabase(this.dbName, this.dataServer, this.did, this.permissions).getDb();
+            let db = new EncryptedDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions);
+            this._db = await db.getDb();
         } else if (this.permissions.read == "public") {
             // Create non-encrypted database
-            this._db = new PublicDatabase().getDb(this.dbName, this.dataServer, this.did, this.permissions);
+            let db = new PublicDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions);
+            this._db = await db.getDb();
         } else if (this.permissions.read == "users") {
             throw "User group permissions are not yet supported";
         }
@@ -235,6 +239,11 @@ class Database extends EventEmitter {
 
 
     _afterUpdate(data, response) {}
+
+    async getInstance() {
+        await this._init();
+        return this._db;
+    }
 
 }
 

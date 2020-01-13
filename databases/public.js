@@ -1,3 +1,4 @@
+/*eslint no-console: "off"*/
 
 import PouchDB from 'pouchdb-browser';
 import PouchDBFind from 'pouchdb-find';
@@ -6,15 +7,15 @@ import Utils from "../utils";
 
 class PublicDatabase {
 
-    constructor(databaseName, dataServer, did, permissions) {
-        this.databaseName = databaseName;
-        this.dataServer = dataServer;
+    constructor(dbName, dataserver, did, permissions) {
+        this.dbName = dbName;
+        this.dataserver = dataserver;
         this.did = did;
         this.permissions = permissions;
     }
 
-    async init() {
-        this._remoteDb = new PouchDB(this.dataserver.dsn + this.databaseName, {
+    async _init() {
+        this._remoteDb = new PouchDB(this.dataserver.dsn + this.dbName, {
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to remote DB');
@@ -30,18 +31,18 @@ class PublicDatabase {
                 permissions: this.permissions
             };
 
-            await this._dataserver.client.createDatabase(this.did, this.databaseName, options);
+            await this.dataserver.client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }
     }
 
     async getDb() {
-        if (!this._localDb) {
+        if (!this._remoteDb) {
             await this._init();
         }
 
-        return this._localDb;
+        return this._remoteDb;
     }
 
 }
