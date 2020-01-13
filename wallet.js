@@ -14,7 +14,7 @@ class Wallet {
      * 
      * @param {string} name 
      */
-    openDataStore(name, config) {
+    async openDataStore(name, config) {
         return this._app.dataservers.user.openDatastore(name, this._app.user.did, "Verida Wallet", config);
     }
 

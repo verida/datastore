@@ -1,3 +1,4 @@
+/*eslint no-console: "off"*/
 const axios = require('axios');
 
 class Client {
@@ -14,6 +15,7 @@ class Client {
     async getUser(did) {
         return this.getAxios().get(this._dataserver.serverUrl + "user/get?did=" + did);
     }
+
     async getPublicUser() {
         return this.getAxios().get(this._dataserver.serverUrl + "user/public");
     }

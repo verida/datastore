@@ -15,7 +15,9 @@ class PublicDatabase {
     }
 
     async _init() {
-        this._remoteDb = new PouchDB(this.dataserver.dsn + this.dbName, {
+        let dsn = await this.dataserver.getDsn();
+        
+        this._remoteDb = new PouchDB(dsn + this.dbName, {
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to remote DB');
@@ -31,7 +33,8 @@ class PublicDatabase {
                 permissions: this.permissions
             };
 
-            await this.dataserver.client.createDatabase(this.did, this.dbName, options);
+            let client = await this.dataserver.getClient();
+            await client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }

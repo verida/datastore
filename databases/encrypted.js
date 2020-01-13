@@ -23,8 +23,13 @@ class EncryptedDatabase {
     async _init() {
         this._localDbEncrypted = new PouchDB(this.dbName);
         this._localDb = new PouchDBCrypt(this.dbName);
-        this._localDb.crypto(this.dataserver.signature, {
-            "key": this.dataserver.key,
+
+        let signature = await this.dataserver.getSignature();
+        let key = await this.dataserver.getKey();
+        let dsn = await this.dataserver.getDsn();
+
+        this._localDb.crypto(signature, {
+            "key": key,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');
@@ -33,7 +38,7 @@ class EncryptedDatabase {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(this.dataserver.dsn + this.dbName);
+        this._remoteDbEncrypted = new PouchDB(dsn + this.dbName);
         
         try {
             await this._remoteDbEncrypted.info();
@@ -42,7 +47,8 @@ class EncryptedDatabase {
                 permissions: this.permissions
             };
 
-            await this.dataserver.client.createDatabase(this.did, this.dbName, options);
+            let client = await this.dataserver.getClient();
+            await client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
         }

@@ -40,20 +40,16 @@ class App {
     /**
      * Look for web3 to connect user
      */
-    async connectUser() {
+    async connect() {
         if (this.user) {
             throw "User already exists, disconnect first";
         }
 
         this.user = new VeridaUser(this);
-
         await this.dataservers.app.connect();
-
-        // TODO: Only call `connect` on user when "set()" is called
-        await this.dataservers.user.connect();
     }
 
-    openDatastore(name, config) {
+    async openDatastore(name, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
 
         return this.dataservers.user.openDatastore(name, this.user.did, this.name, config);
