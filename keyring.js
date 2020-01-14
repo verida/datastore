@@ -24,7 +24,6 @@ class Keyring {
      * @param {string} seed Hex string of the seed generated from a message signed by the users's on chain account
      */
     constructor(seed) {
-        seed = Buffer.from(seed, 'hex');
         const seedNode = ethers.HDNode.fromSeed(seed);
         const baseNode = seedNode.derivePath(BASE_PATH);
 

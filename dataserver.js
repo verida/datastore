@@ -1,9 +1,11 @@
 /*eslint no-console: "off"*/
-const pbkdf2 = require('native-crypto/pbkdf2');
+import { encodeBase64 } from "tweetnacl-util";
 const _ = require('lodash');
 
 import Datastore from "./datastore";
 import Client from "./client";
+import Keyring from "./keyring";
+import { utils, ethers } from "ethers";
 
 class DataServer {
 
@@ -22,10 +24,12 @@ class DataServer {
         this._client = new Client(this);
         this._client.hostName = this.appHost;
         
+        this._keyring = null;
         this._signature = null;
         this._dsn = null;
         this._salt = null;
         this._key = null;
+        this._key64 = null;
 
         this._publicCredentials = {};
         this._datastores = {};
@@ -37,6 +41,11 @@ class DataServer {
         let web3 = await user.getWeb3Provider();
         let signMessage = this._getSignMessage();
         this._signature = await web3.eth.personal.sign(signMessage, user.address);
+
+        const entropy = utils.sha256('0x' + this._signature.slice(2));
+        const seed = ethers.HDNode.mnemonicToSeed(ethers.HDNode.entropyToMnemonic(entropy));
+
+        this._keyring = new Keyring(seed);
 
         // Fetch user details from server
         let response;
@@ -58,7 +67,8 @@ class DataServer {
         // Populate the rest of this user object
         this._dsn = response.data.user.dsn;
         this._salt = response.data.user.salt;
-        this._key = await pbkdf2(this._signature, new Buffer(this._salt, 'hex'), 100000, 256 / 8, "sha512");
+        this._key = this._keyring.asymKey.private;
+        this._key64 = encodeBase64(this._key);
         
         this._init = true;
     }
