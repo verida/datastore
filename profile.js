@@ -70,7 +70,7 @@ class Profile {
             return;
         }
 
-        this._store = await this._app.dataservers.user.openDatastore("profile", this._app.user.did, "Verida Wallet", {
+        this._store = await this._app.dataservers.user.openDatastore("profile", this._app.user.did, {
             permissions: {
                 read: "public",
                 write: "owner"

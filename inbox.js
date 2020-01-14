@@ -26,7 +26,7 @@ class Inbox {
             return;
         }
 
-        this._store = new Datastore("inbox", this._app.user.did, "Verida Wallet", this._app.dataservers.public, {
+        return this._app.dataservers.user.openDatastore("inbox", this._app.user.did, {
             permissions: {
                 write: "public",
                 read: "public"

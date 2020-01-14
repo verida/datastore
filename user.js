@@ -7,15 +7,15 @@ class User {
 
     constructor(app) {
         this._app = app;
-        this._web3 = null;
 
         // User's global DID and address
         this.chain = "ethr";
         this.did = null;
         this.address = null;
+        this.web3Provider = null;
     }
 
-    async getWeb3Provider() {
+    async init() {
         if (this._web3) {
             return this._web3;
         }
@@ -41,13 +41,11 @@ class User {
             throw Error("Unable to locate Ethereum");
         }
 
-        this._web3 = window._web3 = new Web3(web3Provider);
+        this.web3Provider = window._web3 = new Web3(web3Provider);
 
         this.address = await window.ethereum.enable();
         this.address = this.address.toString();
         this.did = 'did:'+this.chain+':'+this.address;
-
-        return this._web3;
     }
 }
 

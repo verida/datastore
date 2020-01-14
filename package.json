@@ -34,6 +34,7 @@
     "lodash": "^4.17.15",
     "pouchdb-browser": "^7.1.1",
     "pouchdb-find": "^7.1.1",
+    "store": "^2.0.12",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",
     "uuid": "^3.3.3",

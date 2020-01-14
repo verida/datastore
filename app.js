@@ -23,16 +23,18 @@ class App {
 
         this._schemas = {};
         this.dataservers = {
+            // Connection to application's data server
             app: new DataServer(this, {
                 datastores: this.config.datastores,
                 serverUrl: this.config.appServerUrl,
                 appHost: this.config.appHost,
                 isUser: false
             }),
+            // Connection to the user's data server
             user: new DataServer(this, {
+                appName: "Verida Wallet",
                 serverUrl: this.config.userServerUrl,
-                dsn: this.config.walletDsn,
-                isUser: true
+                dsn: this.config.walletDsn
             }),
         };
     }
@@ -46,13 +48,24 @@ class App {
         }
 
         this.user = new VeridaUser(this);
+        await this.user.init();
         await this.dataservers.app.connect();
     }
 
+    logout() {
+        this.dataservers.app.logout();
+        this.dataservers.user.logout();
+    }
+
+    /**
+     * Open an application datastore.
+     * 
+     * @param {*} name 
+     * @param {*} config 
+     */
     async openDatastore(name, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
-
-        return this.dataservers.user.openDatastore(name, this.user.did, this.name, config);
+        return this.dataservers.app.openDatastore(name, this.user.did, config);
     }
 
     /**
@@ -64,7 +77,7 @@ class App {
         // TODO: Create smart contract that maps DID's to dataservers and
         // dynamically build a dataserver specific for the requested user
 
-        return this.dataservers.user.openDatastore("profile", did, "Verida Wallet", {
+        return this.dataservers.user.openDatastore("profile", did, {
             permissions: {
                 read: "public",
                 write: "owner"
