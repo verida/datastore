@@ -12,7 +12,6 @@ class Schema {
      * **Do not instantiate directly.**
      * 
      * Access via {@link App#getSchema}
-     * 
      * @constructor
      */
     constructor(name, config) {
@@ -32,6 +31,15 @@ class Schema {
         }
     }
 
+    /**
+     * Get an object that represents the JSON Schema.
+     * 
+     * @example
+     * let schemaDoc = await app.getSchema("social/contact");
+     * let spec = schemaDoc.getSpecification();
+     * console.log(spec);
+     * @returns {object} JSON object representing the defereferenced schema
+     */
     async getSpecification() {
         if (!this._specification) {
             try {
@@ -45,6 +53,12 @@ class Schema {
         return this._specification;
     }
 
+    /**
+     * Validate a data object with this schema.
+     * 
+     * @param {object} data 
+     * @returns {boolean} True if the data validates against the schema.
+     */
     async validate(data) {
         let specification = await this.getSpecification();
         let schema = ajv.getSchema(specification['$id']);
