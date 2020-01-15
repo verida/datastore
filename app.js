@@ -16,11 +16,12 @@ class App {
      * Create a new application
      * 
      * @param {String} name Name of the application
-     * @param {Object} config Configuration for the application
+     * @param {Object} config Configuration for the application. See {@tutorial app-configuration} for details.
      * @constructor
      * @example 
      * import VeridaApp from 'verida-datastore';
      * let myApp = new VeridaApp("My Application Name");
+     * myApp.connect();
      */
     constructor(name, config) {
         this.name = name;
@@ -50,7 +51,9 @@ class App {
     }
 
     /**
-     * Look for web3 to connect user
+     * Connect a user to the application. Similar to "logging in" to an application. This will popup a metamask window asking the user to authorize the application.
+     * 
+     * The user will remain logged in for all subsequent page loads until `app.logout()` is called.
      */
     async connect() {
         if (this.user) {
