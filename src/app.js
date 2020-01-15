@@ -49,9 +49,10 @@ class App {
                 serverUrl: this.config.appServerUrl,
                 dbHashKey: this.config.dbHashKey,
             }),
-            // Connection to the user's data server
+            // Connection to the user's data server (for accessing their profile)
             user: new DataServer(this, {
                 appName: "Verida Wallet",
+                isProfile: true,
                 serverUrl: this.config.userServerUrl
             }),
         };

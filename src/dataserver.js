@@ -6,6 +6,7 @@ import Datastore from "./datastore";
 import Client from "./client";
 import Keyring from "./keyring";
 import { utils, ethers } from "ethers";
+import Consent from "./consent";
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
 import store from 'store';
@@ -23,9 +24,9 @@ class DataServer {
         this.appHost = config.appHost ? config.appHost : "localhost";
         this.serverUrl = config.serverUrl;
         this.hashKey = config.dbHashKey ? config.dbHashKey : "";
+        this.isProfile = config.isProfile ? config.isProfile : false;
 
         this._client = new Client(this);
-        this._storageKey = STORAGE_KEY + this.appName;
         
         this._keyring = null;
         this._signature = null;
@@ -41,11 +42,12 @@ class DataServer {
 
     async connect() {
         // Try to load config from local storage
+        this._storageKey = STORAGE_KEY + this.appName + this.app.user.did;
         let config = store.get(this._storageKey);
         if (config) {
             this.unserialize(config);
         } else {
-            this._signature = await this._requestAccess();
+            this._signature = await Consent.requestSignature(this.app.user, this.isProfile ? "profile" : "default", this.isProfile ? "Verida Wallet" : this.appName);
             let user = await this._getUser();
             
             config = {
@@ -118,13 +120,6 @@ class DataServer {
         return response.data.user;
     }
 
-    async _requestAccess() {
-        let user = this.app.user;
-        let web3 = user.web3Provider;
-        let signMessage = this._getSignMessage();
-        return await web3.eth.personal.sign(signMessage, user.address);
-    }
-
     async getPublicCredentials() {
         if (this._publicCredentials) {
             return this._publicCredentials;
@@ -154,10 +149,6 @@ class DataServer {
         this._datastores[schemaName] = new Datastore(this, schemaName, did, this.appName, config);
 
         return this._datastores[schemaName];
-    }
-
-    _getSignMessage() {
-        return "Do you approve access to view and update \""+this.appName+"\"?\n\n" + this.app.user.did;
     }
 
     async getKey() {

@@ -9,7 +9,7 @@ class Client {
 
         this.username = null;
         this.password = null;
-        this.isUser =  this._dataserver.config.isUser;
+        this.isProfile =  this._dataserver.config.isProfile ? true : false;
     }
 
     async getUser(did) {
@@ -44,7 +44,8 @@ class Client {
                     password: this.password
                 },
                 headers: {
-                    "Application-Name": this.isUser ? "Verida Wallet" : this._dataserver.appName
+                    "Application-Name": this._dataserver.appName,
+                    "Profile-Request": this.isProfile
                 }
             });
         }
