@@ -1,0 +1,1 @@
+aws s3 sync apidocs s3://apidocs.datastore.verida.io --profile=default --delete
