@@ -1,8 +1,7 @@
 import $RefParser from "json-schema-ref-parser";
 import Ajv from "ajv";
-let ajv = new Ajv();
-
-window.Ajv = Ajv;
+const ajv = new Ajv();
+const resolveAllOf = require('json-schema-resolve-allof');
 
 class Schema {
 
@@ -18,17 +17,9 @@ class Schema {
         this.name = name;
 
         this._config = config;
-        this._initialised = false;
 
         this._specification = null;
         this.errors = [];
-    }
-
-    async init() {
-        if (!this._initialised) {
-            
-            this._initialised = true;
-        }
     }
 
     /**
@@ -50,7 +41,7 @@ class Schema {
             }
         }
 
-        return this._specification;
+        return resolveAllOf(this._specification);
     }
 
     /**
