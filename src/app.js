@@ -10,17 +10,20 @@ import DataServer from './dataserver';
 
 const _ = require('lodash');
 
+/**
+ * @property {Wallet} wallet The current user's wallet.
+ */
 class App {
 
     /**
      * Create a new application.
      * 
-     * @param {String} name Name of the application.
-     * @param {Object} [config] Configuration for the application. See `datastore/src/config.js` for default application configuration that can be customised with this `config` parameter.
+     * @param {string} name Name of the application.
+     * @param {object} [config] Configuration for the application. See `datastore/src/config.js` for default application configuration that can be customised with this `config` parameter.
      * @param {string} config.appServerUrl URL of the `datastore-server` instance for this application.
      * @param {string} config.userServerUrl URL of the `datastore-server` instance for the current logged in user. This will be deprecated once user self-management is implemented.
      * @param {string} config.dbHashKey Hash used for generating unique database names for this application. Set a unique value for your application.
-     * @param {Object} config.schemas An object with keys `basePath` and `customPath` that specify the location of data schemas.
+     * @param {object} config.schemas An object with keys `basePath` and `customPath` that specify the location of data schemas.
      * @param {string} config.schemas.basePath Base path for common Verida Schemas. Defaults to `/schemas/`.
      * @param {string} config.schemas.customPath Path for custom schemas just for this application. Defaults to `/customSchemas/`.
      * @constructor
@@ -36,9 +39,7 @@ class App {
         
         this.user = null;
 
-
         this.wallet = new Wallet(this);
-        this.errors = null;
 
         this._schemas = {};
         this.dataservers = {
@@ -83,8 +84,8 @@ class App {
      * Open an application datastore.
      * 
      * @param {string} schemaName
-     * @param {object} [config]
-     * @returns {DataStore} DataStore instance for the requested schema
+     * @param {object} [config] Optional data store configuration
+     * @returns {DataStore} Datastore instance for the requested schema
      */
     async openDatastore(schemaName, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
@@ -94,7 +95,11 @@ class App {
     /**
      * Opens the profile of another user in read only mode
      * 
-     * @param {*} did 
+     * @param {*} did
+     * @example
+     * let profile = app.openProfile(userDid);
+     * console.log(profile.get("email"));
+     * @returns {DataStore} Datastore instance for the requested user profile
      */
     async openProfile(did) {
         // TODO: Create smart contract that maps DID's to dataservers and
@@ -109,6 +114,12 @@ class App {
         });
     }
 
+    /**
+     * Get a JSON Schema object by name
+     * 
+     * @param {string} schemaName 
+     * @returns {Schema}
+     */
     async getSchema(schemaName) {
         if (!this._schemas[schemaName]) {
             this._schemas[schemaName] = new VeridaSchema(schemaName, this.config.schemas);

@@ -15,12 +15,14 @@ const BASE_PATH = "m/6696500'/0'/0'"
 //const ETH_PATH = "m/44'/60'/0'/0"
 
 /**
- * Container for user's encryption keys
+ * Container for user's encryption keys for an application.
  */
 class Keyring {
 
     /**
+     * Create a new Keyring for an application.
      * 
+     * @ignore
      * @param {string} seed Hex string of the seed generated from a message signed by the users's on chain account
      */
     constructor(seed) {

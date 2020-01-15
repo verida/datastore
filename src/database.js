@@ -10,6 +10,11 @@ import PublicDatabase from "./databases/public";
 
 class Database extends EventEmitter {
 
+    /**
+     * Create a new databse.
+     * 
+     * **Do not instantiate directly.**
+     */
     constructor(dbName, did, appName, dataserver, config) {
         super();
         this.dbName = dbName;
@@ -57,13 +62,26 @@ class Database extends EventEmitter {
     }
 
     /**
-     * Save a new record.
+     * Save data to an application schema.
      * 
-     * Automatically generates a UUID _id if an insert.
-     * Automatically 
+     * @param {object} data Data to be saved. Will be validated against the schema associated with this Datastore.
+     * @param {object} [options] Database options that will be passed through to [PouchDB.put()](https://pouchdb.com/api.html#create_document)
+     * @fires Database#beforeInsert Event fired before inserting a new record
+     * @fires Database#beforeUpdate Event fired before updating a new record
+     * @fires Database#afterInsert Event fired after inserting a new record
+     * @fires Database#afterUpdate Event fired after updating a new record
+     * @example
+     * let result = await datastore.save({
+     *  "firstName": "John",
+     *  "lastName": "Doe"
+     * });
      * 
-     * @param {*} data 
-     * @param {*} options 
+     * if (!result) {
+     *  console.errors(datastore.errors);
+     * } else {
+     *  console.log("Successfully saved");
+     * }
+     * @returns {boolean} Boolean indicating if the save was successful. If not successful `this.errors` will be populated.
      */
     async save(data, options) {
         await this._init();
@@ -84,9 +102,23 @@ class Database extends EventEmitter {
 
         if (insert) {
             this._beforeInsert(data);
+
+            /**
+             * Fired before a new record is inserted.
+             * 
+             * @event Database#beforeInsert
+             * @param {object} data Data that was saved
+             */
             this.emit("beforeInsert", data);
         } else {
             this._beforeUpdate(data);
+
+            /**
+             * Fired before a new record is updated.
+             * 
+             * @event Database#beforeUpdate
+             * @param {object} data Data that was saved
+             */
             this.emit("beforeUpdate", data);
         }
 
@@ -94,20 +126,29 @@ class Database extends EventEmitter {
 
         if (insert) {
             this._afterInsert();
+
+            /**
+             * Fired after a new record is inserted.
+             * 
+             * @event Database#afterInsert
+             * @param {object} data Data that was saved
+             */
             this.emit("afterInsert", data, response);
         } else {
             this._afterUpdate();
+
+            /**
+             * Fired after a new record is updated.
+             * 
+             * @event Database#afterUpdate
+             * @param {object} data Data that was saved
+             */
             this.emit("afterUpdate", data, response);
         }
 
         return response;
     }
 
-    /**
-     * 
-     * @param {*} filter 
-     * @param {*} options 
-     */
     async getMany(filter, options) {
         await this._init();
 
@@ -154,11 +195,6 @@ class Database extends EventEmitter {
         }
     }
 
-    /**
-     * 
-     * @param {*} schema 
-     * @param {*} id 
-     */
     async delete(doc, options) {
         if (this.readOnly) {
             throw "Unable to delete. Read only.";
@@ -177,11 +213,6 @@ class Database extends EventEmitter {
         return this.save(doc, options);
     }
 
-    /**
-     * i
-     * @param {*} schema 
-     * @param {*} id 
-     */
     async get(docId, options) {
         await this._init();
 
@@ -191,9 +222,6 @@ class Database extends EventEmitter {
         return await this._db.get(docId, options);
     }
 
-    /**
-     * Get a database.
-     */
     async _init() {
         if (this._db) {
             return;
@@ -230,12 +258,17 @@ class Database extends EventEmitter {
         data.modifiedAt = (new Date()).toISOString();
     }
 
-
     _afterInsert(data, response) {}
 
 
     _afterUpdate(data, response) {}
 
+    /**
+     * Get the underlying PouchDB instance associated with this database.
+     * 
+     * @see {@link https://pouchdb.com/api.html#overview|PouchDB documentation}
+     * @returns {PouchDB}
+     */
     async getInstance() {
         await this._init();
         return this._db;

@@ -6,6 +6,15 @@ window.Ajv = Ajv;
 
 class Schema {
 
+    /**
+     * An object representation of a JSON Schema.
+     * 
+     * **Do not instantiate directly.**
+     * 
+     * Access via {@link App#getSchema}
+     * 
+     * @constructor
+     */
     constructor(name, config) {
         this.name = name;
 

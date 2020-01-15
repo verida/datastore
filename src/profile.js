@@ -1,9 +1,18 @@
 /*eslint no-console: "off"*/
 /**
- * Public profile for this user
+ * Public profile for a user.
  */
 class Profile {
 
+    /**
+     * Create a new user profile.
+     * 
+     * **Do not instantiate directly.**
+     * 
+     * Access the current user's profile via {@link App.profile}
+     * 
+     * @constructor
+     */
     constructor(app) {
         this._app = app;
     }
@@ -11,22 +20,35 @@ class Profile {
     /**
      * Get a profile value by key
      * 
-     * @param {string} key 
+     * @param {string} key Profile key to get (ie: `email`)
+     * @example
+     * let emailDoc = app.wallet.profile.get('email');
+     * 
+     * // key = email
+     * // value = john@doe.com
+     * console.log(emailDoc.key, emailDoc.value);
+     * @return {object} Database record for this profile key. Object has keys [`key`, `value`, `_id`, `_rev`].
      */
     async get(key, options) {
         await this._init();
         return this._store.get(key, options);
     }
 
+    /**
+     * 
+     * @param {string} key Profile key to delete (ie: `email`)
+     * @returns {boolean} Boolean indicating if the delete was successful
+     */
     async delete(key) {
         await this._init();
         return this._store.delete(key);
     }
 
     /**
-     * Get many profile values
+     * Get many profile values.
      * 
-     * @param {string} key 
+     * @param {object} [customFilter] Database query filter to restrict the results passed through to [PouchDB.find()](https://pouchdb.com/api.html#query_index)
+     * @param {object} [options] Database options that will be passed through to [PouchDB.find()](https://pouchdb.com/api.html#query_index)
      */
     async getMany(filter, options) {
         await this._init();
@@ -36,8 +58,19 @@ class Profile {
     /**
      * Set a profile value by key
      * 
-     * @param {string} key 
-     * @param {*} value 
+     * @param {string|object} doc Profile key to set (ie: `email`) **OR** an existing profile document obtained from `get()` or getMany()`.
+     * @param {*} value Value to save
+     * @example
+     * // Set a profile value by key
+     * app.wallet.profile.set('name', 'John');
+     * 
+     * // Update a profile value from an existing document
+     * let emailDoc = app.wallet.profile.get('email');
+     * app.wallet.profile.set(emailDoc, 'john@doe.com');
+     * 
+     * // Update a profile profile by key
+     * app.wallet.profile.set('email', 'john@doe.com');
+     * @returns {boolean} Boolean indicating if the save was successful
      */
     async set(doc, value) {
         await this._init();

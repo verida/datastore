@@ -1,12 +1,17 @@
 import Profile from "./profile";
-//const _ = require('lodash');
 
+/**
+ * @property {Profile} profile The public profile of this wallet
+ */
 class Wallet {
 
     /**
      * Create a new wallet
      * 
-     * @param {App} app Instance of Datastore application
+     * **Do not instantiate directly.**
+     * 
+     * Access via {@link App.wallet}
+     * 
      * @constructor
      */
     constructor(app) {
