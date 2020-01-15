@@ -1,10 +1,21 @@
 # Welcome to Verida Datastore
 
+Quick links:
+
+- [Documentation](http://docs.datastore.verida.io/)
+  - [Getting Started](http://docs.datastore.verida.io/#/?id=getting-started)
+  - [Architecture](http://docs.datastore.verida.io/#/architecture)
+  - [API Docs](http://apidocs.datastore.verida.io/)
+- [Discord Chat](https://discord.gg/qb6vS43)
+- [Verida Website](https://www.verida.io)
+
 **Note: Verida Datastore is in active development with an alpha release coming Q1 2020**
 
-The Verida Datastore enables developers to quickly build self-sovereign applications &mdash; allowing users to own their own data. The system is distributed by design, enabling user data to be stored on Verida infrastructure, a user's own infrastructure or use third party hosting providers.
+## Introduction
 
-Verida Datastore provides an easy to use library that abstracts the complexities of encryption, permissioning, schema management and user management.
+The Verida Datastore enables developers to quickly build self-sovereign applications &mdash; allowing users to own their own data. The system is **distributed** by design, enabling user data to be stored on Verida infrastructure, a user's own infrastructure or use third party hosting providers.
+
+Verida Datastore provides an easy to use library that abstracts the complexities of **encryption, permissioning, schema management and user management**.
 
 Applications can access user data once unlocked by a users blockchain wallet (ie: Ethereum, VeChain).
 

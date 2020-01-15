@@ -13,10 +13,16 @@ const _ = require('lodash');
 class App {
 
     /**
-     * Create a new application
+     * Create a new application.
      * 
-     * @param {String} name Name of the application
-     * @param {Object} config Configuration for the application. See {@tutorial app-configuration} for details.
+     * @param {String} name Name of the application.
+     * @param {Object} [config] Configuration for the application. See `datastore/src/config.js` for default application configuration that can be customised with this `config` parameter.
+     * @param {string} config.appServerUrl URL of the `datastore-server` instance for this application.
+     * @param {string} config.userServerUrl URL of the `datastore-server` instance for the current logged in user. This will be deprecated once user self-management is implemented.
+     * @param {string} config.dbHashKey Hash used for generating unique database names for this application. Set a unique value for your application.
+     * @param {Object} config.schemas An object with keys `basePath` and `customPath` that specify the location of data schemas.
+     * @param {string} config.schemas.basePath Base path for common Verida Schemas. Defaults to `/schemas/`.
+     * @param {string} config.schemas.customPath Path for custom schemas just for this application. Defaults to `/customSchemas/`.
      * @constructor
      * @example 
      * import VeridaApp from 'verida-datastore';
@@ -65,6 +71,9 @@ class App {
         await this.dataservers.app.connect();
     }
 
+    /**
+     * Logout a user.
+     */
     logout() {
         this.dataservers.app.logout();
         this.dataservers.user.logout();
@@ -73,10 +82,11 @@ class App {
     /**
      * Open an application datastore.
      * 
-     * @param {*} name 
-     * @param {*} config 
+     * @param {string} schemaName
+     * @param {object} [config]
+     * @returns {DataStore} DataStore instance for the requested schema
      */
-    async openDatastore(name, config) {
+    async openDatastore(schemaName, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
         return this.dataservers.app.openDatastore(name, this.user.did, config);
     }
