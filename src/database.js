@@ -11,7 +11,7 @@ import PublicDatabase from "./databases/public";
 class Database extends EventEmitter {
 
     /**
-     * Create a new databse.
+     * Create a new database.
      * 
      * **Do not instantiate directly.**
      */

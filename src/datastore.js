@@ -14,6 +14,28 @@ class DataStore {
      * Create a new Datastore.
      * 
      * **Do not instantiate directly.**
+     * @example <caption>Binding to database changes</caption>
+     * // open datastore and fetch database
+     * let datastore = await app.openDataStore("employment");
+     * let db = datastore.getDb();
+     * 
+     * // fetch underlying PouchDB instance (see PouchDB docs)
+     * let pouch = db.getInstance();
+     * pouch.changes({
+     *      since: 'now',
+     *      live: true,
+     *      include_docs: true
+     *  }).on('change', function() {
+     *      console.log("Data has changed in the database");
+     *  });
+     * @example <caption>Binding to database events</caption>
+     * let datastore = await app.openDataStore("employment");
+     * let db = datastore.getDb();
+     * 
+     * db.on("afterInsert", function(data, response) {
+     *  console.log("afterInsert() fired");
+     *  console.log("Saved data", data);
+     * }
      */
     constructor(dataserver, schemaName, did, appName, config) {
         this._dataserver = dataserver;
