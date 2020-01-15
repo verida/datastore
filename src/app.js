@@ -89,7 +89,7 @@ class App {
      */
     async openDatastore(schemaName, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
-        return this.dataservers.app.openDatastore(name, this.user.did, config);
+        return this.dataservers.app.openDatastore(schemaName, this.user.did, config);
     }
 
     /**
