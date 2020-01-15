@@ -1,9 +1,5 @@
 /*eslint no-unused-vars: "off"*/
 /*eslint no-console: "off"*/
-/**
- * Permissioned database
- */
-
 const crypto = require('crypto');
 const uuidv1 = require('uuid/v1');
 const EventEmitter = require('events');

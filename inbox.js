@@ -6,12 +6,7 @@ class Inbox {
         this._app = app;
     }
 
-    /**
-     * Add a message to a user's inbox
-     * 
-     * @param {string} name 
-     */
-    add(messageType, data) {
+    async add(messageType, data) {
         await this._init();
 
         // TODO: validate data against schema of `messageType`

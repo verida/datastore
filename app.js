@@ -12,12 +12,24 @@ const _ = require('lodash');
 
 class App {
 
+    /**
+     * Create a new application
+     * 
+     * @param {String} name Name of the application
+     * @param {Object} config Configuration for the application
+     * @constructor
+     * @example 
+     * import VeridaApp from 'verida-datastore';
+     * let myApp = new VeridaApp("My Application Name");
+     */
     constructor(name, config) {
         this.name = name;
         this.config = {};
         _.merge(this.config, Config, config);
         
         this.user = null;
+
+
         this.wallet = new Wallet(this);
         this.errors = null;
 
@@ -27,14 +39,12 @@ class App {
             app: new DataServer(this, {
                 datastores: this.config.datastores,
                 serverUrl: this.config.appServerUrl,
-                appHost: this.config.appHost,
-                isUser: false
+                dbHashKey: this.config.dbHashKey,
             }),
             // Connection to the user's data server
             user: new DataServer(this, {
                 appName: "Verida Wallet",
-                serverUrl: this.config.userServerUrl,
-                dsn: this.config.walletDsn
+                serverUrl: this.config.userServerUrl
             }),
         };
     }

@@ -3,6 +3,12 @@ import Profile from "./profile";
 
 class Wallet {
 
+    /**
+     * Create a new wallet
+     * 
+     * @param {App} app Instance of Datastore application
+     * @constructor
+     */
     constructor(app) {
         this._app = app;
 

@@ -22,10 +22,9 @@ class DataServer {
         this.appName = config.appName ? config.appName : app.name;
         this.appHost = config.appHost ? config.appHost : "localhost";
         this.serverUrl = config.serverUrl;
-        this.hashKey = app.config.dbHashKey;
+        this.hashKey = config.dbHashKey ? config.dbHashKey : "";
 
         this._client = new Client(this);
-        this._client.hostName = this.appHost;
         this._storageKey = STORAGE_KEY + this.appName;
         
         this._keyring = null;

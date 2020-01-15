@@ -6,7 +6,8 @@
   "author": "Verida",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "mocha -mocha --require @babel/polyfill --require @babel/register './test/**/*.js'"
+    "test": "mocha -mocha --require @babel/polyfill --require @babel/register './test/**/*.js'",
+    "generate-api-docs": "./node_modules/.bin/jsdoc ./ -r -c .jsdoc.conf -d apidocs"
   },
   "eslintConfig": {
     "root": true,
@@ -48,6 +49,8 @@
     "babel-core": "^6.26.3",
     "babel-loader": "^8.0.6",
     "babel-register": "^6.26.0",
+    "jsdoc": "^3.6.3",
+    "minami": "^1.2.3",
     "mocha": "^7.0.0"
   }
 }
