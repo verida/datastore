@@ -2,7 +2,7 @@
   "name": "verida-datastore",
   "version": "0.0.1",
   "description": "Verida Datastore",
-  "main": "app.js",
+  "main": "src/app.js",
   "author": "Verida",
   "license": "Apache-2.0",
   "scripts": {
