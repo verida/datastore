@@ -9,7 +9,6 @@ class Consent {
     }
 
     _getSignMessage(did, accessType, appName) {
-        console.log(did, accessType);
         switch (accessType) {
             case 'profile':
                 return "Do you approve this application to update your Verida public profile?\n\n" + did;
