@@ -2,6 +2,17 @@
 
 **Note: Verida Datastore is in active development with an alpha release coming Q1 2020**
 
+## Quick links
+
+- [Getting Started](http://docs.datastore.verida.io/#/?id=getting-started)
+- Guide (Coming soon)
+- [Architecture](http://docs.datastore.verida.io/#/architecture)
+- [API Docs](http://apidocs.datastore.verida.io/)
+- [Discord Chat](https://discord.gg/qb6vS43)
+- [Verida Website](https://www.verida.io)
+
+## Introduction
+
 The Verida Datastore enables developers to quickly build self-sovereign applications &mdash; allowing users to own their own data. The system is distributed by design, enabling user data to be stored on Verida infrastructure, a user's own infrastructure or use third party hosting providers.
 
 Verida Datastore provides an easy to use library that abstracts the complexities of encryption, permissioning, schema management and user management.
@@ -27,39 +38,64 @@ Create an application instance and ask the user to authorize your application:
 ```
 import VeridaApp from 'verida/datastore';
 
-let config = {};
-let myApp = new VeridaApp("My Application Name", config);
+let myApp = new VeridaApp("My Application Name");
 await myApp.connect();
 ```
 
 At this point a popup will appear asking the user to authorise the application. This is effectively signing into the application.
 
-Example: Save the user's email address to their public profile:
+**Example: Fetch the users contact list**
 
 ```
-let response = myApp.save("profile", {
-  key: "email",
-  value: "user@test.com"
-}
-console.log(response);
+let contactsDs = await myApp.openDatastore("social/contacts");
+let contacts = await contactsDs.getMany();
+console.log(contacts);
 ```
 
-Example: Save a record of employment to the user's private document database:
+See [DataStore.getMany()](http://apidocs.datastore.verida.io/DataStore.html#getMany)
+
+**Example: Save a new contact to the user's contact list:**
 
 ```
-let response = myApp.save("employment", {
-  organisationName: "Google",
-  position: "Product Manager",
-  startDate: "2015-10-12",
-  endDate: "206-03-9"
+let contactsDb = await myApp.openDatastore("social/contacts");
+let success = await contactsDb.save({
+  firstName: "Jane",
+  lastName: "Doe",
+  did: "0xefac8e8..."
 });
 
-console.log(response);
+if (!success) {
+  console.error(contactsDb.errors);
+} else {
+  console.log("Contact saved");
+}
 ```
 
-Example: Fetch employment documents where the user had the position `Product Manager`:
+See [DataStore.save()](http://apidocs.datastore.verida.io/DataStore.html#save)
+
+**Example: Fetch all contacts that work at `Google` and have a DID:**
 
 ```
-let profileData = myApp.getMany("profile");
-let employmentData = myApp.getMany("employment", {position: "Product Manager"});
+let contactsDb = await myApp.openDatastore("social/contacts");
+let contacts = contactsDb.getMany({
+  company: "Google"
+  did: {
+    $exists: true
+  }
+});
 ```
+
+See [DataStore.getMany()](http://apidocs.datastore.verida.io/DataStore.html#getMany)
+
+**Example: Get and set the user's email address on public profile:**
+
+```
+// Get the user's email from their public profile
+let email = myApp.wallet.profile.get("email");
+console.log(email);
+
+// Set the user's email on their public profile
+myApp.wallet.profile.set("email", "user@test.com");
+```
+
+See [Profile](http://apidocs.datastore.verida.io/Profile.html)
