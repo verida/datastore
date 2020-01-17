@@ -4,10 +4,16 @@
 
 ## Quick links
 
+Learn:
+
 - [Getting Started](http://docs.datastore.verida.io/#/?id=getting-started)
 - Guide (Coming soon)
 - [Architecture](http://docs.datastore.verida.io/#/architecture)
 - [API Docs](http://apidocs.datastore.verida.io/)
+
+Other links:
+
+- [Github](https://github.com/verida)
 - [Discord Chat](https://discord.gg/qb6vS43)
 - [Verida Website](https://www.verida.io)
 
