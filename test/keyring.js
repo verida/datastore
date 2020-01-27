@@ -1,7 +1,7 @@
 var assert = require("assert");
 import { box } from "tweetnacl";
 
-import Keyring from "../keyring";
+import Keyring from "../src/keyring";
 import { decodeUTF8 } from "tweetnacl-util";
 
 describe("Keyring", function() {
