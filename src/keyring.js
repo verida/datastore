@@ -41,10 +41,6 @@ class Keyring {
         let signKey = baseNode.derivePath("2");
         this.signKey = this._generateKeyPair(signKey, "sign");
 
-        // Build auth keys
-        let authKey = baseNode.derivePath("3");
-        this.authKey = this._generateKeyPair(authKey, "box");
-
         //this.ethKey = seedNode.derivePath(ETH_PATH);
     }
 
@@ -53,9 +49,7 @@ class Keyring {
             asymmetric: this.asymKey.public,
             asymmetricBytes: decodeUTF8(this.asymKey.public),
             sign: this.signKey.public,
-            signBytes: decodeUTF8(this.signKey.public),
-            auth: this.authKey.public,
-            authBytes: decodeUTF8(this.authKey.public),
+            signBytes: decodeUTF8(this.signKey.public)
         }
     }
 
@@ -73,9 +67,9 @@ class Keyring {
         }
 
         return {
-            public: Buffer.from(keyPair.publicKey).toString('hex'),
+            public: '0x' + Buffer.from(keyPair.publicKey).toString('hex'),
             publicBytes: keyPair.publicKey,
-            private: Buffer.from(keyPair.secretKey).toString('hex'),
+            private: '0x' + Buffer.from(keyPair.secretKey).toString('hex'),
             privateBytes: keyPair.secretKey,
         };
     }

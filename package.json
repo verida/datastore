@@ -29,9 +29,12 @@
     }
   },
   "dependencies": {
+    "@verida/did-helper": "^0.2.1",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
+    "did-document": "github:arablocks/did-document",
     "did-jwt": "^4.0.0",
     "json-schema-ref-parser": "^7.1.2",
+    "json-schema-resolve-allof": "^1.5.0",
     "lodash": "^4.17.15",
     "pouchdb-browser": "^7.1.1",
     "pouchdb-find": "^7.1.1",

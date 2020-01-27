@@ -1,15 +1,16 @@
 /*eslint no-console: "off"*/
 import { encodeBase64 } from "tweetnacl-util";
-const _ = require('lodash');
-
 import Datastore from "./datastore";
 import Client from "./client";
 import Keyring from "./keyring";
 import { utils, ethers } from "ethers";
 import Consent from "./consent";
+import store from 'store';
+import _ from 'lodash';
+import VID from './vid';
+
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
-import store from 'store';
 
 class DataServer {
 
@@ -23,6 +24,7 @@ class DataServer {
         this.appName = config.appName ? config.appName : app.name;
         this.appHost = config.appHost ? config.appHost : "localhost";
         this.serverUrl = config.serverUrl;
+        this.didUrl = config.didUrl;
         this.hashKey = config.dbHashKey ? config.dbHashKey : "";
         this.isProfile = config.isProfile ? config.isProfile : false;
 
@@ -38,6 +40,7 @@ class DataServer {
         this._publicCredentials = {};
         this._datastores = {};
         this._init = false;
+        this._vid = null;
     }
 
     async connect() {
@@ -58,6 +61,9 @@ class DataServer {
 
             this.unserialize(config);
             store.set(this._storageKey, this.serialize());
+
+            this.vid = 'did:vid:' + utils.id(this.appName + this.app.user.did);
+            VID.save(this.vid, this._keyring, this.didUrl);
         }
 
         this._init = true;
