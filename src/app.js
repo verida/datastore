@@ -47,13 +47,15 @@ class App {
             app: new DataServer(this, {
                 datastores: this.config.datastores,
                 serverUrl: this.config.appServerUrl,
+                didUrl: this.config.didServerUrl,
                 dbHashKey: this.config.dbHashKey,
             }),
             // Connection to the user's data server (for accessing their profile)
             user: new DataServer(this, {
                 appName: "Verida Wallet",
                 isProfile: true,
-                serverUrl: this.config.userServerUrl
+                serverUrl: this.config.userServerUrl,
+                didUrl: this.config.didServerUrl
             }),
         };
     }
@@ -79,6 +81,7 @@ class App {
     logout() {
         this.dataservers.app.logout();
         this.dataservers.user.logout();
+        this.user = null;
     }
 
     /**
