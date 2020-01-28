@@ -78,10 +78,14 @@ class App {
     /**
      * Logout a user.
      */
-    logout() {
+    disconnect() {
         this.dataservers.app.logout();
         this.dataservers.user.logout();
         this.user = null;
+    }
+
+    isConnected() {
+        return this.user == null;
     }
 
     /**
