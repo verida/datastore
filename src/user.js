@@ -17,6 +17,10 @@ class User {
         this._app = app;
 
         // User's global DID and address
+        this.reset();
+    }
+
+    reset() {
         this.chain = "ethr";
         this.did = null;
         this.address = null;

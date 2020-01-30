@@ -37,7 +37,7 @@ class App {
         this.config = {};
         _.merge(this.config, Config, config);
         
-        this.user = null;
+        this.user = new VeridaUser(this);
 
         this.wallet = new Wallet(this);
 
@@ -69,8 +69,7 @@ class App {
         if (this.user) {
             throw "User already exists, disconnect first";
         }
-
-        this.user = new VeridaUser(this);
+        
         await this.user.init();
         await this.dataservers.app.connect();
     }
@@ -81,11 +80,12 @@ class App {
     disconnect() {
         this.dataservers.app.logout();
         this.dataservers.user.logout();
-        this.user = null;
+        this.user = this.user.reset();
     }
 
-    isConnected() {
-        return this.user != null;
+    async isConnected() {
+        await this.user.init();
+        return this.user.did != null;
     }
 
     /**
