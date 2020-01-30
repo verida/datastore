@@ -85,7 +85,7 @@ class App {
     }
 
     isConnected() {
-        return this.user == null;
+        return this.user != null;
     }
 
     /**
