@@ -17,7 +17,6 @@ class Inbox {
 
     constructor(app) {
         this._app = app;
-        this._dataservers = {};
     }
     
     /**
@@ -42,7 +41,7 @@ class Inbox {
          */
         // Use the current application's keyring as we shouldn't request access to
         // the user's private wallet
-        let keyring = await this._app.dataservers.app.getKeyring();
+        let keyring = await this._app.dataserver.getKeyring();
         let signer = didJWT.SimpleSigner(keyring.signKey.private);
 
         let jwt = await didJWT.createJWT({
@@ -89,7 +88,7 @@ class Inbox {
         _.merge(config, defaults, config);
 
         // Build dataserver connecting to the recipient user's inbox
-        let dataserver = await this.getUserDataserver(did, config);
+        let dataserver = await this._app.buildDataserver(did, config);
         let inbox = new Datastore(dataserver, "inbox/item", did, config.appName, {
             permissions: {
                 read: "public",
@@ -98,35 +97,6 @@ class Inbox {
         });
 
         return inbox;
-    }
-
-    /**
-     * 
-     * @param {*} did 
-     * @param {*} config 
-     */
-    async getUserDataserver(did, config) {
-        if (this._dataservers[did]) {
-            return this._dataservers[did];
-        }
-
-        // Get user's VID to obtain their dataserver address
-        let vidDoc = await VidHelper.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
-        let dataserverDoc = vidDoc.service.find(entry => entry.id.includes('dataserver'));
-        let dataserverUrl = dataserverDoc.serviceEndpoint;
-
-        let dataserver = new Dataserver(this._app, {
-            appName: config.appName ? config.appName : "Verida Wallet",
-            isProfile: false,
-            serverUrl: dataserverUrl,
-            didUrl: this._app.config.didServerUrl
-        });
-        dataserver.loadExternal({
-            vid: vidDoc.id
-        });
-
-        this._dataservers[did] = dataserver;
-        return this._dataservers[did];
     }
 
     encrypt(data, secretOrSharedKey) {

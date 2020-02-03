@@ -8,6 +8,7 @@ import VeridaSchema from "./schema";
 import DataServer from './dataserver';
 import Inbox from "./inbox";
 import WalletHelper from "./helpers/wallet";
+import VidHelper from "./helpers/vid";
 
 const _ = require('lodash');
 
@@ -41,26 +42,16 @@ class App {
         _.merge(this.config, Config, config);
         
         this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
-        this._isConnected = false;
-
         this.inbox = new Inbox(this);
+        this.dataserver = new DataServer(this, {
+            datastores: this.config.datastores,
+            serverUrl: this.config.appServerUrl,
+            didUrl: this.config.didServerUrl
+        });
 
         this._schemas = {};
-        this.dataservers = {
-            // Connection to application's data server
-            app: new DataServer(this, {
-                datastores: this.config.datastores,
-                serverUrl: this.config.appServerUrl,
-                didUrl: this.config.didServerUrl
-            }),
-            // Connection to the user's data server (for accessing their profile)
-            user: new DataServer(this, {
-                appName: "Verida Wallet",
-                isProfile: true,
-                serverUrl: this.config.userServerUrl,
-                didUrl: this.config.didServerUrl
-            })
-        };
+        this._isConnected = false;
+        this._dataservers = {};
     }
 
     /**
@@ -74,7 +65,7 @@ class App {
             throw "Application is already connected";
         }
 
-        await this.dataservers.app.connect();
+        await this.dataserver.connect();
         this._isConnected = true;
     }
 
@@ -82,8 +73,7 @@ class App {
      * Logout a user.
      */
     disconnect() {
-        this.dataservers.app.logout();
-        this.dataservers.user.logout();
+        this.dataserver.logout();
         this._isconnected = false;
     }
 
@@ -100,7 +90,7 @@ class App {
      */
     async openDatastore(schemaName, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
-        return this.dataservers.app.openDatastore(schemaName, this.user.did, config);
+        return this.dataserver.openDatastore(schemaName, this.user.did, config);
     }
 
     /**
@@ -113,13 +103,10 @@ class App {
      * @returns {DataStore} Datastore instance for the requested user profile
      */
     async openProfile(did) {
-        // TODO: Create smart contract that maps DID's to dataservers and
-        // dynamically build a dataserver specific for the requested user
-
-        //let vid = getVid("Verida Wallet", did);
-        //let dataserverUrl = vid.getAttribute("dataserver");
-        //let dataserver = this.buildDataserver(dataserverUrl);
-        let dataStore = await this.dataservers.user.openDatastore("profile", did, {
+        let dataserver = this.buildDataserver(did, {
+            appName: "Verida Wallet"
+        });
+        let dataStore = await dataserver.openDatastore("profile", did, {
             permissions: {
                 read: "public",
                 write: "owner"
@@ -142,6 +129,36 @@ class App {
         }
 
         return this._schemas[schemaName];
+    }
+
+    async buildDataserver(did, config) {
+        if (this._dataservers[did + ':' + config.appName]) {
+            return this._dataservers[did + ':' + config.appName];
+        }
+
+        // Get user's VID to obtain their dataserver address
+        let vidDoc = await VidHelper.getByDid(did, config.appName, this.config.didServerUrl);
+        let dataserverDoc = vidDoc.service.find(entry => entry.id.includes('dataserver'));
+        let dataserverUrl = dataserverDoc.serviceEndpoint;
+
+        // Build dataserver config, merging defaults and user defined config
+        let dataserverConfig = {};
+        _.merge(dataserverConfig, {
+            appName: "Verida Wallet",
+            isProfile: false,
+            serverUrl: dataserverUrl,
+            didUrl: this.config.didServerUrl
+        }, config);
+
+        // Build dataserver
+        let dataserver = new DataServer(this, dataserverConfig);
+        dataserver.loadExternal({
+            vid: vidDoc.id
+        });
+
+        // Cache and return dataserver
+        this._dataservers[did + ':' + config.appName] = dataserver;
+        return this._dataservers[did + ':' + config.appName];
     }
 
 }
