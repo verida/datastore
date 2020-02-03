@@ -40,7 +40,7 @@ class App {
         };
         _.merge(this.config, Config, config);
         
-        this.user = new VeridaUser(chain, address, web3Provider);
+        this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
         this._isConnected = false;
 
         this.inbox = new Inbox(this);

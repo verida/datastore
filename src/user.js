@@ -1,6 +1,4 @@
-/*eslint no-console: "off"*/
-"use strict"
-
+import DIDHelper from '@verida/did-helper';
 const Web3 = require('web3');
 
 class User {
@@ -13,11 +11,22 @@ class User {
      * @property {string} did Decentralised ID for this use (ie: `did:ethr:0xaef....`)
      * @property {string} address Blockchain address for this user (ie: `0xaef....`)
      */
-    constructor(chain, address, web3Provider) {
+    constructor(chain, address, web3Provider, didServerUrl) {
         this.web3Provider = new Web3(web3Provider);
         this.chain = chain;
         this.address = address;
         this.did = 'did:'+this.chain+':'+this.address;
+        this.didServerUrl = didServerUrl;
+
+        this._vid = null;
+    }
+
+    async getAppVid(appName) {
+        if (!this._vid) {
+            this._vid = await DIDHelper.loadForApp(this.did, appName, this.didServerUrl);
+        }
+        
+        return this._vid;
     }
 
 }
