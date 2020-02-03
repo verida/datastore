@@ -61,7 +61,8 @@ class DataServer {
 
             this.unserialize(config);
             store.set(this._storageKey, this.serialize());
-            this._vidDoc = this.app.user.getAppVid(this.appName);
+            this._vidDoc = await this.app.user.getAppVid(this.appName);
+            
             if (!this._vidDoc) {
                 this._vidDoc = await vidHelper.save(this.app.user.did, this.appName, this.app.config.didServiceUrl, this._keyring, this.didUrl, this.serverUrl);
             }
