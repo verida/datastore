@@ -1,8 +1,9 @@
 /*eslint no-console: "off"*/
 import { DIDDocument } from 'did-document';
 import DIDHelper from '@verida/did-helper';
+import { utils } from 'ethers';
 
-class Vid {
+class VidHelper {
 
     /**
      * TODO: Replace with decentralised lookup
@@ -11,7 +12,9 @@ class Vid {
      * @param {*} chainDID 
      * @param {*} didServerUrl
      */
-    async save(did, appName, appUrl, vid, keyring, didServerUrl, userDataserverUrl) {
+    async save(did, appName, appUrl, keyring, didServerUrl, userDataserverUrl) {
+        let vid = 'did:vid:' + utils.id("Verida Wallet" + did);
+
         let publicKeys = keyring.exportPublicKeys();
 
         // Generate a VID Document
@@ -50,7 +53,10 @@ class Vid {
         });
 
         DIDHelper.createProof(doc, keyring.signKey.private);
-        return await DIDHelper.commit(did, doc, didServerUrl);
+        let response = await DIDHelper.commit(did, doc, didServerUrl);
+        if (response) {
+            return doc;
+        }
 
         // Future: Have did-helper include consent message in the proof
         // and have did-server verify the consent message is from a
@@ -63,5 +69,5 @@ class Vid {
 
 }
 
-let vid = new Vid();
-export default vid;
+let vidHelper = new VidHelper();
+export default vidHelper;

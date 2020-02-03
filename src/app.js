@@ -5,9 +5,9 @@ import Config from './config';
 
 import VeridaUser from "./user";
 import VeridaSchema from "./schema";
-import Wallet from './wallet';
 import DataServer from './dataserver';
 import Inbox from "./inbox";
+import WalletHelper from "./helpers/wallet";
 
 const _ = require('lodash');
 
@@ -43,7 +43,6 @@ class App {
         this.user = new VeridaUser(chain, address, web3Provider);
         this._isConnected = false;
 
-        this.wallet = new Wallet(this);
         this.inbox = new Inbox(this);
 
         this._schemas = {};
@@ -85,6 +84,7 @@ class App {
     disconnect() {
         this.dataservers.app.logout();
         this.dataservers.user.logout();
+        this._isconnected = false;
     }
 
     async isConnected() {
@@ -146,4 +146,5 @@ class App {
 
 }
 
+App.WalletHelper = WalletHelper;
 export default App;

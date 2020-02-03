@@ -6,8 +6,8 @@ import Keyring from "./keyring";
 import { utils, ethers } from "ethers";
 import Consent from "./consent";
 import store from 'store';
+import vidHelper from './helpers/vid';
 import _ from 'lodash';
-import VID from './vid';
 
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
@@ -40,6 +40,7 @@ class DataServer {
         this._datastores = {};
         this._init = false;
         this._vid = null;
+        this._vidDoc = null;
     }
 
     async connect() {
@@ -60,9 +61,12 @@ class DataServer {
 
             this.unserialize(config);
             store.set(this._storageKey, this.serialize());
+            this._vidDoc = vidHelper.getByDid(this.app.user.did, this.appName, this.app.config.didServerUrl);
+            if (!this._vidDoc) {
+                this._vidDoc = await vidHelper.save(this.app.user.did, this.appName, this.app.config.didServiceUrl, this._keyring, this.didUrl, this.serverUrl);
+            }
 
-            this.vid = 'did:vid:' + utils.id(this.appName + this.app.user.did);
-            await VID.save(this.app.user.did, this.appName, this.app.config.didServiceUrl, this.vid, this._keyring, this.didUrl, this.serverUrl);
+            this._vid = this._vidDoc.id;
         }
 
         this._init = true;
@@ -87,7 +91,8 @@ class DataServer {
             signature: this._signature,
             dsn: this._dsn,
             salt: this._salt,
-            publicCredentials: this._publicCredentials
+            publicCredentials: this._publicCredentials,
+            vid: this._vid
         };
     }
 
@@ -110,6 +115,7 @@ class DataServer {
         this._key = this._keyring.asymKey.private;
         this._key64 = encodeBase64(this._key);
         this._publicCredentials = data.publicCredentials;
+        this._vid = data.vid;
     }
 
     async _getUser() {

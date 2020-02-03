@@ -2,7 +2,7 @@
 import Dataserver from "./dataserver";
 import Datastore from "./datastore";
 import _ from "lodash";
-import VID from './vid';
+import VidHelper from './helpers/vid';
 import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
@@ -57,7 +57,7 @@ class Inbox {
         });
 
         // Encrypt this message using the receipients public key
-        let vidDoc = await VID.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
+        let vidDoc = await VidHelper.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
         let publicSignKey = DIDHelper.getSignKeyBytes(vidDoc);
 
         let encrypted = this.encrypt(jwt, publicSignKey);
@@ -111,7 +111,7 @@ class Inbox {
         }
 
         // Get user's VID to obtain their dataserver address
-        let vidDoc = await VID.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
+        let vidDoc = await VidHelper.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
         let dataserverDoc = vidDoc.service.find(entry => entry.id.includes('dataserver'));
         let dataserverUrl = dataserverDoc.serviceEndpoint;
 
