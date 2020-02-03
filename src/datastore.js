@@ -142,6 +142,10 @@ class DataStore {
         return this._db;
     }
 
+    getDataserver() {
+        return this._dataserver;
+    }
+
     async _init() {
         if (this._db) {
             return;

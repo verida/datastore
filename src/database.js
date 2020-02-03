@@ -53,7 +53,7 @@ class Database extends EventEmitter {
             this.permissions.write
         ].join("/");
 
-        let hash = crypto.createHmac('sha256', this.dataserver.hashKey);
+        let hash = crypto.createHmac('sha256',"");
         hash.update(text);
         this._dbHash = "v" + hash.digest('hex');
 
@@ -238,7 +238,7 @@ class Database extends EventEmitter {
             this._db = await db.getDb();
         } else if (this.permissions.read == "public") {
             // Create non-encrypted database
-            let db = new PublicDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions);
+            let db = new PublicDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions, this.config.isOwner);
             this._db = await db.getDb();
         } else if (this.permissions.read == "users") {
             throw "User group permissions are not yet supported";

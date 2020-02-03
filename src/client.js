@@ -13,15 +13,15 @@ class Client {
     }
 
     async getUser(did) {
-        return this.getAxios().get(this._dataserver.serverUrl + "user/get?did=" + did);
+        return this.getAxios(true).get(this._dataserver.serverUrl + "user/get?did=" + did);
     }
 
     async getPublicUser() {
-        return this.getAxios().get(this._dataserver.serverUrl + "user/public");
+        return this.getAxios(false).get(this._dataserver.serverUrl + "user/public");
     }
 
     async createUser(did, password) {
-        return this.getAxios().post(this._dataserver.serverUrl + "user/create", {
+        return this.getAxios(true).post(this._dataserver.serverUrl + "user/create", {
             did: did,
             password: password
         });
@@ -29,25 +29,30 @@ class Client {
 
     async createDatabase(did, databaseName, options) {
         options = options ? options : {};
-        this.getAxios().post(this._dataserver.serverUrl + "user/createDatabase", {
+        return this.getAxios(true).post(this._dataserver.serverUrl + "user/createDatabase", {
             did: did,
             databaseName: databaseName,
             options: options
         });
     }
 
-    getAxios() {
+    getAxios(includeAuth) {
         if (!this._axios) {
-            this._axios = axios.create({
-                auth: {
-                    username: this.username.replace(/:/g, "_"),
-                    password: this.password
-                },
+            let config = {
                 headers: {
                     "Application-Name": this._dataserver.appName,
                     "Profile-Request": this.isProfile
                 }
-            });
+            };
+
+            if (includeAuth) {
+                config.auth = {
+                    username: this.username.replace(/:/g, "_"),
+                    password: this.password
+                };
+            }
+
+            this._axios = axios.create(config);
         }
 
         return this._axios;

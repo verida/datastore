@@ -3,7 +3,6 @@ module.exports = {
     appServerUrl: "http://datastore.dev.verida.io:5000/",
     userServerUrl: "http://datastore.dev.verida.io:5000/",
     didServerUrl: "http://did.dev.verida.io:5001/",
-    dbHashKey: "9c2b7826978f2c49678",
     datastores: {
         default: {
             privacy: "private"

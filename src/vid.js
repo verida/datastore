@@ -11,7 +11,7 @@ class Vid {
      * @param {*} chainDID 
      * @param {*} didServerUrl
      */
-    async save(vid, keyring, didServerUrl) {
+    async save(did, appName, appUrl, vid, keyring, didServerUrl, userDataserverUrl) {
         let publicKeys = keyring.exportPublicKeys();
 
         // Generate a VID Document
@@ -36,19 +36,30 @@ class Vid {
             type: 'Secp256k1SignatureAuthentication2018'
         });
 
-        console.log(keyring.signKey.private);
-        DIDHelper.createProof(doc, keyring.signKey.private);
-        return await DIDHelper.commit(doc, didServerUrl);
+        doc.addService({
+            id: `${vid}#application`,
+            type: 'verida.Application',
+            serviceEndpoint: appUrl,
+            description: appName
+        });
 
-        //let result = await DIDHelper.commit(doc, this.host);
-        // TODO: Have did-helper include consent message in the proof
+        doc.addService({
+            id: `${vid}#dataserver`,
+            type: 'verida.DataServer',
+            serviceEndpoint: userDataserverUrl
+        });
+
+        DIDHelper.createProof(doc, keyring.signKey.private);
+        return await DIDHelper.commit(did, doc, didServerUrl);
+
+        // Future: Have did-helper include consent message in the proof
         // and have did-server verify the consent message is from a
-        // chain address that is linked to the DID (unless it's the only one)
+        // chain address that is linked to the DID (unless it's the only one)?
     }
 
-    /*async get(VID) {
-        
-    }*/
+    async getByDid(did, appName, didServerUrl) {
+        return await DIDHelper.loadForApp(did, appName, didServerUrl);
+    }
 
 }
 

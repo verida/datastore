@@ -7,6 +7,7 @@ import VeridaUser from "./user";
 import VeridaSchema from "./schema";
 import Wallet from './wallet';
 import DataServer from './dataserver';
+import Inbox from "./inbox";
 
 const _ = require('lodash');
 
@@ -32,14 +33,18 @@ class App {
      * let myApp = new VeridaApp("My Application Name");
      * myApp.connect();
      */
-    constructor(name, config) {
+    constructor(name, chain, address, web3Provider, config) {
         this.name = name;
-        this.config = {};
+        this.config = {
+            didServiceUrl: window.location.origin
+        };
         _.merge(this.config, Config, config);
         
-        this.user = new VeridaUser(this);
+        this.user = new VeridaUser(chain, address, web3Provider);
+        this._isConnected = false;
 
         this.wallet = new Wallet(this);
+        this.inbox = new Inbox(this);
 
         this._schemas = {};
         this.dataservers = {
@@ -47,8 +52,7 @@ class App {
             app: new DataServer(this, {
                 datastores: this.config.datastores,
                 serverUrl: this.config.appServerUrl,
-                didUrl: this.config.didServerUrl,
-                dbHashKey: this.config.dbHashKey,
+                didUrl: this.config.didServerUrl
             }),
             // Connection to the user's data server (for accessing their profile)
             user: new DataServer(this, {
@@ -56,22 +60,23 @@ class App {
                 isProfile: true,
                 serverUrl: this.config.userServerUrl,
                 didUrl: this.config.didServerUrl
-            }),
+            })
         };
     }
 
     /**
-     * Connect a user to the application. Similar to "logging in" to an application. This will popup a metamask window asking the user to authorize the application.
+     * Connect a user to the application. Similar to "logging in" to an application. 
+     * This will popup a metamask window asking the user to authorize the application.
      * 
      * The user will remain logged in for all subsequent page loads until `app.logout()` is called.
      */
     async connect() {
-        if (this.user) {
-            throw "User already exists, disconnect first";
+        if (this._connected) {
+            throw "Application is already connected";
         }
-        
-        await this.user.init();
+
         await this.dataservers.app.connect();
+        this._isConnected = true;
     }
 
     /**
@@ -80,12 +85,10 @@ class App {
     disconnect() {
         this.dataservers.app.logout();
         this.dataservers.user.logout();
-        this.user = this.user.reset();
     }
 
     async isConnected() {
-        await this.user.init();
-        return this.user.did != null;
+        return this._isConnected;
     }
 
     /**
@@ -113,13 +116,18 @@ class App {
         // TODO: Create smart contract that maps DID's to dataservers and
         // dynamically build a dataserver specific for the requested user
 
-        return this.dataservers.user.openDatastore("profile", did, {
+        //let vid = getVid("Verida Wallet", did);
+        //let dataserverUrl = vid.getAttribute("dataserver");
+        //let dataserver = this.buildDataserver(dataserverUrl);
+        let dataStore = await this.dataservers.user.openDatastore("profile", did, {
             permissions: {
                 read: "public",
                 write: "owner"
             },
             readOnly: true
         });
+
+        return dataStore;
     }
 
     /**

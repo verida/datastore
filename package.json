@@ -29,7 +29,7 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.2.1",
+    "@verida/did-helper": "^0.3.2",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
     "did-jwt": "^4.0.0",

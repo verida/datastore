@@ -25,7 +25,6 @@ class DataServer {
         this.appHost = config.appHost ? config.appHost : "localhost";
         this.serverUrl = config.serverUrl;
         this.didUrl = config.didUrl;
-        this.hashKey = config.dbHashKey ? config.dbHashKey : "";
         this.isProfile = config.isProfile ? config.isProfile : false;
 
         this._client = new Client(this);
@@ -37,7 +36,7 @@ class DataServer {
         this._key = null;
         this._key64 = null;
 
-        this._publicCredentials = {};
+        this._publicCredentials = null;
         this._datastores = {};
         this._init = false;
         this._vid = null;
@@ -63,9 +62,19 @@ class DataServer {
             store.set(this._storageKey, this.serialize());
 
             this.vid = 'did:vid:' + utils.id(this.appName + this.app.user.did);
-            VID.save(this.vid, this._keyring, this.didUrl);
+            await VID.save(this.app.user.did, this.appName, this.app.config.didServiceUrl, this.vid, this._keyring, this.didUrl, this.serverUrl);
         }
 
+        this._init = true;
+    }
+
+    /**
+     * Load an external data store (only requires limited fields)
+     * 
+     * TODO: Refactor into two types of dataservers (the current user's and external)
+     */
+    async loadExternal(config) {
+        this._vid = config.vid;
         this._init = true;
     }
 
@@ -133,17 +142,20 @@ class DataServer {
 
         let response = await this._client.getPublicUser();
 
-        this._publicCredentials = {
-            username: response.data.user.username,
-            password: response.data.user.password
-        }
+        this._publicCredentials = response.data.user;
 
         return this._publicCredentials;
     }
 
     async openDatastore(schemaName, did, config) {
-        if (!this._init) {
-            await this.connect();
+        config = config ? config : {};
+        config.permissions = config.permissions ? config.permissions : {};
+
+        // If permissions require "owner" access, connect the current user
+        if (config.permissions.read == "owner" || config.permissions.write == "owner") {
+            if (!this._init) {
+                await this.connect();
+            }
         }
 
         if (this._datastores[schemaName]) {
@@ -152,6 +164,7 @@ class DataServer {
 
         // merge config with this.config?
 
+        config.isOwner = (did == this.app.user.did);
         this._datastores[schemaName] = new Datastore(this, schemaName, did, this.appName, config);
 
         return this._datastores[schemaName];
@@ -195,6 +208,14 @@ class DataServer {
         }
 
         return this._dsn;
+    }
+
+    async getKeyring() {
+        if (!this._init) {
+            await this.connect();
+        }
+
+        return this._keyring;
     }
 
 }
