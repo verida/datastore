@@ -43,13 +43,20 @@ class DataServer {
         this._vidDoc = null;
     }
 
-    async connect() {
+    async connect(force) {
         // Try to load config from local storage
         this._storageKey = STORAGE_KEY + this.appName + this.app.user.did;
         let config = store.get(this._storageKey);
         if (config) {
             this.unserialize(config);
-        } else {
+            this._init = true;
+            return true;
+        }
+        
+        /**
+         * Force a connection
+         */
+        if (force) {
             this._signature = await Consent.requestSignature(this.app.user, this.isProfile ? "profile" : "default", this.isProfile ? "Verida Wallet" : this.appName);
             let user = await this._getUser();
             
@@ -68,9 +75,11 @@ class DataServer {
             }
 
             this._vid = this._vidDoc.id;
+            this._init = true;
+            return true;
         }
 
-        this._init = true;
+        return false;
     }
 
     /**
@@ -161,7 +170,7 @@ class DataServer {
         // If permissions require "owner" access, connect the current user
         if (config.permissions.read == "owner" || config.permissions.write == "owner") {
             if (!this._init) {
-                await this.connect();
+                await this.connect(true);
             }
         }
 
@@ -179,7 +188,7 @@ class DataServer {
 
     async getKey() {
         if (!this._init) {
-            await this.connect();
+            await this.connect(true);
         }
 
         return this._key;
@@ -187,7 +196,7 @@ class DataServer {
 
     async getHash() {
         if (!this._init) {
-            await this.connect();
+            await this.connect(true);
         }
 
         return this._hash;
@@ -195,7 +204,7 @@ class DataServer {
 
     async getSignature() {
         if (!this._init) {
-            await this.connect();
+            await this.connect(true);
         }
 
         return this._signature;
@@ -203,7 +212,7 @@ class DataServer {
 
     async getClient() {
         if (!this._init) {
-            await this.connect();
+            await this.connect(true);
         }
 
         return this._client;
@@ -211,7 +220,7 @@ class DataServer {
 
     async getDsn() {
         if (!this._init) {
-            await this.connect();
+            await this.connect(true);
         }
 
         return this._dsn;
@@ -219,7 +228,7 @@ class DataServer {
 
     async getKeyring() {
         if (!this._init) {
-            await this.connect();
+            await this.connect(true);
         }
 
         return this._keyring;

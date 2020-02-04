@@ -32,7 +32,7 @@ class App {
      * @example 
      * import VeridaApp from 'verida-datastore';
      * let myApp = new VeridaApp("My Application Name");
-     * myApp.connect();
+     * myApp.connect(true);
      */
     constructor(name, chain, address, web3Provider, config) {
         this.name = name;
@@ -60,13 +60,14 @@ class App {
      * 
      * The user will remain logged in for all subsequent page loads until `app.logout()` is called.
      */
-    async connect() {
+    async connect(force) {
         if (this._isConnected) {
-            throw "Application is already connected";
+            throw "Application datastore is already connected";
         }
 
-        await this.dataserver.connect();
-        this._isConnected = true;
+        let connected = await this.dataserver.connect(force);
+        this._isConnected = connected;
+        return connected;
     }
 
     /**
@@ -74,11 +75,11 @@ class App {
      */
     disconnect() {
         this.dataserver.logout();
-        this._isconnected = false;
+        this._isConnected = false;
     }
 
     async isConnected() {
-        return this._isConnected;
+        return await this.connect();
     }
 
     /**
