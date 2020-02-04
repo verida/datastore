@@ -6,10 +6,6 @@ import VidHelper from './helpers/vid';
 import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
-import {
-  decodeUTF8,
-  encodeBase64
-} from "tweetnacl-util";
 
 const newAsymNonce = () => randomBytes(box.nonceLength);
 
@@ -55,11 +51,11 @@ class Inbox {
             signer
         });
 
-        // Encrypt this message using the receipients public key
+        // Encrypt this message using the receipients public key and this apps private key
         let vidDoc = await VidHelper.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
-        let publicSignKey = DIDHelper.getSignKeyBytes(vidDoc);
-
-        let encrypted = this.encrypt(jwt, publicSignKey);
+        let publicAsymKey = DIDHelper.getKeyBytes(vidDoc, 'asym');
+        let sharedKey = box.before(publicAsymKey, keyring.asymKey.privateBytes);
+        let encrypted = keyring.asymEncrypt(jwt, sharedKey);
 
         // Save the encrypted JWT to the user's inbox
         let inbox = await this.getDatastore(did);
@@ -73,7 +69,8 @@ class Inbox {
         })
 
         let response = await inbox.save({
-            content: encrypted
+            content: encrypted,
+            key: keyring.asymKey.public
         });
 
         return response;
@@ -97,20 +94,6 @@ class Inbox {
         });
 
         return inbox;
-    }
-
-    encrypt(data, secretOrSharedKey) {
-        secretOrSharedKey = secretOrSharedKey ? secretOrSharedKey : this.asymKey.publicBytes;
-        const nonce = newAsymNonce();
-        const messageUint8 = decodeUTF8(JSON.stringify(data));
-        const encrypted = box.after(messageUint8, nonce, secretOrSharedKey);
-
-        const fullMessage = new Uint8Array(nonce.length + encrypted.length);
-        fullMessage.set(nonce);
-        fullMessage.set(encrypted, nonce.length);
-
-        const base64FullMessage = encodeBase64(fullMessage);
-        return base64FullMessage;
     }
 
     /*eslint no-unused-vars: "off"*/

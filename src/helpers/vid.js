@@ -23,7 +23,7 @@ class VidHelper {
         });
 
         doc.addPublicKey({
-            id: `${vid}#asymKey`,
+            id: `${vid}#asym`,
             type: 'Curve25519EncryptionPublicKey',
             publicKeyHex: publicKeys.asymmetric
         });
