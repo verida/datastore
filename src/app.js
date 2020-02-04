@@ -61,7 +61,7 @@ class App {
      * The user will remain logged in for all subsequent page loads until `app.logout()` is called.
      */
     async connect() {
-        if (this._connected) {
+        if (this._isConnected) {
             throw "Application is already connected";
         }
 
