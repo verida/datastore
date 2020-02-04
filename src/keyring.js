@@ -119,7 +119,6 @@ class Keyring {
     }
 
     asymEncrypt(data, secretOrSharedKey) {
-        secretOrSharedKey = secretOrSharedKey ? secretOrSharedKey : this.asymKey.publicBytes;
         const nonce = newAsymNonce();
         const messageUint8 = decodeUTF8(JSON.stringify(data));
         const encrypted = box.after(messageUint8, nonce, secretOrSharedKey);
@@ -133,7 +132,6 @@ class Keyring {
     }
       
     asymDecrypt(messageWithNonce, secretOrSharedKey) {
-        secretOrSharedKey = secretOrSharedKey ? secretOrSharedKey : this.asymKey.privateBytes;
         const messageWithNonceAsUint8Array = decodeBase64(messageWithNonce);
         const nonce = messageWithNonceAsUint8Array.slice(0, box.nonceLength);
         const message = messageWithNonceAsUint8Array.slice(
