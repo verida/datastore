@@ -10,7 +10,7 @@ describe("Keyring", function() {
     describe("Signing", function() {
         this.beforeAll(function() {
             let seed = new Uint8Array([37, 111, 93, 122, 134, 74, 12, 201, 10, 204, 68, 90, 213, 69, 150, 82, 163, 69, 157, 239, 64, 194, 140, 31, 144, 79, 225, 141, 74, 52, 70, 90]);
-            seed = Buffer.from(seed).toString('hex');
+            seed = '0x' + Buffer.from(seed).toString('hex');
             keyring = new Keyring(seed);
         });
 
@@ -40,7 +40,7 @@ describe("Keyring", function() {
     });
 
     describe("Asymmetric encryption", function() {
-        it("should assymetrically encrypt and decrypt an inbox message", function() {
+        it("should assymetrically encrypt and decrypt a message with shared key", function() {
             let data = {
                 "hello": "world"
             };
