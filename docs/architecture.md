@@ -73,6 +73,12 @@ Each user has a `master` Verida Data Wallet that contains all their data. This c
 
 Applications have separate user databases. This data is encrypted (unless marked as `public`) by encryption keys specific for the application. This data can be unlocked when a user access the application or when a user accesses their Verida Data Wallet.
 
+### User's Inbox
+
+All users have a public data `inbox` that can be accessed from their Verida Data Wallet. Any application can send any type of valid schema data to this inbox which the user can then choose to accept or deny. A user could be sent a digital receipt, identity document or a simple message.
+
+Applications can easily send data to a user with the `app.inbox.send(did, message)` method. The message is converted into a digitally signed DID-JWT object and then encrypted using the User's wallet public key. When a user opens the Verida Data Wallet application, the data in their inbox is decrypted using their private key and the DID-JWT is decoded. This decrypted and decoded data is then saved as an encrypted message in the users private inbox and shown to the user.
+
 ### Data Storage
 
 Under the hood a combination of [CouchDB](https://en.wikipedia.org/wiki/Apache_CouchDB) and [PouchDB](https://pouchdb.com/) is used to store user data. Here's why that combination was chosen over other options:

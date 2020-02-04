@@ -76,6 +76,12 @@ class Inbox {
         return response;
     }
 
+    /**
+     * Get the inbox Datastore for a user by DID
+     * 
+     * @param {string} did User's public DID
+     * @param {object} config Config to be passed to the dataserver
+     */
     async getDatastore(did, config) {
         config = config ? config : {};
 
