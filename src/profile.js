@@ -103,11 +103,16 @@ class Profile {
             return;
         }
 
-        this._store = await this._app.dataservers.user.openDatastore("profile", this._app.user.did, {
+        let dataserver = await this._app.buildDataserver(this._app.user.did, {
+            appName: "Verida Public Profile"
+        });
+
+        this._store = new Datastore(dataserver, "profile", this._app.user.did, "Verida Public Profile", {
             permissions: {
                 read: "public",
                 write: "owner"
-            }
+            },
+            isOwner: true
         });
     }
 
