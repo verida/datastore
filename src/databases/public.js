@@ -18,6 +18,9 @@ class PublicDatabase {
     async _init() {
         let dsn;
 
+        // If the current application user is the owner of this database, request
+        // consent from the user for full access. Otherwise, use public credentials
+        // to access the database.
         if (this.isOwner) {
             dsn = await this.dataserver.getDsn();
         } else {
