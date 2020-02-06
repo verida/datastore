@@ -9,6 +9,7 @@ import DataServer from './dataserver';
 import Inbox from "./inbox";
 import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
+import Profile from './profile';
 
 const _ = require('lodash');
 
@@ -43,6 +44,7 @@ class App {
         
         this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
         this.inbox = new Inbox(this);
+        this.profile = new Profile(this);
         this.dataserver = new DataServer(this, {
             datastores: this.config.datastores,
             serverUrl: this.config.appServerUrl,
@@ -61,7 +63,7 @@ class App {
      * The user will remain logged in for all subsequent page loads until `app.logout()` is called.
      */
     async connect(force) {
-        if (this._isConnected) {
+        if (this._isConnected && force) {
             throw "Application datastore is already connected";
         }
 
@@ -95,7 +97,7 @@ class App {
     }
 
     /**
-     * Opens the profile of another user in read only mode
+     * Opens the profile of any user in read only mode
      * 
      * @param {*} did
      * @example
@@ -139,6 +141,11 @@ class App {
 
         // Get user's VID to obtain their dataserver address
         let vidDoc = await VidHelper.getByDid(did, config.appName, this.config.didServerUrl);
+
+        if (!vidDoc) {
+            throw "Unable to locate application VID. User hasn't initialised this application?";
+        }
+
         let dataserverDoc = vidDoc.service.find(entry => entry.id.includes('dataserver'));
         let dataserverUrl = dataserverDoc.serviceEndpoint;
 
