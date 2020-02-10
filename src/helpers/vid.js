@@ -13,7 +13,7 @@ class VidHelper {
      * @param {*} didServerUrl
      */
     async save(did, appName, appUrl, keyring, didServerUrl, userDataserverUrl) {
-        let vid = 'did:vid:' + utils.id("Verida Wallet" + did);
+        let vid = 'did:vid:' + utils.id(appName + did);
 
         let publicKeys = keyring.exportPublicKeys();
 
