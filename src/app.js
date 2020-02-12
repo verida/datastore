@@ -6,7 +6,8 @@ import Config from './config';
 import VeridaUser from "./user";
 import VeridaSchema from "./schema";
 import DataServer from './dataserver';
-import Inbox from "./inbox";
+import Inbox from "./messaging/inbox";
+import Outbox from "./messaging/outbox";
 import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import Profile from './profile';
@@ -43,8 +44,10 @@ class App {
         _.merge(this.config, Config, config);
         
         this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
+        this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
         this.profile = new Profile(this);
+
         this.dataserver = new DataServer(this, {
             datastores: this.config.datastores,
             serverUrl: this.config.appServerUrl,
@@ -69,6 +72,10 @@ class App {
 
         let connected = await this.dataserver.connect(force);
         this._isConnected = connected;
+        if (this._isConnected) {
+            await this.inbox.init();
+        }
+
         return connected;
     }
 

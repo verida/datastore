@@ -1,22 +1,19 @@
 /*eslint no-console: "off"*/
-import Dataserver from "./dataserver";
-import Datastore from "./datastore";
+import Datastore from "../datastore";
 import _ from "lodash";
-import VidHelper from './helpers/vid';
+import VidHelper from '../helpers/vid';
 import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
 
-const newAsymNonce = () => randomBytes(box.nonceLength);
-
-class Inbox {
+class Outbox {
 
     constructor(app) {
         this._app = app;
     }
     
     /**
-     * Send a message to a user's application inbox. The message is converted to
+     * Send a message to another user's application inbox. The message is converted to
      * a DID-JWT, signed by this application user (sender).
      * 
      * The message is then encrypted using the recipients public key and saved
@@ -29,13 +26,45 @@ class Inbox {
      */
     async send(did, data, config) {
         config = config ? config : {};
+
+        let defaults = {
+            // By default send data to the user's official Verida Wallet application
+            appName: "Verida Wallet"
+        };
+        _.merge(config, defaults, config);
+
         this.validateData(data);
+
+        let vidDoc = await VidHelper.getByDid(did, config.appName, this._app.config.didServerUrl);
+        let outboxEntry = {
+            sentTo: {
+                did: did,
+                vid: vidDoc.id
+            },
+            data: data,
+            sent: false
+        }
+
+        let outbox = await this.getOutboxDatastore();
+        let response = await outbox.save(outboxEntry);
+
+        if (!response.ok === true) {
+            console.error(response);
+            throw new "Unable to save to outbox";
+        }
+
+        // Include the outbox _id and _rev so the recipient user
+        // can respond to this inbox message
+        outboxEntry._id = response.id;
+        outboxEntry._rev = response.rev;
+
+        // TODO: Save data to outbox, include _id's in sent data
 
         /**
          * Sign this message from the current application user to create a JWT
          * containing the inbox message
          */
-        // Use the current application's keyring as we shouldn't request access to
+        // Use the current application's keyring as we can't request access to
         // the user's private wallet
         let keyring = await this._app.dataserver.getKeyring();
         let signer = didJWT.SimpleSigner(keyring.signKey.private);
@@ -43,7 +72,7 @@ class Inbox {
         let jwt = await didJWT.createJWT({
             aud: this._app.user.did,
             exp: config.expiry,
-            data: data,
+            data: outboxEntry,
             insertedAt: (new Date()).toISOString()
         }, {
             alg: 'ES256K-R',
@@ -52,13 +81,12 @@ class Inbox {
         });
 
         // Encrypt this message using the receipients public key and this apps private key
-        let vidDoc = await VidHelper.getByDid(did, "Verida Wallet", this._app.config.didServerUrl);
         let publicAsymKey = DIDHelper.getKeyBytes(vidDoc, 'asym');
         let sharedKey = box.before(publicAsymKey, keyring.asymKey.privateBytes);
         let encrypted = keyring.asymEncrypt(jwt, sharedKey);
 
         // Save the encrypted JWT to the user's inbox
-        let inbox = await this.getDatastore(did);
+        let inbox = await this.getInboxDatastore(did);
 
         // Undo saving of inserted / modified metadata as this DB is public
         let db = await inbox.getDb();
@@ -68,21 +96,26 @@ class Inbox {
             delete data['modifiedAt'];
         })
 
-        let response = await inbox.save({
+        response = await inbox.save({
             content: encrypted,
             key: keyring.asymKey.public
         });
+
+        // Update outbox entry as saved
+        outboxEntry.sent = true;
+        response = await outbox.save(outboxEntry);
 
         return response;
     }
 
     /**
-     * Get the inbox Datastore for a user by DID
+     * Get the inbox Datastore for a user by DID (and 
+     * optionally application name)
      * 
      * @param {string} did User's public DID
      * @param {object} config Config to be passed to the dataserver
      */
-    async getDatastore(did, config) {
+    async getInboxDatastore(did, config) {
         config = config ? config : {};
 
         let defaults = {
@@ -102,6 +135,10 @@ class Inbox {
         return inbox;
     }
 
+    async getOutboxDatastore() {
+        return this._app.openDatastore("outbox/entry");
+    }
+
     /*eslint no-unused-vars: "off"*/
     validateData(data) {
         // TODO: Validate the data is a valid schema (or an array of valid schemas)
@@ -110,4 +147,4 @@ class Inbox {
 
 }
 
-export default Inbox;
+export default Outbox;
