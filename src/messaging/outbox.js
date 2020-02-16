@@ -10,6 +10,7 @@ class Outbox {
 
     constructor(app) {
         this._app = app;
+        this._inboxes = {};
     }
     
     /**
@@ -57,8 +58,6 @@ class Outbox {
         // can respond to this inbox message
         outboxEntry._id = response.id;
         outboxEntry._rev = response.rev;
-
-        // TODO: Save data to outbox, include _id's in sent data
 
         /**
          * Sign this message from the current application user to create a JWT
@@ -123,6 +122,11 @@ class Outbox {
         };
         _.merge(config, defaults, config);
 
+        let key = did + config.appName;
+        if (this._inboxes[key]) {
+            return this._inboxes[key];
+        }
+
         // Build dataserver connecting to the recipient user's inbox
         let dataserver = await this._app.buildDataserver(did, config);
         let inbox = new Datastore(dataserver, "inbox/item", did, config.appName, {
@@ -131,6 +135,8 @@ class Outbox {
                 write: "public"
             }
         });
+
+        this._inboxes[key] = inbox;
 
         return inbox;
     }
