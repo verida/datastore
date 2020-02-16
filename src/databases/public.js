@@ -45,7 +45,6 @@ class PublicDatabase {
         try {
             let info = await this._remoteDb.info();
             if (info.error && info.error == "not_found") {
-                console.log("public db not found!");
                 await this.createDb();
             }
         } catch(err) {
