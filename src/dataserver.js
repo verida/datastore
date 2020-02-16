@@ -1,5 +1,5 @@
 /*eslint no-console: "off"*/
-import { encodeBase64 } from "tweetnacl-util";
+import { encodeBase64, decodeBase64 } from "tweetnacl-util";
 import Datastore from "./datastore";
 import Client from "./client";
 import Keyring from "./keyring";
@@ -8,7 +8,7 @@ import Consent from "./consent";
 import store from 'store';
 import vidHelper from './helpers/vid';
 import _ from 'lodash';
-
+const pbkdf2 = require('native-crypto/pbkdf2');
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
 
@@ -34,7 +34,6 @@ class DataServer {
         this._dsn = null;
         this._salt = null;
         this._key = null;
-        this._key64 = null;
 
         this._publicCredentials = null;
         this._datastores = {};
@@ -59,9 +58,11 @@ class DataServer {
         if (force) {
             this._signature = await Consent.requestSignature(this.app.user, this.isProfile ? "profile" : "default", this.isProfile ? "Verida Wallet" : this.appName);
             let user = await this._getUser();
+            this._key = await pbkdf2(this._signature, new Buffer(user.salt, 'hex'), 100000, 256 / 8, "sha512");
             
             config = {
                 signature: this._signature,
+                key: encodeBase64(this._key),
                 dsn: user.dsn,
                 salt: user.salt
             };
@@ -97,16 +98,21 @@ class DataServer {
     }
 
     serialize() {
+        console.log("serialize");
+        console.log(encodeBase64(this._key));
         return {
             signature: this._signature,
             dsn: this._dsn,
             salt: this._salt,
             publicCredentials: this._publicCredentials,
-            vid: this._vid
+            vid: this._vid,
+            key: encodeBase64(this._key)
         };
     }
 
     unserialize(data) {
+        console.log(data);
+        console.log("unserialize");
         let user = this.app.user;
         this._signature = data.signature;
 
@@ -119,11 +125,11 @@ class DataServer {
         const seed = ethers.HDNode.mnemonicToSeed(ethers.HDNode.entropyToMnemonic(entropy));
         this._keyring = new Keyring(seed);
 
-        // load other data
+        // load other data - did:ethr:0x2e922f72f4f1a27701dde0627dfd693376ab0d02
         this._dsn = data.dsn;
         this._salt = data.salt;
-        this._key = this._keyring.asymKey.private;
-        this._key64 = encodeBase64(this._key);
+        this._key = decodeBase64(data.key);
+        console.log(this._key);
         this._publicCredentials = data.publicCredentials;
         this._vid = data.vid;
     }

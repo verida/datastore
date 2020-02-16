@@ -38,24 +38,34 @@ class PublicDatabase {
                     console.error('Unable to connect to remote DB');
                     console.error(err);
                 }
-            }
+            },
+            skip_setup: true
         });
 
         try {
-            await this._remoteDb.info();
-        } catch(err) {
-            let options = {
-                permissions: this.permissions
-            };
-
-            let client = await this.dataserver.getClient();
-            try {
-                await client.createDatabase(this.did, this.dbName, options);
-                // There's an odd timing issue that needs a deeper investigation
-                await Utils.sleep(1000);
-            } catch (err) {
-                throw new Error("User doesn't exist or unable to create user database");
+            let info = await this._remoteDb.info();
+            if (info.error && info.error == "not_found") {
+                console.log("public db not found!");
+                await this.createDb();
             }
+        } catch(err) {
+            console.log(err);
+            await this.createDb();
+        }
+    }
+
+    async createDb() {
+        let options = {
+            permissions: this.permissions
+        };
+
+        let client = await this.dataserver.getClient();
+        try {
+            await client.createDatabase(this.did, this.dbName, options);
+            // There's an odd timing issue that needs a deeper investigation
+            await Utils.sleep(1000);
+        } catch (err) {
+            throw new Error("User doesn't exist or unable to create user database");
         }
     }
 

@@ -27,7 +27,7 @@ class EncryptedDatabase {
         let signature = await this.dataserver.getSignature();
         let key = await this.dataserver.getKey();
         let dsn = await this.dataserver.getDsn();
-
+        
         this._localDb.crypto(signature, {
             "key": key,
             cb: function(err) {
@@ -38,19 +38,17 @@ class EncryptedDatabase {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(dsn + this.dbName);
+        this._remoteDbEncrypted = new PouchDB(dsn + this.dbName, {
+            skip_setup: true
+        });
         
         try {
-            await this._remoteDbEncrypted.info();
+            let info = await this._remoteDbEncrypted.info();
+            if (info.error && info.error == "not_found") {
+                await this.createDb();
+            }
         } catch(err) {
-            let options = {
-                permissions: this.permissions
-            };
-
-            let client = await this.dataserver.getClient();
-            await client.createDatabase(this.did, this.dbName, options);
-            // There's an odd timing issue that needs a deeper investigation
-            await Utils.sleep(1000);
+            await this.createDb();
         }
 
         // Start syncing the local encrypted database with the remote encrypted database
@@ -64,6 +62,21 @@ class EncryptedDatabase {
             console.log("denied error");
             console.log(err);
         });
+    }
+
+    async createDb() {
+        let options = {
+            permissions: this.permissions
+        };
+
+        let client = await this.dataserver.getClient();
+        try {
+            await client.createDatabase(this.did, this.dbName, options);
+            // There's an odd timing issue that needs a deeper investigation
+            await Utils.sleep(1000);
+        } catch (err) {
+            throw new Error("User doesn't exist or unable to create user database");
+        }
     }
 
     async getDb() {
