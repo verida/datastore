@@ -21,11 +21,14 @@ class Outbox {
      * to their public inbox with date/time metadata removed.
      * 
      * @param {string} did User's public DID
+     * @param {string} type Type of inbox entry (ie: /schemas/base/inbox/type/dataSend)
      * @param {object} data Data to include in the message. Must match a particular
      *  schema or be an array of schema objects
+     * @param {string} message Message to show the user describing the inbox message
      * @param {config} config Optional config (TBA)
      */
-    async send(did, data, config) {
+    async send(did, type, data, message, config) {
+        message = message ? message : "";
         config = config ? config : {};
 
         let defaults = {
@@ -34,15 +37,17 @@ class Outbox {
         };
         _.merge(config, defaults, config);
 
-        this.validateData(data);
+        this.validateData(type, data);
 
         let vidDoc = await VidHelper.getByDid(did, config.appName, this._app.config.didServerUrl);
         let outboxEntry = {
+            type: type,
+            data: data,
+            message: message,
             sentTo: {
                 did: did,
                 vid: vidDoc.id
             },
-            data: data,
             sent: false
         }
 

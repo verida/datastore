@@ -57,17 +57,20 @@ class Inbox extends EventEmitter {
 
         let inboxEntry = {
             _id: inboxItem._id, // Use the same _id to avoid duplicates
-            message: this.buildInboxMessage(item),
+            message: item.data.message,
+            type: item.data.type,
+            sentAt: item.insertedAt,
+            data: item.data.data,
             sentBy: {
                 did: item.aud,
                 vid: item.vid,  // TODO: Include VID in inbox message
                 name: null,     // TODO: Pull name from user's public profile
                 avatar: null    // TODO: Pull name from user's public profile
             },
-            sentAt: item.insertedAt,
-            data: item.data,
             read: false
         }
+
+        // TODO: Populate actions based on inboxEntry.type
 
         // Save a new inbox entry into the user's private inbox
         try {
@@ -107,19 +110,6 @@ class Inbox extends EventEmitter {
 
             inbox.processAll();
         })
-    }
-
-    buildInboxMessage(item) {
-        let data = item.data.data;
-        let firstItem = data[0];
-        let schema = firstItem.schema;
-        switch(schema) {
-            case 'inbox/message':
-                return firstItem.subject;
-            default:
-                // TODO: Fetch schema and use label
-                return "New " + schema;
-        }
     }
 
     /**
