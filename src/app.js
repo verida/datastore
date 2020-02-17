@@ -46,7 +46,6 @@ class App {
         this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
-        this.profile = new Profile(this);
 
         this.dataserver = new DataServer(this, {
             datastores: this.config.datastores,
@@ -104,7 +103,7 @@ class App {
     }
 
     /**
-     * Opens the profile of any user in read only mode
+     * Opens the public profile of any user in read only mode
      * 
      * @param {*} did
      * @example
@@ -113,10 +112,10 @@ class App {
      * @returns {DataStore} Datastore instance for the requested user profile
      */
     async openProfile(did) {
-        let dataserver = this.buildDataserver(did, {
+        let dataserver = await this.buildDataserver(did, {
             appName: "Verida Wallet"
         });
-        let dataStore = await dataserver.openDatastore("profile", did, {
+        let dataStore = await dataserver.openDatastore("profile/public", did, {
             permissions: {
                 read: "public",
                 write: "owner"
@@ -124,7 +123,7 @@ class App {
             readOnly: true
         });
 
-        return dataStore;
+        return new Profile(dataStore);
     }
 
     /**
