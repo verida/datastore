@@ -30,6 +30,7 @@ class Outbox {
     async send(did, type, data, message, config) {
         message = message ? message : "";
         config = config ? config : {};
+        did = did.toLowerCase();
 
         let defaults = {
             // By default send data to the user's official Verida Wallet application
@@ -40,6 +41,10 @@ class Outbox {
         this.validateData(type, data);
 
         let vidDoc = await VidHelper.getByDid(did, config.appName, this._app.config.didServerUrl);
+        if(!vidDoc) {
+            throw new Error("Unable to locate VID for "+config.appName);
+        }
+
         let outboxEntry = {
             type: type,
             data: data,
