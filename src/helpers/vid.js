@@ -8,11 +8,9 @@ class VidHelper {
     /**
      * TODO: Replace with decentralised lookup
      * 
-     * @param {*} keyring 
-     * @param {*} chainDID 
-     * @param {*} didServerUrl
      */
     async save(did, appName, appUrl, keyring, didServerUrl, userDataserverUrl) {
+        did = did.toLowerCase();
         let vid = 'did:vid:' + utils.id(appName + did);
 
         let publicKeys = keyring.exportPublicKeys();
@@ -64,6 +62,7 @@ class VidHelper {
     }
 
     async getByDid(did, appName, didServerUrl) {
+        did = did.toLowerCase();
         return await DIDHelper.loadForApp(did, appName, didServerUrl);
     }
 
