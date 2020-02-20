@@ -235,8 +235,8 @@ class Database extends EventEmitter {
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
-            let db = new EncryptedDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions);
-            this._db = await db.getDb();
+                let db = new EncryptedDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions);
+                this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating database ("+this.dbName+"): " + err.message);
             }
