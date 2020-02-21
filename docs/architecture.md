@@ -11,6 +11,7 @@ Verida Datastore is designed with the following principles:
 - Use existing standards where possible
 - Embrace open source software principles
 - Suitable for Enterprise use
+- Maximise data portability
 - Write data once, access everywhere
 - Blockchain agnostic where possible
 - Streamline on-boarding for users and developers
@@ -78,6 +79,8 @@ Applications have separate user databases. This data is encrypted (unless marked
 All users have a public data `inbox` that can be accessed from their Verida Data Wallet. Any application can send any type of valid schema data to this inbox which the user can then choose to accept or deny. A user could be sent a digital receipt, identity document or a simple message.
 
 Applications can easily send data to a user with the `app.inbox.send(did, message)` method. The message is converted into a digitally signed DID-JWT object and then encrypted using the User's wallet public key. When a user opens the Verida Data Wallet application, the data in their inbox is decrypted using their private key and the DID-JWT is decoded. This decrypted and decoded data is then saved as an encrypted message in the users private inbox and shown to the user.
+
+In addition, every application has it's own inbox.
 
 ### Data Storage
 
