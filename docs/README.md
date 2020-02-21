@@ -19,11 +19,13 @@ Other links:
 
 ## Introduction
 
-The Verida Datastore enables developers to quickly build self-sovereign applications &mdash; allowing users to own their own data. The system is distributed by design, enabling user data to be stored on Verida infrastructure, a user's own infrastructure or use third party hosting providers.
+The Verida Datastore enables developers to quickly build self-sovereign applications &mdash; allowing users to own their own data.
 
-Verida Datastore provides an easy to use library that abstracts the complexities of encryption, permissioning, schema management and user management.
+Applications developed using Verida Datastore and using common schemas allow data to by shared / syncronised across all other applications used by the same user. This provides unparallelled data portability.
 
-Applications can access user data once unlocked by a users blockchain wallet (ie: Ethereum, VeChain).
+The system is distributed by design, enabling user data to be stored on Verida infrastructure, a user's own infrastructure or use third party hosting providers.
+
+Verida Datastore provides an easy to use library that abstracts the complexities of encryption, permissioning, schema management and user management. Applications can access user data once unlocked by a users blockchain wallet (ie: Ethereum, VeChain).
 
 Applications can store unstructured data, but are encouraged to use the built-in data schemas pre-defined by Verida (or develop their own custom schemas). This ensures all applications built using Verida Datastore can interoperate together with data of a particular type created in one application available in all other applications that support that data type.
 
