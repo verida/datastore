@@ -37,25 +37,21 @@ class Client {
     }
 
     getAxios(includeAuth) {
-        if (!this._axios) {
-            let config = {
-                headers: {
-                    "Application-Name": this._dataserver.appName,
-                    "Profile-Request": this.isProfile
-                }
-            };
-
-            if (includeAuth) {
-                config.auth = {
-                    username: this.username.replace(/:/g, "_"),
-                    password: this.password
-                };
+        let config = {
+            headers: {
+                "Application-Name": this._dataserver.appName,
+                "Profile-Request": this.isProfile
             }
+        };
 
-            this._axios = axios.create(config);
+        if (includeAuth) {
+            config.auth = {
+                username: this.username.replace(/:/g, "_"),
+                password: this.password
+            };
         }
 
-        return this._axios;
+        return axios.create(config);
     }
 
 }
