@@ -3,7 +3,8 @@
   * [Initialisation](initialisation.md)
   * [Datastores](datastore.md)
   * [Schemas](schemas.md)
-  * [App Communication](app-comms.md)
+  * [Inbox](inbox.md)
+  * [Data Sync](sync.md)
 * [Architecture](architecture.md)
 * [API](http://apidocs.datastore.verida.io/)
 * Links
