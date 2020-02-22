@@ -7,6 +7,7 @@ import Consent from "./consent";
 import store from 'store';
 import vidHelper from './helpers/vid';
 import _ from 'lodash';
+import Database from './database';
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
 
@@ -158,9 +159,20 @@ class DataServer {
         return this._publicCredentials;
     }
 
+    async openDatabase(dbName, did, config) {
+        // TODO: Cache databases so we don't open the same one more than once
+        return new Database(dbName, did, this.appName, this, config);
+    }
+
     async openDatastore(schemaName, did, config) {
         config = config ? config : {};
         config.permissions = config.permissions ? config.permissions : {};
+
+        let datastoreName = config.dbName ? config.dbName : schemaName;
+
+        if (this._datastores[datastoreName]) {
+            return this._datastores[datastoreName];
+        }
 
         // If permissions require "owner" access, connect the current user
         if (config.permissions.read == "owner" || config.permissions.write == "owner") {
@@ -169,16 +181,12 @@ class DataServer {
             }
         }
 
-        if (this._datastores[schemaName]) {
-            return this._datastores[schemaName];
-        }
-
         // merge config with this.config?
 
         config.isOwner = (did == this.app.user.did);
-        this._datastores[schemaName] = new Datastore(this, schemaName, did, this.appName, config);
+        this._datastores[datastoreName] = new Datastore(this, schemaName, did, this.appName, config);
 
-        return this._datastores[schemaName];
+        return this._datastores[datastoreName];
     }
 
     async getKey() {

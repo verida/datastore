@@ -59,6 +59,7 @@ class PublicDatabase {
         };
 
         let client = await this.dataserver.getClient();
+
         try {
             await client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
