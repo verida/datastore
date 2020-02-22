@@ -1,5 +1,9 @@
 * [Welcome](/)
 * [Guide](guide.md)
+  * [Initialisation](initialisation.md)
+  * [Datastores](datastore.md)
+  * [Schemas](schemas.md)
+  * [App Communication](app-comms.md)
 * [Architecture](architecture.md)
 * [API](http://apidocs.datastore.verida.io/)
 * Links

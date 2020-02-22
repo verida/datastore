@@ -1,5 +1,7 @@
-# Guide
+# Verida User Guide
 
-Coming soon.
+!>Still in development
+
+See the left sidebar to navigate the User Guide.
 
 Please reach out on [Discord](https://discord.gg/qb6vS43) if you have suggestions on what guides / tutorials you would like to see.
