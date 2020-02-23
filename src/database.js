@@ -235,7 +235,9 @@ class Database extends EventEmitter {
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
-                let db = new EncryptedDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions);
+                let encryptionKey = await this.dataserver.getKey();
+                let remoteDsn = await this.dataserver.getDsn();
+                let db = new EncryptedDatabase(this.getDatabaseHash(), encryptionKey, remoteDsn, this.did, this.permissions);
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating database ("+this.dbName+"): " + err.message);
@@ -248,8 +250,16 @@ class Database extends EventEmitter {
             } catch (err) {
                 throw new Error("Error creating database ("+this.dbName+"): " + err.message);
             }
-        } else if (this.permissions.read == "users") {
-            throw "User group permissions are not yet supported";
+        } else if (this.permissions.read == "users" || this.permissions.write == "users") {
+            // Create encrypted database with generated encryption key
+            try {
+                let encryptionKey = this.config.encryptionKey; // TODO: Where and how to generate?
+                let remoteDsn = await this.dataserver.getDsn();
+                let db = new EncryptedDatabase(this.getDatabaseHash(), encryptionKey, remoteDsn, this.did, this.permissions);
+                this._db = await db.getDb();
+            } catch (err) {
+                throw new Error("Error creating database ("+this.dbName+"): " + err.message);
+            }
         }
         else {
             throw "Unknown database permissions requested";

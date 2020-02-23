@@ -13,23 +13,21 @@ PouchDBCrypt.plugin(CryptoPouch);
 
 class EncryptedDatabase {
 
-    constructor(dbName, dataserver, did, permissions) {
+    constructor(dbName, encryptionKey, remoteDsn, did, permissions) {
         this.dbName = dbName;
         this.dataserver = dataserver;
         this.did = did;
         this.permissions = permissions;
+        this.encryptionKey = encryptionKey;
+        this.remoteDsn = remoteDsn;
     }
 
     async _init() {
         this._localDbEncrypted = new PouchDB(this.dbName);
         this._localDb = new PouchDBCrypt(this.dbName);
-
-        let signature = await this.dataserver.getSignature();
-        let key = await this.dataserver.getKey();
-        let dsn = await this.dataserver.getDsn();
         
-        this._localDb.crypto(signature, {
-            "key": key,
+        this._localDb.crypto("", {
+            "key": this.encryptionKey,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');
@@ -38,7 +36,7 @@ class EncryptedDatabase {
             }
         });
 
-        this._remoteDbEncrypted = new PouchDB(dsn + this.dbName, {
+        this._remoteDbEncrypted = new PouchDB(this.remoteDsn + this.dbName, {
             skip_setup: true
         });
         
