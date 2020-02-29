@@ -161,6 +161,24 @@ class DataStore {
         //_.merge(dataStoreConfig, this.config);
 
         this._db = new Database(dbName, this.did, this.appName, this._dataserver, this.config);
+        let indexes = specification.database.indexes;
+
+        if (indexes) {
+            await this.ensureIndexes(indexes);
+        }
+    }
+
+    // TODO: Support removing indexes that were deleted from the spec
+    // TODO: Validate indexes
+    async ensureIndexes(indexes) {
+        for (var indexName in indexes) {
+            let indexFields = indexes[indexName];
+            let db = await this._db.getInstance();
+            await db.createIndex({
+                fields: indexFields,
+                name: indexName
+            });
+        }
     }
 
 }

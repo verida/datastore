@@ -159,6 +159,7 @@ class Database extends EventEmitter {
         }
 
         options = _.merge(defaults, options);
+        filter = this.applySortFix(filter, options.sort);
         
         if (filter) {
             let request = {
@@ -171,6 +172,10 @@ class Database extends EventEmitter {
 
             if (options.limit) {
                 request.limit = options.limit;
+            }
+
+            if (options.use_index) {
+                request.use_index = options.use_index;
             }
 
             try {
@@ -290,6 +295,35 @@ class Database extends EventEmitter {
     async getInstance() {
         await this._init();
         return this._db;
+    }
+
+    /**
+     * See PouchDB bug: https://github.com/pouchdb/pouchdb/issues/6399
+     * 
+     * This method automatically detects any fields being sorted on and
+     * adds them to an $and clause to ensure query indexes are used.
+     * 
+     * Note: This still requires the appropriate index to exist for
+     * sorting to work.
+     */
+    applySortFix(filter, sortItems) {
+        if (sortItems.length) {
+            let and = [filter];
+            for (var s in sortItems) {
+                let sort = sortItems[s];
+                for (var fieldName in sort) {
+                    let d = {};
+                    d[fieldName] = {$gt: true};
+                    and.push(d);
+                }
+            }
+            
+            filter = {
+                $and: and
+            }
+        }
+
+        return filter;
     }
 
 }
