@@ -149,7 +149,7 @@ class App {
         let vidDoc = await VidHelper.getByDid(did, config.appName, this.config.didServerUrl);
 
         if (!vidDoc) {
-            throw "Unable to locate application VID. User hasn't initialised this application?";
+            throw "Unable to locate application VID. User hasn't initialised this application? ("+did+" / "+config.appName+")";
         }
 
         let dataserverDoc = vidDoc.service.find(entry => entry.id.includes('dataserver'));
@@ -173,6 +173,10 @@ class App {
         // Cache and return dataserver
         this._dataservers[did + ':' + config.appName] = dataserver;
         return this._dataservers[did + ':' + config.appName];
+    }
+
+    async getVid(vid) {
+        return VidHelper.getByVid(vid, this.config.didServerUrl);
     }
 
 }
