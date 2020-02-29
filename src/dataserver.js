@@ -160,6 +160,18 @@ class DataServer {
     }
 
     async openDatabase(dbName, did, config) {
+        config = config ? config : {};
+        config.permissions = config.permissions ? config.permissions : {};
+
+        // If permissions require "owner" access, connect the current user
+        if (config.permissions.read == "owner" || config.permissions.write == "owner") {
+            if (!this._init) {
+                await this.connect(true);
+            }
+        }
+
+        config.isOwner = (did == this.app.user.did);
+
         // TODO: Cache databases so we don't open the same one more than once
         return new Database(dbName, did, this.appName, this, config);
     }
