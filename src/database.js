@@ -237,7 +237,7 @@ class Database extends EventEmitter {
             try {
                 let encryptionKey = await this.dataserver.getKey();
                 let remoteDsn = await this.dataserver.getDsn();
-                let db = new EncryptedDatabase(this.getDatabaseHash(), encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(this.getDatabaseHash(), this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating database ("+this.dbName+"): " + err.message);

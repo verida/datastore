@@ -13,7 +13,7 @@ PouchDBCrypt.plugin(CryptoPouch);
 
 class EncryptedDatabase {
 
-    constructor(dbName, encryptionKey, remoteDsn, did, permissions) {
+    constructor(dbName, dataserver, encryptionKey, remoteDsn, did, permissions) {
         this.dbName = dbName;
         this.dataserver = dataserver;
         this.did = did;
