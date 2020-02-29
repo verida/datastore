@@ -63,14 +63,10 @@ class Inbox extends EventEmitter {
             data: item.data.data,
             sentBy: {
                 did: item.aud,
-                vid: item.vid,  // TODO: Include VID in inbox message
-                name: null,     // TODO: Pull name from user's public profile
-                avatar: null    // TODO: Pull name from user's public profile
+                vid: item.vid
             },
             read: false
         }
-
-        // TODO: Populate actions based on inboxEntry.type
 
         // Save a new inbox entry into the user's private inbox
         try {
