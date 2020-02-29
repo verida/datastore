@@ -63,7 +63,8 @@ class Inbox extends EventEmitter {
             data: item.data.data,
             sentBy: {
                 did: item.aud,
-                vid: item.vid
+                vid: item.vid,
+                app: item.veridaApp
             },
             read: false
         }

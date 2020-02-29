@@ -25,24 +25,28 @@ class Outbox {
      * @param {object} data Data to include in the message. Must match a particular
      *  schema or be an array of schema objects
      * @param {string} message Message to show the user describing the inbox message
-     * @param {config} config Optional config (TBA)
+     * @param {config} config Optional config (TBA). ie: specify `appName` if sending to a specific application
      */
-    async send(did, type, data, message, config) {
+    async send(did, type, data, message, customConfig) {
         message = message ? message : "";
-        config = config ? config : {};
+        customConfig = customConfig ? customConfig : {};
         did = did.toLowerCase();
 
         let defaults = {
             // By default send data to the user's official Verida Wallet application
             appName: "Verida Wallet"
         };
-        _.merge(config, defaults, config);
+        let config = {};
+        _.merge(config, defaults, customConfig);
+
+        let sendingAppName = this._app.name;
+        let receivingAppName = config.appName;
 
         this.validateData(type, data);
 
-        let vidDoc = await VidHelper.getByDid(did, config.appName, this._app.config.didServerUrl);
+        let vidDoc = await VidHelper.getByDid(did, receivingAppName, this._app.config.didServerUrl);
         if(!vidDoc) {
-            throw new Error("Unable to locate VID for "+config.appName);
+            throw new Error("Unable to locate VID for "+receivingAppName);
         }
 
         let outboxEntry = {
@@ -80,8 +84,10 @@ class Outbox {
 
         let jwt = await didJWT.createJWT({
             aud: this._app.user.did,
+            vid: vidDoc.id,
             exp: config.expiry,
             data: outboxEntry,
+            veridaApp: sendingAppName,
             insertedAt: (new Date()).toISOString()
         }, {
             alg: 'ES256K-R',
@@ -95,7 +101,9 @@ class Outbox {
         let encrypted = keyring.asymEncrypt(jwt, sharedKey);
 
         // Save the encrypted JWT to the user's inbox
-        let inbox = await this.getInboxDatastore(did);
+        let inbox = await this.getInboxDatastore(did, {
+            appName: receivingAppName
+        });
 
         // Undo saving of inserted / modified metadata as this DB is public
         let db = await inbox.getDb();
@@ -124,13 +132,14 @@ class Outbox {
      * @param {string} did User's public DID
      * @param {object} config Config to be passed to the dataserver
      */
-    async getInboxDatastore(did, config) {
-        config = config ? config : {};
+    async getInboxDatastore(did, customConfig) {
+        customConfig = customConfig ? customConfig : {};
 
         let defaults = {
             appName: "Verida Wallet"
         };
-        _.merge(config, defaults, config);
+        let config = {};
+        _.merge(config, defaults, customConfig);
 
         let key = did + config.appName;
         if (this._inboxes[key]) {
