@@ -15,10 +15,10 @@ class DataServer {
 
     constructor(app, config) {
         this.app = app;
-        this.config = {
+        let defaults = {
             datastores: {}
         };
-        _.merge(this.config, config);
+        this.config = _.merge(defaults, config);
 
         this.appName = config.appName ? config.appName : app.name;
         this.appHost = config.appHost ? config.appHost : "localhost";

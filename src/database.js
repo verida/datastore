@@ -25,7 +25,7 @@ class Database extends EventEmitter {
         this.config = config ? config : {};
         this.permissions = {};
 
-        _.merge(this.permissions, {
+        this.permissions = _.merge({
             read: "owner",
             write: "owner",
             readUsers: [],

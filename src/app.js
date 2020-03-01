@@ -38,12 +38,12 @@ class App {
      */
     constructor(name, chain, address, web3Provider, config) {
         this.name = name;
-        this.config = {
+        let defaults = {
             didServiceUrl: window.location.origin,
             appServerUrl: 'https://dataserver.alpha.verida.io',
             didServerUrl: 'https://did.alpha.verida.io'
         };
-        _.merge(this.config, Config, config);
+        this.config = _.merge(defaults, Config, Config, config);
         
         this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
         this.outbox = new Outbox(this);
@@ -162,8 +162,7 @@ class App {
         let dataserverUrl = dataserverDoc.serviceEndpoint;
 
         // Build dataserver config, merging defaults and user defined config
-        let dataserverConfig = {};
-        _.merge(dataserverConfig, {
+        config = _.merge({
             appName: "Verida Wallet",
             isProfile: false,
             serverUrl: dataserverUrl,
@@ -171,7 +170,7 @@ class App {
         }, config);
 
         // Build dataserver
-        let dataserver = new DataServer(this, dataserverConfig);
+        let dataserver = new DataServer(this, config);
         dataserver.loadExternal({
             vid: vidDoc.id
         });

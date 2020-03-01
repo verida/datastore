@@ -103,8 +103,7 @@ class DataStore {
     async getMany(customFilter, options) {
         await this._init();
 
-        let filter = {};
-        _.merge(filter, {
+        let filter = _.merge({
             schema: this.schemaName
         }, customFilter);
 

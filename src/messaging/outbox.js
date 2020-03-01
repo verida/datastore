@@ -28,17 +28,16 @@ class Outbox {
      * @param {string} message Message to show the user describing the inbox message
      * @param {config} config Optional config (TBA). ie: specify `appName` if sending to a specific application
      */
-    async send(did, type, data, message, customConfig) {
+    async send(did, type, data, message, config) {
         message = message ? message : "";
-        customConfig = customConfig ? customConfig : {};
+        config = config ? config : {};
         did = did.toLowerCase();
 
         let defaults = {
             // By default send data to the user's official Verida Wallet application
             appName: "Verida Wallet"
         };
-        let config = {};
-        _.merge(config, defaults, customConfig);
+        config = _.merge(defaults, config);
 
         let sendingAppName = this._app.name;
         let receivingAppName = config.appName;
@@ -134,14 +133,13 @@ class Outbox {
      * @param {string} did User's public DID
      * @param {object} config Config to be passed to the dataserver
      */
-    async getInboxDatastore(did, customConfig) {
-        customConfig = customConfig ? customConfig : {};
+    async getInboxDatastore(did, config) {
+        config = config ? config : {};
 
         let defaults = {
             appName: "Verida Wallet"
         };
-        let config = {};
-        _.merge(config, defaults, customConfig);
+        config = _.merge(defaults, config);
 
         let key = did + config.appName;
         if (this._inboxes[key]) {
