@@ -11,6 +11,7 @@ class Outbox {
     constructor(app) {
         this._app = app;
         this._inboxes = {};
+        this._outboxDatastore = null;
     }
     
     /**
@@ -120,6 +121,7 @@ class Outbox {
 
         // Update outbox entry as saved
         outboxEntry.sent = true;
+
         response = await outbox.save(outboxEntry);
 
         return response;
@@ -161,7 +163,11 @@ class Outbox {
     }
 
     async getOutboxDatastore() {
-        return this._app.openDatastore("outbox/entry");
+        if (!this._outboxDatastore) {
+            this._outboxDatastore = this._app.openDatastore("outbox/entry");
+        }
+
+        return this._outboxDatastore;
     }
 
     /*eslint no-unused-vars: "off"*/
