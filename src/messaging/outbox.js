@@ -5,7 +5,7 @@ import VidHelper from '../helpers/vid';
 import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
-import Config from './config';
+import Config from '../config';
 
 class Outbox {
 
