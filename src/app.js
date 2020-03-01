@@ -2,7 +2,6 @@
 "use strict"
 
 import Config from './config';
-
 import VeridaUser from "./user";
 import VeridaSchema from "./schema";
 import DataServer from './dataserver';
@@ -39,9 +38,7 @@ class App {
     constructor(name, chain, address, web3Provider, config) {
         this.name = name;
         let defaults = {
-            didServiceUrl: window.location.origin,
-            appServerUrl: 'https://dataserver.alpha.verida.io',
-            didServerUrl: 'https://did.alpha.verida.io'
+            didServiceUrl: window.location.origin
         };
         this.config = _.merge(defaults, Config, Config, config);
         

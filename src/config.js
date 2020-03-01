@@ -1,8 +1,7 @@
 
 module.exports = {
-    appServerUrl: "http://datastore.dev.verida.io:5000/",
-    userServerUrl: "http://datastore.dev.verida.io:5000/",
-    didServerUrl: "http://did.dev.verida.io:5001/",
+    appServerUrl: "https://dataserver.alpha.verida.io:5000/",
+    didServerUrl: "https://did.alpha.verida.io:5001/",
     datastores: {
         default: {
             privacy: "private"
