@@ -35,7 +35,7 @@ class Outbox {
         did = did.toLowerCase();
 
         let defaults = {
-            // By default send data to the user's official Verida Wallet application
+            // By default send data to the user's official Verida Vault application
             appName: Config.vaultAppName
         };
         config = _.merge(defaults, config);
@@ -79,7 +79,7 @@ class Outbox {
          * containing the inbox message
          */
         // Use the current application's keyring as we can't request access to
-        // the user's private wallet
+        // the user's private vault
         let keyring = await this._app.dataserver.getKeyring();
         let signer = didJWT.SimpleSigner(keyring.signKey.private);
 
