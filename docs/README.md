@@ -1,14 +1,14 @@
 # Welcome to Verida Datastore
 
-**Note: Verida Datastore is in active development with an alpha release coming Q1 2020**
+!>Verida Datastore is currently Alpha and in active development. This is a preview release for developers to provide early feedback. Do **not** expect any data saved to be retained, unless you run your own dataserver. API's and data schemas are **highly** likely to change before an initial release.
 
 ## Quick links
 
 Learn:
 
-- [Getting Started](http://docs.datastore.verida.io/#/?id=getting-started)
-- Guide (Coming soon)
-- [Architecture](http://docs.datastore.verida.io/#/architecture)
+- [Quick Start](/#quick-start)
+- [Guide](/guide)
+- [Architecture](/architecture)
 - [API Docs](http://apidocs.datastore.verida.io/)
 
 Other links:
@@ -25,85 +25,131 @@ Applications developed using Verida Datastore and using common schemas allow dat
 
 The system is distributed by design, enabling user data to be stored on Verida infrastructure, a user's own infrastructure or use third party hosting providers.
 
-Verida Datastore provides an easy to use library that abstracts the complexities of encryption, permissioning, schema management and user management. Applications can access user data once unlocked by a users blockchain wallet (ie: Ethereum, VeChain).
+Verida Datastore provides an easy to use library that abstracts the complexities of encryption, permissioning, schemas and user management. Applications can access user data once unlocked by a users blockchain wallet (ie: Ethereum, VeChain).
 
 Applications can store unstructured data, but are encouraged to use the built-in data schemas pre-defined by Verida (or develop their own custom schemas). This ensures all applications built using Verida Datastore can interoperate together with data of a particular type created in one application available in all other applications that support that data type.
 
 The Verida Datastore is the first component in a broader ecosystem of open source tools being developed by Verida.
 
-## Getting Started
+## Quick Start
 
-This library which provides a drop in self sovereign data storage solution for any web application.
+This NodeJs library provides a drop in self sovereign data storage and communication platform for any web application.
 
 Install into your application:
 
 ```
-npm install verida/datastore
+npm install @verida/datastore
 ```
+
+### Initialize Application
 
 Create an application instance and ask the user to authorize your application:
 
 ```
-import VeridaApp from 'verida/datastore';
+import Verida from '@verida/datastore';
 
-let myApp = new VeridaApp("My Application Name");
-await myApp.connect();
+// Fetch the users web3Provider and address
+const web3Provider = await Verida.WalletHelper.connectWeb3('ethr');
+const address = await Verida.WalletHelper.getAddress('ethr');
+
+let app = new Verida('Your Application Name', 'ethr', address, web3Provider);
 ```
 
-At this point a popup will appear asking the user to authorise the application. This is effectively signing into the application.
+At this point, the user will be asked to connect Metamask to your application (if they haven't already).
 
-**Example: Fetch the users contact list**
+You now have an application instance that allows you to create databases, access other user's public profiles and receive data via the user's application inbox.
 
-```
-let contactsDs = await myApp.openDatastore("social/contacts");
-let contacts = await contactsDs.getMany();
-console.log(contacts);
-```
+?>Note: You don't have to use the rather basic `Verida.WalletHelper`, it's possible to use your own code to locate the user's web3Provider and address.
 
-See [DataStore.getMany()](http://apidocs.datastore.verida.io/DataStore.html#getMany)
+### Authorize Application
 
-**Example: Save a new contact to the user's contact list:**
+You can now connect the user to your application:
 
 ```
-let contactsDb = await myApp.openDatastore("social/contacts");
-let success = await contactsDb.save({
-  firstName: "Jane",
-  lastName: "Doe",
-  did: "0xefac8e8..."
+let connected = await app.connect(true);
+```
+
+A popup will appear asking the user to sign a consent message authorizing the application to use their data. The first time a user connects, the Datastore library will create new encryption keys that are used by this user and this application only.
+
+Once complete, the user is logged into the application.
+
+You can access the user's DID via:
+
+```
+console.log(app.user.did);
+```
+
+### Open a Database
+
+You can now open a private, encrypted database for the user. It will be created if it doesn't exist.
+
+```
+let db = await app.openDatabase('test_db');
+let item = await db.save({
+  hello: 'world'
 });
+let items = await db.getMany();
+console.log(items);
+```
+
+It's also possible to create public databases and connect to other user's public database. We are also working on permissioned databases where the database owner can control who has read or write access.
+
+?>See [Data Permissions](/Guide.html#Database-Permissions)
+
+### Open a Datastore
+
+In a world where users own their own data, it's important their data is portable between applications. Otherwise we end up with the current situation of data silos, where user data is scatterred across lots of different applications.
+
+Verida solves this problem by creating databases with a defined schema, called `Datastores`. This ensures data interoperability between applications.
+
+Lets demonstrate by opening the datastore using the `social/contact` schema:
+
+```
+let contactsDs = await app.openDatastore('social/contact');
+let contact = {
+  firstName: 'John',
+  lastName: 'Smith',
+  email: 'john@smith.com'
+}
+let success = await contactsDs.save(contact);
 
 if (!success) {
   console.error(contactsDb.errors);
 } else {
   console.log("Contact saved");
 }
+
+let contacts = await contactsDs.getMany();
+console.log(contacts);
 ```
 
-See [DataStore.save()](http://apidocs.datastore.verida.io/DataStore.html#save)
+### Syncing a Datastore
 
-**Example: Fetch all contacts that work at `Google` and have a DID:**
+In the above example we have created a private, encrypted database in the context of our application. While, we're using a common `social/contact` schema, the data is still trapped within this application.
 
-```
-let contactsDb = await myApp.openDatastore("social/contacts");
-let contacts = contactsDb.getMany({
-  company: "Google"
-  did: {
-    $exists: true
-  }
-});
-```
+This data needs to be syncronized with any other contacts the user has. In this way, our application can instantly be populated with the user's existing contacts and **also** make changes to the user's contact list that will propogate across all other applications using the same `social/contact` datastore.
 
-See [DataStore.getMany()](http://apidocs.datastore.verida.io/DataStore.html#getMany)
+!>Example coming soon
 
-**Example: Get and set the user's email address on public profile:**
+## Getting a Public Profile
+
+All users have a public profile that provides basic information (ie: name, avatar).
 
 ```
-// Get the user's email from their public profile
-let email = myApp.wallet.profile.get("email");
-console.log(email);
+// Specify the DID of the user
+let did = 'did:ethr:0x...';
+let profile = await app.openProfile(did);
 
-// Set the user's email on their public profile
-myApp.wallet.profile.set("email", "user@test.com");
+let allData = await profile.getMany();
+let firstName = await profile.get('name');
 ```
 
-See [Profile](http://apidocs.datastore.verida.io/Profile.html)
+?>This is entirely optional &mdash; Users can remain anonymous by not entering any public profile information.
+
+### Receive Inbox Messages
+
+Your application has an `inbox`, where other applications and other users can send encrypted messages to users. Your application can listen to new inbox messages and handle them as appropriate.
+
+This effectively creates a secure Peer-to-Peer communication channel between all users.
+
+!>Example coming soon

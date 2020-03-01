@@ -27,7 +27,7 @@ The rest of this Architecture document provides an overview of the key design de
   <div><caption>Personal Data Store - System Architecture</caption></div>
 </div>
 
-The Verida Data Store is basically a per user database that exists within your application. It manages syncronising data between your application and the Datstore within the user's Verida Data Wallet. This is akin to the user's **master database**. Once data is synced with the user's Data Wallet, it is synced with all other applications attached to the user's Data Wallet based on the data schemas and permissions of that application.
+The Verida Data Store is basically a per user database that exists within your application. It manages syncronising data between your application and the Datastore within the user's Verida Vault. This is akin to the user's **master database**. Once data is synced with the user's Vault, it is synced with all other applications attached to the user's Vault based on the data schemas and permissions of that application.
 
 This ensures data entered into one application is automatically made available to all other applications.
 
@@ -64,21 +64,21 @@ This signed message is then used as a synchronous encryption key to unlock the u
 
 ## Databases
 
-Data is stored in both the user's Verida Data Wallet (akin to their `master` database) and an `application` specific database. These two database are then kept in sync &mdash; *See Data Synchronisation (below)*
+Data is stored in both the user's Verida Vault (akin to their `master` database) and an `application` specific database. These two database are then kept in sync &mdash; *See Data Synchronisation (below)*
 
-### User's Data Wallet Database
+### User's Vault Database
 
-Each user has a `master` Verida Data Wallet that contains all their data. This can be accessed by logging into https://wallet.verida.io/. This data is encrypted (unless marked as `public`) by encryption keys specific for this master database that can only be unlocked when a user signs a consent message (See _Authorization_ above).
+Each user has a `master` Verida Vault that contains all their data. This can be accessed by logging into https://vault.alpha.verida.io/. This data is encrypted (unless marked as `public`) by encryption keys specific for this master database that can only be unlocked when a user signs a consent message (See _Authorization_ above).
 
 ### User's Application Databases
 
-Applications have separate user databases. This data is encrypted (unless marked as `public`) by encryption keys specific for the application. This data can be unlocked when a user access the application or when a user accesses their Verida Data Wallet.
+Applications have separate user databases. This data is encrypted (unless marked as `public`) by encryption keys specific for the application. This data can be unlocked when a user access the application or when a user accesses their Verida Vault.
 
 ### User's Inbox
 
-All users have a public data `inbox` that can be accessed from their Verida Data Wallet. Any application can send any type of valid schema data to this inbox which the user can then choose to accept or deny. A user could be sent a digital receipt, identity document or a simple message.
+All users have a public data `inbox` that can be accessed from their Verida Vault. Any application can send any type of valid schema data to this inbox which the user can then choose to accept or deny. A user could be sent a digital receipt, identity document or a simple message.
 
-Applications can easily send data to a user with the `app.inbox.send(did, message)` method. The message is converted into a digitally signed DID-JWT object and then encrypted using the User's wallet public key. When a user opens the Verida Data Wallet application, the data in their inbox is decrypted using their private key and the DID-JWT is decoded. This decrypted and decoded data is then saved as an encrypted message in the users private inbox and shown to the user.
+Applications can easily send data to a user with the `app.inbox.send(did, message)` method. The message is converted into a digitally signed DID-JWT object and then encrypted using the User's wallet public key. When a user opens the Verida Vault application, the data in their inbox is decrypted using their private key and the DID-JWT is decoded. This decrypted and decoded data is then saved as an encrypted message in the users private inbox and shown to the user.
 
 In addition, every application has it's own inbox.
 
@@ -120,10 +120,10 @@ Applications built with Verida Datastore store user data in two places; The user
 
 This is done to ensure security of user's data as it prevents applications directly accessing a user's master database. Each application has separate encryption keys for enhanced security.
 
-When a user logs into their Verida Data Wallet it automaticall performs the following operations in the background:
+When a user logs into their Verida Vault it automaticall performs the following operations in the background:
 
 - Decrypt any new application data
-- Re-encrypt any new application data and store it in the user's `master` Verida Data Wallet database
+- Re-encrypt any new application data and store it in the user's `master` Verida Vault database
 
 This synchronisation process is facilitated via the CouchDB replication protocol. Data from multiple applications using the same schemas can be synchronised into a single user master database with minimal conflicts. This is very similar to a `git merge` for the user's application databases. This process also works in reverse &mdash; relevant data from a user's master database is synchronised with the user's application databases.
 
