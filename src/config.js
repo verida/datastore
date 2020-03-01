@@ -10,5 +10,6 @@ module.exports = {
     schemas: {
         basePath: '/schemas/',
         customPath: '/customSchemas/'
-    }
+    },
+    vaultAppName: "Verida Vault"
 }

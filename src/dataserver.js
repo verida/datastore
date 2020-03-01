@@ -8,6 +8,7 @@ import store from 'store';
 import vidHelper from './helpers/vid';
 import _ from 'lodash';
 import Database from './database';
+import Config from './config';
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
 
@@ -55,7 +56,7 @@ class DataServer {
          * Force a connection
          */
         if (force) {
-            this._signature = await Consent.requestSignature(this.app.user, this.isProfile ? "profile" : "default", this.isProfile ? "Verida Wallet" : this.appName);
+            this._signature = await Consent.requestSignature(this.app.user, this.isProfile ? "profile" : "default", this.isProfile ? Config.vaultAppName : this.appName);
             let user = await this._getUser();
             
             config = {

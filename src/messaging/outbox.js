@@ -5,6 +5,7 @@ import VidHelper from '../helpers/vid';
 import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
+import Config from './config';
 
 class Outbox {
 
@@ -35,7 +36,7 @@ class Outbox {
 
         let defaults = {
             // By default send data to the user's official Verida Wallet application
-            appName: "Verida Wallet"
+            appName: Config.vaultAppName
         };
         config = _.merge(defaults, config);
 
@@ -137,7 +138,7 @@ class Outbox {
         config = config ? config : {};
 
         let defaults = {
-            appName: "Verida Wallet"
+            appName: Config.vaultAppName
         };
         config = _.merge(defaults, config);
 

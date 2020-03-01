@@ -116,7 +116,7 @@ class App {
      */
     async openProfile(did) {
         let dataserver = await this.buildDataserver(did, {
-            appName: "Verida Wallet"
+            appName: Config.vaultAppName
         });
         let dataStore = await dataserver.openDatastore("profile/public", did, {
             permissions: {
@@ -160,7 +160,7 @@ class App {
 
         // Build dataserver config, merging defaults and user defined config
         config = _.merge({
-            appName: "Verida Wallet",
+            appName: Config.vaultAppName,
             isProfile: false,
             serverUrl: dataserverUrl,
             didUrl: this.config.didServerUrl
