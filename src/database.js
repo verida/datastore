@@ -53,9 +53,8 @@ class Database extends EventEmitter {
             this.permissions.write
         ].join("/");
 
-        let hash = crypto.createHmac('sha256',"");
-        hash.update(text);
-        this._dbHash = "v" + hash.digest('hex');
+        let hash = crypto.createHash('md5').update(text).digest("hex");
+        this._dbHash = "v" + appHash + "_" + hash;
 
         // Database name must start with a letter
         return this._dbHash;
