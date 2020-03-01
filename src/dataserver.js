@@ -9,6 +9,7 @@ import vidHelper from './helpers/vid';
 import _ from 'lodash';
 import Database from './database';
 import Config from './config';
+import crypto from 'crypto';
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
 
@@ -111,7 +112,7 @@ class DataServer {
 
         // configure client
         this._client.username = user.did;
-        this._client.password = this._signature;
+        this._client.signature = this._signature;
 
         // build keyring
         const entropy = utils.sha256('0x' + this._signature.slice(2));
@@ -132,12 +133,12 @@ class DataServer {
         let response;
         try {
             this._client.username = user.did;
-            this._client.password = this._signature;
+            this._client.signature = this._signature;
             response = await this._client.getUser(user.did);
         } catch (err) {
             if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
                 // User doesn't exist, so create
-                response = await this._client.createUser(user.did);
+                response = await this._client.createUser(user.did, this._generatePassword(this._signature));
             }
             else {
                 // Unknown error
@@ -254,6 +255,10 @@ class DataServer {
         }
 
         return this._keyring;
+    }
+
+    _generatePassword() {
+        return crypto.createHash('sha256').update(this._signature).digest("hex");
     }
 
 }

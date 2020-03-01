@@ -8,7 +8,7 @@ class Client {
         this._axios = null;
 
         this.username = null;
-        this.password = null;
+        this.signature = null;
         this.isProfile =  this._dataserver.config.isProfile ? true : false;
     }
 
@@ -20,10 +20,9 @@ class Client {
         return this.getAxios(false).get(this._dataserver.serverUrl + "user/public");
     }
 
-    async createUser(did, password) {
+    async createUser(did) {
         return this.getAxios(true).post(this._dataserver.serverUrl + "user/create", {
-            did: did,
-            password: password
+            did: did
         });
     }
 
@@ -47,7 +46,7 @@ class Client {
         if (includeAuth) {
             config.auth = {
                 username: this.username.replace(/:/g, "_"),
-                password: this.password
+                password: this.signature
             };
         }
 
