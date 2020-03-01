@@ -170,6 +170,9 @@ class DataServer {
             }
         }
 
+        // Default to user's did if not specified
+        did = did ? did : this.app.user.did;
+
         config.isOwner = (did == this.app.user.did);
 
         // TODO: Cache databases so we don't open the same one more than once
@@ -194,6 +197,9 @@ class DataServer {
         }
 
         // merge config with this.config?
+
+        // Default to user's did if not specified
+        did = did ? did : this.app.user.did;
 
         config.isOwner = (did == this.app.user.did);
         this._datastores[datastoreName] = new Datastore(this, schemaName, did, this.appName, config);
