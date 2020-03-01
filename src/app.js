@@ -39,7 +39,9 @@ class App {
     constructor(name, chain, address, web3Provider, config) {
         this.name = name;
         this.config = {
-            didServiceUrl: window.location.origin
+            didServiceUrl: window.location.origin,
+            appServerUrl: 'https://dataserver.alpha.verida.io',
+            didServerUrl: 'https://did.alpha.verida.io'
         };
         _.merge(this.config, Config, config);
         
@@ -100,6 +102,10 @@ class App {
     async openDatastore(schemaName, config) {
         // TODO: Add schema specific config from app config or do it in openDatastore?
         return this.dataserver.openDatastore(schemaName, this.user.did, config);
+    }
+
+    async openDatabase(dbName, did, config) {
+        return this.dataserver.openDatabase(dbName, did, config);
     }
 
     /**
