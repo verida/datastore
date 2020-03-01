@@ -149,6 +149,12 @@ class Database extends EventEmitter {
         return response;
     }
 
+    /**
+     * Get many rows from the database.
+     * 
+     * @param {*} filter 
+     * @param {*} options 
+     */
     async getMany(filter, options) {
         await this._init();
 
