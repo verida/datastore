@@ -75,12 +75,11 @@ class Inbox extends EventEmitter {
         } catch (err) { 
             console.error("Unable to save to private inbox");
             console.error(err);
-            throw err;
         }
 
         try {
             // delete the inbox/item
-            await this._publicInbox.delete(inboxItem._id);
+            await this._publicInbox.delete(inboxItem);
         } catch (err) { 
             console.error("Unable to delete from public inbox");
             console.error(err);
@@ -106,6 +105,9 @@ class Inbox extends EventEmitter {
             }
 
             inbox.processAll();
+        }).on('error', function(err) {
+            console.log("Error watching for inbox changes");
+            console.log(err);
         })
     }
 
