@@ -54,7 +54,7 @@ class Database extends EventEmitter {
         ].join("/");
 
         let hash = crypto.createHash('md5').update(text).digest("hex");
-        this._dbHash = "v" + appHash + "_" + hash;
+        this._dbHash = "v" + hash;
 
         // Database name must start with a letter
         return this._dbHash;
