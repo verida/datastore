@@ -18,15 +18,15 @@ class User {
         this.did = 'did:'+this.chain+':'+this.address;
         this.didServerUrl = didServerUrl;
 
-        this._vid = null;
+        this._vids = {};
     }
 
     async getAppVid(appName) {
-        if (!this._vid) {
-            this._vid = await DIDHelper.loadForApp(this.did, appName, this.didServerUrl);
+        if (!this._vids[appName]) {
+            this._vids[appName] = await DIDHelper.loadForApp(this.did, appName, this.didServerUrl);
         }
         
-        return this._vid;
+        return this._vids[appName];
     }
 
 }
