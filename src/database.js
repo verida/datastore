@@ -7,6 +7,7 @@ const _ = require('lodash');
 
 import EncryptedDatabase from "./databases/encrypted";
 import PublicDatabase from "./databases/public";
+import VidHelper from "./helpers/vid";
 
 class Database extends EventEmitter {
 
@@ -15,11 +16,12 @@ class Database extends EventEmitter {
      * 
      * **Do not instantiate directly.**
      */
-    constructor(dbName, did, appName, dataserver, config) {
+    constructor(dbName, did, appName, dataserver, keyring, config) {
         super();
         this.dbName = dbName;
         this.did = did;
         this.appName = appName;
+        this.keyring = keyring;
         this.dataserver = dataserver;
 
         this.config = config ? config : {};
@@ -280,10 +282,12 @@ class Database extends EventEmitter {
         data._id = uuidv1();
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
+        this.signData(data);
     }
 
     _beforeUpdate(data) {
         data.modifiedAt = (new Date()).toISOString();
+        this.signData(data);
     }
 
     _afterInsert(data, response) {}
@@ -329,6 +333,18 @@ class Database extends EventEmitter {
         }
 
         return filter;
+    }
+
+    signData(data) {
+        if (!data.signatures) {
+            data.signatures = {};
+        }
+
+        let _data = _.merge({}, data);
+        delete _data['_signatures'];
+
+        let vid = VidHelper.getVidFromDid(this.did, this.appName);
+        data.signatures[vid] = this.keyring.sign(_data);
     }
 
 }

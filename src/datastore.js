@@ -159,7 +159,8 @@ class DataStore {
         //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);
         //_.merge(dataStoreConfig, this.config);
 
-        this._db = new Database(dbName, this.did, this.appName, this._dataserver, this.config);
+        let keyring = await this._dataserver.getKeyring();
+        this._db = new Database(dbName, this.did, this.appName, this._dataserver, keyring, this.config);
         let indexes = specification.database.indexes;
 
         if (indexes) {

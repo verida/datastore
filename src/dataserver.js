@@ -178,7 +178,8 @@ class DataServer {
         config.isOwner = (did == this.app.user.did);
 
         // TODO: Cache databases so we don't open the same one more than once
-        return new Database(dbName, did, this.appName, this, config);
+        let keyring = await this.app.dataserver.getKeyring();
+        return new Database(dbName, did, this.appName, this, keyring, config);
     }
 
     async openDatastore(schemaName, did, config) {
