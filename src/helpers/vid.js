@@ -5,14 +5,17 @@ import { utils } from 'ethers';
 
 class VidHelper {
 
+    getVidFromDid(did, appName) {
+        did = did.toLowerCase();
+        return 'did:vid:' + utils.id(appName + did);
+    }
+
     /**
      * TODO: Replace with decentralised lookup
      * 
      */
     async save(did, appName, appUrl, keyring, didServerUrl, userDataserverUrl) {
-        did = did.toLowerCase();
-        let vid = 'did:vid:' + utils.id(appName + did);
-
+        let vid = this.getVidFromDid(did, appName);
         let publicKeys = keyring.exportPublicKeys();
 
         // Generate a VID Document
