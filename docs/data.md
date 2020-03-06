@@ -171,6 +171,8 @@ let restrictedDb = await app.openDatabase('restricted/data', app.user.did, {
 
 !>Note: `users` permission type is not fully implemented in the alpha, so don't use just yet.
 
+!>Note: Assigning a database `write=public` currently results in `read=public` also being applied. This is an issue caused by CouchDB not supporting a user having `write` access, but not `read` access. It's expected a modified version of CouchDB will be used to work around this current limitation in production environments.
+
 Databases are unique based on a hash of their `name` combined with their `permissions`. You could open two databases with the same name, but different permissions and they would be different databases.
 
 ## Advanced
