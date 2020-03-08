@@ -23,12 +23,13 @@ class App {
      * 
      * @param {string} name Name of the application.
      * @param {object} [config] Configuration for the application. See `datastore/src/config.js` for default application configuration that can be customised with this `config` parameter.
-     * @param {string} config.appServerUrl URL of the `datastore-server` instance for this application.
-     * @param {string} config.userServerUrl URL of the `datastore-server` instance for the current logged in user. This will be deprecated once user self-management is implemented.
+     * @param {string} config.environment The environment to run the application in. Current options are; "dev", "alpha", "custom".
      * @param {string} config.dbHashKey Hash used for generating unique database names for this application. Set a unique value for your application.
      * @param {object} config.schemas An object with keys `basePath` and `customPath` that specify the location of data schemas.
      * @param {string} config.schemas.basePath Base path for common Verida Schemas. Defaults to `/schemas/`.
      * @param {string} config.schemas.customPath Path for custom schemas just for this application. Defaults to `/customSchemas/`.
+     * @param {string} config.appServerUrl URL of the `datastore-server` instance for this application (overrides `config.environment` defaults)
+     * @param {string} config.didServerUrl URL of the `did-server` instance used for DID document management (overrides `config.environment` defaults)
      * @constructor
      * @example 
      * import VeridaApp from 'verida-datastore';
@@ -37,10 +38,21 @@ class App {
      */
     constructor(name, chain, address, web3Provider, config) {
         this.name = name;
+
+        // Build default config
         let defaults = {
-            didServiceUrl: window.location.origin
+            didServiceUrl: window.location.origin,
+            environment: "alpha"
         };
-        this.config = _.merge(defaults, Config, Config, config);
+        this.config = _.merge(defaults, Config, config);
+
+        // Apply default server URLs based on selected environment
+        if (Config.servers[this.config.environment]) {
+            this.config = _.merge({
+                appServerUrl: Config.servers[this.config.environment].appServerUrl,
+                didServerUrl: Config.servers[this.config.environment].didServerUrl,
+            }, this.config);
+        }
         
         this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
         this.outbox = new Outbox(this);

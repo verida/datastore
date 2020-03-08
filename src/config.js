@@ -1,7 +1,16 @@
 
 module.exports = {
-    appServerUrl: "https://dataserver.alpha.verida.io:5000/",
-    didServerUrl: "https://did.alpha.verida.io:5001/",
+    environment: "alpha",
+    servers: {
+        dev: {
+            appServerUrl: "http://localhost:5000/",
+            didServerUrl: "http://localhost:5001/",
+        },
+        alpha: {
+            appServerUrl: "https://dataserver.alpha.verida.io:5000/",
+            didServerUrl: "https://did.alpha.verida.io:5001/"
+        },
+    },
     datastores: {
         default: {
             privacy: "private"
