@@ -74,6 +74,11 @@ class VidHelper {
         return await DIDHelper.load(vid, didServerUrl);
     }
 
+    async getDidFromVid(vid, didServerUrl) {
+        vid = vid.toLowerCase();
+        return await DIDHelper.getDidFromVid(vid, didServerUrl);
+    }
+
 }
 
 let vidHelper = new VidHelper();

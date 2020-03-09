@@ -189,8 +189,8 @@ class App {
         return this._dataservers[did + ':' + config.appName];
     }
 
-    async getVid(vid) {
-        return VidHelper.getByVid(vid, this.config.didServerUrl);
+    async getDidFromVid(vid) {
+        return VidHelper.getDidFromVid(vid, this.config.didServerUrl);
     }
 
 }
