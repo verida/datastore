@@ -154,6 +154,9 @@ class DataStore {
 
         let specification = await this.schema.getSpecification();
         let dbName = this.config.dbName ? this.config.dbName : specification.database.name;
+        if (specification.name) {
+            this.schemaName = specification.name;
+        }
 
         // TODO: How and where to configure app specific datastore configs?
         //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);
