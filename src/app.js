@@ -155,6 +155,12 @@ class App {
         return this._schemas[schemaName];
     }
 
+    /**
+     * Build a dataserver connection to an external dataserver
+     * 
+     * @param {*} did 
+     * @param {*} config 
+     */
     async buildDataserver(did, config) {
         if (this._dataservers[did + ':' + config.appName]) {
             return this._dataservers[did + ':' + config.appName];
@@ -180,8 +186,10 @@ class App {
 
         // Build dataserver
         let dataserver = new DataServer(this, config);
+        let keyring = await this.dataserver.getKeyring();
         dataserver.loadExternal({
-            vid: vidDoc.id
+            vid: vidDoc.id,
+            keyring: keyring
         });
 
         // Cache and return dataserver

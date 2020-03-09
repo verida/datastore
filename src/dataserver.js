@@ -89,6 +89,7 @@ class DataServer {
      */
     async loadExternal(config) {
         this._vid = config.vid;
+        this._keyring = config.keyring;
         this._init = true;
     }
 

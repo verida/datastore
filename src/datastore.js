@@ -42,6 +42,7 @@ class DataStore {
         this._app = this._dataserver.app;
 
         this.schemaName = schemaName;
+        this.schemaPath = null;
         this.appName = appName;
         this.did = did;
         
@@ -82,7 +83,7 @@ class DataStore {
             return false;
         }
 
-        data.schema = this.schemaName;
+        data.schema = this.schemaPath;
         return this._db.save(data, options);
     }
 
@@ -154,9 +155,8 @@ class DataStore {
 
         let specification = await this.schema.getSpecification();
         let dbName = this.config.dbName ? this.config.dbName : specification.database.name;
-        if (specification.name) {
-            this.schemaName = specification.name;
-        }
+        this.schemaName = this.schema.name;
+        this.schemaPath = this.schema.path;
 
         // TODO: How and where to configure app specific datastore configs?
         //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);

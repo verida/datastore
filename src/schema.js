@@ -13,8 +13,9 @@ class Schema {
      * Access via {@link App#getSchema}
      * @constructor
      */
-    constructor(name, config) {
-        this.name = name;
+    constructor(path, config) {
+        this.path = path;
+        this.name = null;
 
         this._config = config;
 
@@ -32,22 +33,30 @@ class Schema {
      * @returns {object} JSON object representing the defereferenced schema
      */
     async getSpecification() {
-        // Handle a schema being provided as a URL
-        if (this.name.match("http")) {
-            this._specification = await $RefParser.dereference(this.name + '/schema.json');
-            return resolveAllOf(this._specification);
+        if (this._specification) {
+            return this._specification;
         }
 
-        if (!this._specification) {
+        // Handle a schema being provided as a URL
+        if (!this.path.match("http")) {
+            let path = this._config.basePath + this.path + '/schema.json';
             try {
-                this._specification = await $RefParser.dereference(this._config.basePath + this.name + '/schema.json');
+                this._specification = await $RefParser.dereference(path);
             } catch (err) {
                 // Schema failed, try custom schema location
-                this._specification = await $RefParser.dereference(this._config.customPath + this.name + '/schema.json');
+                path = this._config.customPath + this.path + '/schema.json';
+                this._specification = await $RefParser.dereference(path);
             }
+
+            this.path = path;
+            
+        } else {
+            this._specification = await $RefParser.dereference(this.path + '/schema.json');
         }
 
-        return resolveAllOf(this._specification);
+        let spec = await resolveAllOf(this._specification);
+        this.name = spec.name;
+        return spec;
     }
 
     /**

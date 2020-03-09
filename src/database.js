@@ -335,6 +335,11 @@ class Database extends EventEmitter {
         return filter;
     }
 
+    /**
+     * Sign data as the current user
+     * 
+     * @param {*} data 
+     */
     signData(data) {
         if (!data.signatures) {
             data.signatures = {};
