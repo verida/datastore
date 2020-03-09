@@ -144,7 +144,7 @@ class App {
     /**
      * Get a JSON Schema object by name
      * 
-     * @param {string} schemaName 
+     * @param {string} schemaName That may be a name (ie: "social/contact") or a URL of a schema (ie: "https://test.com/schema.json")
      * @returns {Schema}
      */
     async getSchema(schemaName) {

@@ -32,6 +32,12 @@ class Schema {
      * @returns {object} JSON object representing the defereferenced schema
      */
     async getSpecification() {
+        // Handle a schema being provided as a URL
+        if (this.name.match("http")) {
+            this._specification = await $RefParser.dereference(this.name + '/schema.json');
+            return resolveAllOf(this._specification);
+        }
+
         if (!this._specification) {
             try {
                 this._specification = await $RefParser.dereference(this._config.basePath + this.name + '/schema.json');
