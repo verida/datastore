@@ -82,10 +82,11 @@ class Outbox {
         // the user's private vault
         let keyring = await this._app.dataserver.getKeyring();
         let signer = didJWT.SimpleSigner(keyring.signKey.private);
+        let userVid = await this._app.user.getAppVid(sendingAppName);
 
         let jwt = await didJWT.createJWT({
             aud: this._app.user.did,
-            vid: vidDoc.id,
+            vid: userVid.id,
             exp: config.expiry,
             data: outboxEntry,
             veridaApp: sendingAppName,
