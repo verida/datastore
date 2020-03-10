@@ -147,11 +147,14 @@ class App {
      * @param {string} schemaName That may be a name (ie: "social/contact") or a URL of a schema (ie: "https://test.com/schema.json")
      * @returns {Schema}
      */
-    async getSchema(schemaName) {
+    async getSchema(schemaName, returnSpec) {
         if (!this._schemas[schemaName]) {
             this._schemas[schemaName] = new VeridaSchema(schemaName, this.config.schemas);
         }
 
+        if (returnSpec) {
+            return this._schemas[schemaName].getSpecification();
+        }
         return this._schemas[schemaName];
     }
 
