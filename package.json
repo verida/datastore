@@ -41,6 +41,7 @@
     "store": "^2.0.12",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",
+    "url-exists": "^1.0.3",
     "uuid": "^3.3.3",
     "web3": "^1.2.4"
   },

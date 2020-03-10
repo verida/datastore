@@ -2,6 +2,8 @@ import $RefParser from "json-schema-ref-parser";
 import Ajv from "ajv";
 const ajv = new Ajv();
 const resolveAllOf = require('json-schema-resolve-allof');
+const util = require('util');
+const urlExists = util.promisify(require('url-exists'));
 
 class Schema {
 
@@ -11,14 +13,13 @@ class Schema {
      * **Do not instantiate directly.**
      * 
      * Access via {@link App#getSchema}
+     * @param {object} path Path to a schema in the form (http://..../schema.json, /schemas/name/schema.json, name/of/schema)
      * @constructor
      */
     constructor(path, config) {
+        this._config = config;
         this.path = path;
         this.name = null;
-
-        this._config = config;
-
         this._specification = null;
         this.errors = [];
     }
@@ -37,23 +38,9 @@ class Schema {
             return this._specification;
         }
 
-        // Handle a schema being provided as a URL
-        if (!this.path.match("http")) {
-            let path = this._config.basePath + this.path + '/schema.json';
-            try {
-                this._specification = await $RefParser.dereference(path);
-            } catch (err) {
-                // Schema failed, try custom schema location
-                path = this._config.customPath + this.path + '/schema.json';
-                this._specification = await $RefParser.dereference(path);
-            }
+        this.path = await this.resolvePath(this.path);
 
-            this.path = path;
-            
-        } else {
-            this._specification = await $RefParser.dereference(this.path + '/schema.json');
-        }
-
+        this._specification = await $RefParser.dereference(this.path);
         let spec = await resolveAllOf(this._specification);
         this.name = spec.name;
         return spec;
@@ -79,6 +66,44 @@ class Schema {
         }
 
         return true;
+    }
+
+    async resolvePath(path) {
+        // If we have a full path, simply return it
+        if (path.match("http")) {
+            return path;
+        }
+
+        // Append /schema.json if required
+        if (path.substring(path.length-5) != ".json") {
+            path += "/schema.json";
+        }
+
+        // Try to resolve the path as being "custom"
+        let tmpPath = this.buildFullPath(this._config.customPath + path);
+        let exists = await urlExists(tmpPath);
+        if (exists) {
+            return tmpPath;
+        }
+
+        // Try to resolve the path as being "base"
+        tmpPath = this.buildFullPath(this._config.basePath + path);
+        exists = await urlExists(tmpPath);
+        if (exists) {
+            return tmpPath;
+        }
+        
+    }
+
+    buildFullPath(path) {
+        if (path.match("http")) {
+            return path;
+        }
+
+        // Don't have a full path, so assume it's hosted within the 
+        // current application.
+        // Pre-pend current host / port (ie: http://localhost:8080)
+        return window.location.origin + path;
     }
 
 }
