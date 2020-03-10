@@ -19,9 +19,23 @@ class Schema {
     constructor(path, config) {
         this._config = config;
         this.path = path;
+        this.errors = [];
+
         this.name = null;
         this._specification = null;
-        this.errors = [];
+    }
+
+    async init() {
+        if (this._specification) {
+            return;
+        }
+
+        this.path = await this._resolvePath(this.path);
+        this._specification = await $RefParser.dereference(this.path);
+        let spec = await resolveAllOf(this._specification);
+        this.name = spec.name;
+
+        this._init = true;
     }
 
     /**
@@ -34,16 +48,8 @@ class Schema {
      * @returns {object} JSON object representing the defereferenced schema
      */
     async getSpecification() {
-        if (this._specification) {
-            return this._specification;
-        }
-
-        this.path = await this.resolvePath(this.path);
-
-        this._specification = await $RefParser.dereference(this.path);
-        let spec = await resolveAllOf(this._specification);
-        this.name = spec.name;
-        return spec;
+        await this.init();
+        return this._specification;
     }
 
     /**
@@ -53,7 +59,8 @@ class Schema {
      * @returns {boolean} True if the data validates against the schema.
      */
     async validate(data) {
-        let specification = await this.getSpecification();
+        await this.init();
+        let specification = this._specification;
         let schema = ajv.getSchema(specification['$id']);
         if (!schema) {
             ajv.addSchema(specification);
@@ -68,7 +75,12 @@ class Schema {
         return true;
     }
 
-    async resolvePath(path) {
+    async getIcon() {
+        await this.init();
+        return this.path.replace("schema.json","icon.svg");
+    }
+
+    async _resolvePath(path) {
         // If we have a full path, simply return it
         if (path.match("http")) {
             return path;
@@ -80,14 +92,14 @@ class Schema {
         }
 
         // Try to resolve the path as being "custom"
-        let tmpPath = this.buildFullPath(this._config.customPath + path);
+        let tmpPath = this._buildFullPath(this._config.customPath + path);
         let exists = await urlExists(tmpPath);
         if (exists) {
             return tmpPath;
         }
 
         // Try to resolve the path as being "base"
-        tmpPath = this.buildFullPath(this._config.basePath + path);
+        tmpPath = this._buildFullPath(this._config.basePath + path);
         exists = await urlExists(tmpPath);
         if (exists) {
             return tmpPath;
@@ -95,7 +107,7 @@ class Schema {
         
     }
 
-    buildFullPath(path) {
+    _buildFullPath(path) {
         if (path.match("http")) {
             return path;
         }
