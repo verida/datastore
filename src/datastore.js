@@ -105,7 +105,7 @@ class DataStore {
         await this._init();
 
         let filter = _.merge({
-            schema: this.schemaName
+            schema: this.schemaPath
         }, customFilter);
 
         return this._db.getMany(filter, options);
