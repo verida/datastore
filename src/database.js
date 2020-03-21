@@ -19,7 +19,7 @@ class Database extends EventEmitter {
     constructor(dbName, did, appName, dataserver, keyring, config) {
         super();
         this.dbName = dbName;
-        this.did = did;
+        this.did = did.toLowerCase();
         this.appName = appName;
         this.keyring = keyring;
         this.dataserver = dataserver;
@@ -244,33 +244,35 @@ class Database extends EventEmitter {
         // public inbox (public, private) -- is that even possible? may need to be public, public
         // group data -- (users, users)
 
+        let dbHashName = this.getDatabaseHash();
+
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
                 let encryptionKey = await this.dataserver.getKey();
                 let remoteDsn = await this.dataserver.getDsn();
-                let db = new EncryptedDatabase(this.getDatabaseHash(), this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._db = await db.getDb();
             } catch (err) {
-                throw new Error("Error creating database ("+this.dbName+"): " + err.message);
+                throw new Error("Error creating owner database ("+this.dbName+") for "+this.did+": " + err.message);
             }
         } else if (this.permissions.read == "public") {
             // Create non-encrypted database
             try {
-                let db = new PublicDatabase(this.getDatabaseHash(), this.dataserver, this.did, this.permissions, this.config.isOwner);
+                let db = new PublicDatabase(dbHashName, this.dataserver, this.did, this.permissions, this.config.isOwner);
                 this._db = await db.getDb();
             } catch (err) {
-                throw new Error("Error creating database ("+this.dbName+"): " + err.message);
+                throw new Error("Error creating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
             }
         } else if (this.permissions.read == "users" || this.permissions.write == "users") {
             // Create encrypted database with generated encryption key
             try {
                 let encryptionKey = this.config.encryptionKey; // TODO: Where and how to generate?
                 let remoteDsn = await this.dataserver.getDsn();
-                let db = new EncryptedDatabase(this.getDatabaseHash(), encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(dbHashName, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._db = await db.getDb();
             } catch (err) {
-                throw new Error("Error creating database ("+this.dbName+"): " + err.message);
+                throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
             }
         }
         else {
