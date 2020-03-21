@@ -10,6 +10,7 @@ import _ from 'lodash';
 import Database from './database';
 import Config from './config';
 import crypto from 'crypto';
+import Utils from './utils';
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
 
@@ -184,13 +185,27 @@ class DataServer {
     }
 
     async openDatastore(schemaName, did, config) {
-        config = config ? config : {};
-        config.permissions = config.permissions ? config.permissions : {};
+        did = did.toLowerCase();
+        config = _.merge({
+            permissions: {
+                read: "owner",
+                write: "owner"
+            },
+            isOwner: (did == this.app.user.did),
+        }, config);
 
         let datastoreName = config.dbName ? config.dbName : schemaName;
+        did = did ? did : this.app.user.did;
 
-        if (this._datastores[datastoreName]) {
-            return this._datastores[datastoreName];
+        let dsHash = Utils.md5FromArray([
+            datastoreName,
+            did,
+            config.permissions.read,
+            config.permissions.write
+        ]);
+
+        if (this._datastores[dsHash]) {
+            return this._datastores[dsHash];
         }
 
         // If permissions require "owner" access, connect the current user
@@ -202,13 +217,8 @@ class DataServer {
 
         // merge config with this.config?
 
-        // Default to user's did if not specified
-        did = did ? did : this.app.user.did;
-
-        config.isOwner = (did == this.app.user.did);
-        this._datastores[datastoreName] = new Datastore(this, schemaName, did, this.appName, config);
-
-        return this._datastores[datastoreName];
+        this._datastores[dsHash] = new Datastore(this, schemaName, did, this.appName, config);
+        return this._datastores[dsHash];
     }
 
     async getKey() {
