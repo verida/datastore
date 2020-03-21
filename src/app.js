@@ -127,6 +127,7 @@ class App {
      * @returns {DataStore} Datastore instance for the requested user profile
      */
     async openProfile(did) {
+        did = did.toLowerCase();
         let dataserver = await this.buildDataserver(did, {
             appName: Config.vaultAppName
         });
@@ -165,6 +166,11 @@ class App {
      * @param {*} config 
      */
     async buildDataserver(did, config) {
+        config = _.merge({
+            appName: this.name
+        }, config);
+        did = did.toLowerCase();
+
         if (this._dataservers[did + ':' + config.appName]) {
             return this._dataservers[did + ':' + config.appName];
         }
@@ -181,7 +187,6 @@ class App {
 
         // Build dataserver config, merging defaults and user defined config
         config = _.merge({
-            appName: Config.vaultAppName,
             isProfile: false,
             serverUrl: dataserverUrl,
             didUrl: this.config.didServerUrl
