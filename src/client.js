@@ -44,6 +44,14 @@ class Client {
         };
 
         if (includeAuth) {
+            if (!this.username) {
+                throw Error("Username not specified");
+            }
+
+            if (!this.signature) {
+                throw Error("Signature not specified");
+            }
+
             config.auth = {
                 username: this.username.replace(/:/g, "_"),
                 password: this.signature
