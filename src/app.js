@@ -2,7 +2,8 @@
 "use strict"
 
 import Config from './config';
-import VeridaUser from "./user";
+import WebUser from "./user/web";
+import ServerUser from "./user/server";
 import VeridaSchema from "./schema";
 import DataServer from './dataserver';
 import Inbox from "./messaging/inbox";
@@ -36,12 +37,12 @@ class App {
      * let myApp = new VeridaApp("My Application Name");
      * myApp.connect(true);
      */
-    constructor(name, chain, address, web3Provider, config) {
-        this.name = name;
+    constructor(config) {
+        this.name = config.name;
 
         // Build default config
         let defaults = {
-            didServiceUrl: window.location.origin,
+            didServiceUrl: (process.browser ? window.location.origin : null),
             environment: "alpha"
         };
         this.config = _.merge(defaults, Config, config);
@@ -53,8 +54,13 @@ class App {
                 didServerUrl: Config.servers[this.config.environment].didServerUrl,
             }, this.config);
         }
-        
-        this.user = new VeridaUser(chain, address, web3Provider, this.config.didServerUrl);
+
+        if (process.browser) {
+            this.user = new WebUser(config.chain, config.address, this.config.web3Provider);
+        } else {
+            this.user = new ServerUser(config.chain, config.address, this.config.privateKey, this.config.didServerUrl);
+        }
+
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
 

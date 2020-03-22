@@ -1,6 +1,6 @@
 /*eslint no-console: "off"*/
 
-import PouchDB from 'pouchdb-browser';
+import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 PouchDB.plugin(PouchDBFind);
 import Utils from "../utils";

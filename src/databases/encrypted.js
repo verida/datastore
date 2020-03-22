@@ -1,7 +1,7 @@
 /*eslint no-console: "off"*/
 
-import PouchDBCrypt from 'pouchdb-browser';
-import PouchDB from 'pouchdb-browser';
+import PouchDBCrypt from 'pouchdb';
+import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import Utils from "../utils";
 

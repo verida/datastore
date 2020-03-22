@@ -4,6 +4,9 @@ const ajv = new Ajv();
 const resolveAllOf = require('json-schema-resolve-allof');
 const util = require('util');
 const urlExists = util.promisify(require('url-exists'));
+const fs = require("fs");
+const path = require('path');
+const fileExists = async filePath => !!(await fs.promises.stat(filePath).catch(e => false));
 
 class Schema {
 
@@ -81,7 +84,7 @@ class Schema {
     }
 
     async _resolvePath(path) {
-        // If we have a full path, simply return it
+        // If we have a full HTTP path, simply return it
         if (path.match("http")) {
             return path;
         }
@@ -93,29 +96,41 @@ class Schema {
 
         // Try to resolve the path as being "custom"
         let tmpPath = this._buildFullPath(this._config.customPath + path);
-        let exists = await urlExists(tmpPath);
+        let exists = await this._pathExists(tmpPath);
         if (exists) {
             return tmpPath;
         }
 
         // Try to resolve the path as being "base"
         tmpPath = this._buildFullPath(this._config.basePath + path);
-        exists = await urlExists(tmpPath);
+        exists = await this._pathExists(tmpPath);
         if (exists) {
             return tmpPath;
         }
-        
+
+        throw new Error("Unable to resolve the path for: "+path);
     }
 
-    _buildFullPath(path) {
-        if (path.match("http")) {
-            return path;
+    _buildFullPath(filePath) {
+        if (filePath.match("http")) {
+            return filePath;
         }
 
         // Don't have a full path, so assume it's hosted within the 
         // current application.
-        // Pre-pend current host / port (ie: http://localhost:8080)
-        return window.location.origin + path;
+        if (process.browser) {
+            return filePath;
+        } else {
+            return path.resolve(process.cwd(), filePath);
+        }
+    }
+
+    async _pathExists(filePath) {
+        if (process.browser) {
+            return urlExists(filePath);
+        } else {
+            return fileExists(filePath);
+        }
     }
 
 }

@@ -3,7 +3,6 @@ import Datastore from "./datastore";
 import Client from "./client";
 import Keyring from "./keyring";
 import { utils, ethers } from "ethers";
-import Consent from "./consent";
 import store from 'store';
 import vidHelper from './helpers/vid';
 import _ from 'lodash';
@@ -58,7 +57,7 @@ class DataServer {
          * Force a connection
          */
         if (force) {
-            this._signature = await Consent.requestSignature(this.app.user, this.isProfile ? "profile" : "default", this.isProfile ? Config.vaultAppName : this.appName);
+            this._signature = await this.app.user.requestSignature(this.isProfile ? Config.vaultAppName : this.appName, this.isProfile ? "profile" : "default");
             let user = await this._getUser();
             
             config = {
@@ -141,6 +140,9 @@ class DataServer {
             if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
                 // User doesn't exist, so create
                 response = await this._client.createUser(user.did, this._generatePassword(this._signature));
+            }
+            else if (err.response.statusText == "Unauthorized") {
+                throw new Error("Invalid signature or permission to access DID server");
             }
             else {
                 // Unknown error
