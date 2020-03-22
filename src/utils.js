@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
 class Utils {
+    
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -12,8 +13,6 @@ class Utils {
      */
     md5FromArray(parts) {
         let text = parts.join("/");
-        console.log(text);
-
         return crypto.createHash('md5').update(text).digest("hex");
     }
 }
