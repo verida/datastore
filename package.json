@@ -2,12 +2,13 @@
   "name": "@verida/datastore",
   "version": "0.1.0",
   "description": "Verida Datastore",
-  "main": "src/app.js",
+  "main": "dist/app.js",
   "author": "Verida",
   "license": "Apache-2.0",
   "scripts": {
     "test": "mocha -mocha --require @babel/polyfill --require @babel/register './test/**/*.js'",
-    "generate-api-docs": "./node_modules/.bin/jsdoc ./ -r -c .jsdoc.conf -d apidocs -u tutorials --readme README.api.md"
+    "generate-api-docs": "./node_modules/.bin/jsdoc ./ -r -c .jsdoc.conf -d apidocs -u tutorials --readme README.api.md",
+    "build": "babel src -d dist"
   },
   "eslintConfig": {
     "root": true,
@@ -15,7 +16,6 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/essential",
       "eslint:recommended"
     ],
     "rules": {},
@@ -33,19 +33,21 @@
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
     "did-jwt": "^4.0.0",
+    "fs": "0.0.1-security",
     "json-schema-ref-parser": "^7.1.2",
     "json-schema-resolve-allof": "^1.5.0",
     "lodash": "^4.17.15",
-    "pouchdb-browser": "^7.1.1",
+    "pouchdb": "^7.2.1",
     "pouchdb-find": "^7.1.1",
     "store": "^2.0.12",
-    "tweetnacl": "^1.0.1",
+    "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.0",
     "url-exists": "^1.0.3",
     "uuid": "^3.3.3",
     "web3": "^1.2.4"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.3",
     "@babel/node": "^7.8.3",
     "@babel/polyfill": "^7.8.3",
