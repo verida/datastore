@@ -95,42 +95,20 @@ class Schema {
         }
 
         // Try to resolve the path as being "custom"
-        let tmpPath = this._buildFullPath(this._config.customPath + path);
-        let exists = await this._pathExists(tmpPath);
+        let tmpPath = this._config.customPath + path;
+        let exists = await urlExists(tmpPath);
         if (exists) {
             return tmpPath;
         }
 
         // Try to resolve the path as being "base"
-        tmpPath = this._buildFullPath(this._config.basePath + path);
-        exists = await this._pathExists(tmpPath);
+        tmpPath = this._config.basePath + path;
+        exists = await urlExists(tmpPath);
         if (exists) {
             return tmpPath;
         }
 
         throw new Error("Unable to resolve the path for: "+path);
-    }
-
-    _buildFullPath(filePath) {
-        if (filePath.match("http")) {
-            return filePath;
-        }
-
-        // Don't have a full path, so assume it's hosted within the 
-        // current application.
-        if (process.browser) {
-            return filePath;
-        } else {
-            return path.resolve(process.cwd(), filePath);
-        }
-    }
-
-    async _pathExists(filePath) {
-        if (process.browser) {
-            return urlExists(filePath);
-        } else {
-            return fileExists(filePath);
-        }
     }
 
 }
