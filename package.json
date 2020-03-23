@@ -9,7 +9,7 @@
     "test": "mocha -mocha --require @babel/polyfill --require @babel/register './test/**/*.js'",
     "generate-api-docs": "./node_modules/.bin/jsdoc ./ -r -c .jsdoc.conf -d apidocs -u tutorials --readme README.api.md",
     "build": "babel src -d dist",
-    "prepare": "npm run build"
+    "preinstall": "npm run build"
   },
   "eslintConfig": {
     "root": true,
