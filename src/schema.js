@@ -95,6 +95,7 @@ class Schema {
         }
 
         // Try to resolve the path as being "custom"
+
         let tmpPath1 = this._config.customPath + path;
         let exists = await urlExists(tmpPath1);
         if (exists) {
@@ -108,7 +109,7 @@ class Schema {
             return tmpPath2;
         }
 
-        throw new Error("Unable to resolve the path for: "+path+" (tried "+tmpPath1+" & "+tmpPath2+")";
+        throw new Error("Unable to resolve the path for: "+path+" (tried "+tmpPath1+" & "+tmpPath2+")");
     }
 
 }
