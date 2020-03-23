@@ -95,20 +95,20 @@ class Schema {
         }
 
         // Try to resolve the path as being "custom"
-        let tmpPath = this._config.customPath + path;
-        let exists = await urlExists(tmpPath);
+        let tmpPath1 = this._config.customPath + path;
+        let exists = await urlExists(tmpPath1);
         if (exists) {
-            return tmpPath;
+            return tmpPath1;
         }
 
         // Try to resolve the path as being "base"
-        tmpPath = this._config.basePath + path;
-        exists = await urlExists(tmpPath);
+        let tmpPath2 = this._config.basePath + path;
+        exists = await urlExists(tmpPath2);
         if (exists) {
-            return tmpPath;
+            return tmpPath2;
         }
 
-        throw new Error("Unable to resolve the path for: "+path);
+        throw new Error("Unable to resolve the path for: "+path+" (tried "+tmpPath1+" & "+tmpPath2+")";
     }
 
 }
