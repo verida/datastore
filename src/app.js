@@ -56,7 +56,7 @@ class App {
         }
 
         if (process.browser) {
-            this.user = new WebUser(config.chain, config.address, this.config.web3Provider);
+            this.user = new WebUser(config.chain, config.address, this.config.web3Provider, this.config.didServerUrl);
         } else {
             this.user = new ServerUser(config.chain, config.address, this.config.privateKey, this.config.didServerUrl);
         }
