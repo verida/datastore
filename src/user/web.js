@@ -11,7 +11,7 @@ class WebUser {
      * @property {string} did Decentralised ID for this use (ie: `did:ethr:0xaef....`)
      * @property {string} address Blockchain address for this user (ie: `0xaef....`)
      */
-    constructor(chain, address, web3Provider) {
+    constructor(chain, address, web3Provider, didServerUrl) {
         if (!web3Provider) {
             throw new Error("No web3 provider specified for server user");
         }
@@ -20,6 +20,7 @@ class WebUser {
         this.chain = chain;
         this.address = address;
         this.did = 'did:'+this.chain+':'+this.address.toLowerCase();
+        this.didServerUrl = didServerUrl;
 
         this._vids = {};
     }
