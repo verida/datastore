@@ -35,12 +35,8 @@ class ServerUser {
 
     async requestSignature(appName, accessType) {
         let signMessage = this._getSignMessage(appName, accessType);
-
-        console.log("sign message: ",signMessage);
-
         let message = Buffer.from(signMessage);
         let messageHash = hashPersonalMessage(message);
-
         let sig = ecsign(messageHash, this.privateKey);
         return toRpcSig(sig.v, sig.r, sig.s);
     }

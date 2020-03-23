@@ -79,6 +79,20 @@ class VidHelper {
         return await DIDHelper.getDidFromVid(vid, didServerUrl);
     }
 
+    async signData(data, app) {
+        if (!data.signatures) {
+            data.signatures = {};
+        }
+
+        let _data = _.merge({}, data);
+        delete _data['_signatures'];
+
+        let vid = this.getVidFromDid(app.user.did, app.name);
+        let keyring = await app.dataserver.getKeyring();
+        data.signatures[vid] = keyring.sign(_data);
+        return data;
+    }
+
 }
 
 let vidHelper = new VidHelper();
