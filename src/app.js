@@ -217,5 +217,6 @@ class App {
 
 }
 
+App.VidHelper = VidHelper;
 App.WalletHelper = WalletHelper;
 export default App;
