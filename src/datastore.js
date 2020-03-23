@@ -111,6 +111,13 @@ class DataStore {
         return this._db.getMany(filter, options);
     }
 
+    async getOne(customFilter, options) {
+        let results = await this.getMany(customFilter, options);
+        if (results && results.length) {
+            return results[0];
+        }
+    }
+
     /**
      * Get a record by ID.
      * 
