@@ -11,6 +11,7 @@ import Outbox from "./messaging/outbox";
 import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import Profile from './profile';
+import Trust from './trust';
 
 const _ = require('lodash');
 
@@ -63,6 +64,7 @@ class App {
 
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
+        this.trust = new Trust(this);
 
         this.dataserver = new DataServer(this, {
             datastores: this.config.datastores,
@@ -132,10 +134,10 @@ class App {
      * console.log(profile.get("email"));
      * @returns {DataStore} Datastore instance for the requested user profile
      */
-    async openProfile(did) {
+    async openProfile(did, appName) {
         did = did.toLowerCase();
         let dataserver = await this.buildDataserver(did, {
-            appName: Config.vaultAppName
+            appName: appName ? appName : Config.vaultAppName
         });
         let dataStore = await dataserver.openDatastore("profile/public", did, {
             permissions: {

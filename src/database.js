@@ -341,6 +341,7 @@ class Database extends EventEmitter {
      * Sign data as the current user
      * 
      * @param {*} data 
+     * @todo Think about signing data and versions / insertedAt etc.
      */
     signData(data) {
         if (!data.signatures) {
@@ -348,6 +349,7 @@ class Database extends EventEmitter {
         }
 
         let _data = _.merge({}, data);
+        delete _data['_signatures'];
         delete _data['_signatures'];
 
         let vid = VidHelper.getVidFromDid(this.did, this.appName);
