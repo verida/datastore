@@ -141,7 +141,7 @@ class DataServer {
                 // User doesn't exist, so create
                 response = await this._client.createUser(user.did, this._generatePassword(this._signature));
             }
-            else if (err.response.statusText == "Unauthorized") {
+            else if (err.response && err.response.statusText == "Unauthorized") {
                 throw new Error("Invalid signature or permission to access DID server");
             }
             else {
