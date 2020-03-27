@@ -76,7 +76,7 @@ class DataStore {
      */
     async save(data, options) {
         await this._init();
-        let valid = this.schema.validate(data);
+        let valid = await this.schema.validate(data);
 
         if (!valid) {
             this.errors = this.schema.errors;
