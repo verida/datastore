@@ -9,6 +9,7 @@
     "test": "mocha -mocha --require @babel/polyfill --require @babel/register './test/**/*.js'",
     "generate-api-docs": "./node_modules/.bin/jsdoc ./ -r -c .jsdoc.conf -d apidocs -u tutorials --readme README.api.md",
     "build": "./node_modules/.bin/babel src -d dist",
+    "preinstall": "npm install --ignore-scripts",
     "prepublish": "npm run build",
     "postinstall": "npm run build"
   },
