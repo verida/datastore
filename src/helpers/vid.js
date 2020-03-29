@@ -2,21 +2,19 @@
 import { DIDDocument } from 'did-document';
 import DIDHelper from '@verida/did-helper';
 import { utils } from 'ethers';
+import App from '../app';
 
 class VidHelper {
 
-    getVidFromDid(did, appName) {
-        did = did.toLowerCase();
-        return 'did:vid:' + utils.id(appName + did);
-    }
-
     /**
-     * TODO: Replace with decentralised lookup
+     * Save a DID document
      * 
+     * @todo: Replace with decentralised lookup
      */
-    async save(did, appName, appUrl, keyring, didServerUrl, userDataserverUrl) {
+    async save(did, appName, keyring, userDataserverUrl) {
         let vid = this.getVidFromDid(did, appName);
         let publicKeys = keyring.exportPublicKeys();
+        let appUrl = App.config.appHost;
 
         // Generate a VID Document
         let doc = new DIDDocument({
@@ -54,7 +52,7 @@ class VidHelper {
         });
 
         DIDHelper.createProof(doc, keyring.signKey.private);
-        let response = await DIDHelper.commit(did, doc, didServerUrl);
+        let response = await DIDHelper.commit(did, doc, App.config.server.didServerUrl);
         if (response) {
             return doc;
         }
@@ -64,33 +62,42 @@ class VidHelper {
         // chain address that is linked to the DID (unless it's the only one)?
     }
 
-    async getByDid(did, appName, didServerUrl) {
+    async getByDid(did, appName) {
+        appName = appName || App.config.appName;
         did = did.toLowerCase();
-        return await DIDHelper.loadForApp(did, appName, didServerUrl);
+        return await DIDHelper.loadForApp(did, appName, App.config.server.didServerUrl);
     }
 
-    async getByVid(vid, didServerUrl) {
+    async getByVid(vid) {
         vid = vid.toLowerCase();
-        return await DIDHelper.load(vid, didServerUrl);
+        return await DIDHelper.load(vid, App.config.server.didServerUrl);
     }
 
-    async getDidFromVid(vid, didServerUrl) {
+    /**
+     * Get DID for a given VID
+     * 
+     * @param {*} vid
+     */
+    async getDidFromVid(vid) {
         vid = vid.toLowerCase();
-        return await DIDHelper.getDidFromVid(vid, didServerUrl);
+        return await DIDHelper.getDidFromVid(vid, App.config.server.didServerUrl);
     }
 
-    async signData(data, app) {
-        if (!data.signatures) {
-            data.signatures = {};
-        }
+    /**
+     * Get the VID for a given DID and application name
+     * 
+     * @param {*} did 
+     * @param {*} appName 
+     */
+    getVidFromDid(did, appName) {
+        appName = appName || App.config.appName;
+        did = did.toLowerCase();
+        return 'did:vid:' + utils.id(appName + did);
+    }
 
-        let _data = _.merge({}, data);
-        delete _data['_signatures'];
-
-        let vid = this.getVidFromDid(app.user.did, app.name);
-        let keyring = await app.dataserver.getKeyring();
-        data.signatures[vid] = keyring.sign(_data);
-        return data;
+    getDidFromAddress(address, chain) {
+        chain = chain || "ethr";
+        return 'did:'+chain+':'+address.toLowerCase();
     }
 
 }

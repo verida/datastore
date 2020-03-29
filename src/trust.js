@@ -8,37 +8,6 @@ class Trust {
     }
 
     /**
-     * Create a DID-JWT from a data object
-     * @param {*} data 
-     */
-    async createDidJwt(data, config) {
-        config = _.merge({
-            expiry: null,
-            appName: this._app.name,
-            insertedAt: (new Date()).toISOString()
-        }, config);
-
-        let keyring = await this._app.dataserver.getKeyring();
-        let signer = didJWT.SimpleSigner(keyring.signKey.private);
-        let userVid = await this._app.user.getAppVid(config.appName);
-
-        let jwt = await didJWT.createJWT({
-            aud: this._app.user.did,
-            vid: userVid.id,
-            exp: config.expiry,
-            data: data,
-            veridaApp: config.appName,
-            insertedAt: config.insertedAt
-        }, {
-            alg: 'ES256K-R',
-            issuer: this._app.user.did,
-            signer
-        });
-
-        return jwt;
-    }
-
-    /**
      * 
      * @param {*} didJwt 
      */
@@ -74,7 +43,6 @@ class Trust {
      * @todo
      */
     verifySignature(data, did, signature) {
-
         return true;
     }
 

@@ -4,9 +4,7 @@ const ajv = new Ajv();
 const resolveAllOf = require('json-schema-resolve-allof');
 const util = require('util');
 const urlExists = util.promisify(require('url-exists'));
-const fs = require("fs");
-const path = require('path');
-const fileExists = async filePath => !!(await fs.promises.stat(filePath).catch(e => false));
+import App from './app';
 
 class Schema {
 
@@ -19,8 +17,8 @@ class Schema {
      * @param {object} path Path to a schema in the form (http://..../schema.json, /schemas/name/schema.json, name/of/schema)
      * @constructor
      */
-    constructor(path, config) {
-        this._config = config;
+    constructor(path) {
+        this._config = App.config.schemas;
         this.path = path;
         this.errors = [];
 

@@ -6,7 +6,7 @@ import {
   encodeBase64,
   decodeBase64
 } from "tweetnacl-util";
-import { ethers } from 'ethers';
+import { utils, ethers } from 'ethers';
 
 const newSymNonce = () => randomBytes(secretbox.nonceLength);
 const newAsymNonce = () => randomBytes(box.nonceLength);
@@ -25,7 +25,12 @@ class Keyring {
      * @ignore
      * @param {string} seed Hex string of the seed generated from a message signed by the users's on chain account
      */
-    constructor(seed) {
+    constructor(signature) {
+        this.signature = signature;
+        
+        const entropy = utils.sha256('0x' + signature.slice(2));
+        const seed = ethers.HDNode.mnemonicToSeed(ethers.HDNode.entropyToMnemonic(entropy));
+
         const seedNode = ethers.HDNode.fromSeed(seed);
         const baseNode = seedNode.derivePath(BASE_PATH);
 

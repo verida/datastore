@@ -1,24 +1,36 @@
 
-module.exports = {
-    environment: "alpha",
+console.log(process.env);
+
+let config = {
+    environment: process.env.VERIDA_ENVIRONMENT || "testnet",
+    appName: process.env.VERIDA_APP_NAME || "Test App",
+    appHost: process.env.VERIDA_APP_HOST || (process.browser ? window.location.origin : null),
     servers: {
         dev: {
             appServerUrl: "http://localhost:5000/",
-            didServerUrl: "http://localhost:5001/",
+            didServerUrl: "http://localhost:5001/"
         },
-        alpha: {
-            appServerUrl: "https://dataserver.alpha.verida.io:5000/",
-            didServerUrl: "https://did.alpha.verida.io:5001/"
+        testnet: {
+            appServerUrl: "https://dataserver.testnet.verida.io:5000/",
+            didServerUrl: "https://did.testnet.verida.io:5001/"
         },
+        custom: {
+            appServerUrl: process.env.VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
+            didServerUrl: process.env.VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
+        }
     },
     datastores: {
         default: {
-            privacy: "private"
+            privacy: process.env.VERIDA_DATASTORES_DEFAULT_PRIVACY || "private"
         }
     },
     schemas: {
-        basePath: '/schemas/',
-        customPath: '/customSchemas/'
+        basePath: process.env.VERIDA_SCHEMAS_BASE_PATH || '/schemas/',
+        customPath: process.env.VERIDA_SCHEMAS_CUSTOM_PATH || '/customSchemas/'
     },
     vaultAppName: "Verida Vault"
-}
+};
+
+config.server = config.servers[config.environment];
+
+module.exports = config;

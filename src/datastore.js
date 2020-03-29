@@ -1,5 +1,6 @@
 /*eslint no-console: "off"*/
 import Database from "./database";
+import App from './app';
 const _ = require('lodash');
 
 /**
@@ -158,7 +159,7 @@ class DataStore {
             return;
         }
 
-        this.schema = await this._app.getSchema(this.schemaName);
+        this.schema = await App.getSchema(this.schemaName);
 
         let specification = await this.schema.getSpecification();
         let dbName = this.config.dbName ? this.config.dbName : specification.database.name;
@@ -169,8 +170,8 @@ class DataStore {
         //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);
         //_.merge(dataStoreConfig, this.config);
 
-        let keyring = await this._dataserver.getKeyring();
-        this._db = new Database(dbName, this.did, this.appName, this._dataserver, keyring, this.config);
+        console.log(this._dataserver);
+        this._db = new Database(dbName, this.did, this.appName, this._dataserver, this.config);
         let indexes = specification.database.indexes;
 
         if (indexes) {

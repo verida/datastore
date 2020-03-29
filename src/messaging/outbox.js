@@ -5,7 +5,7 @@ import VidHelper from '../helpers/vid';
 import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
-import Config from '../config';
+import App from '../app';
 
 class Outbox {
 
@@ -36,7 +36,7 @@ class Outbox {
 
         let defaults = {
             // By default send data to the user's official Verida Vault application
-            appName: Config.vaultAppName
+            appName: App.config.vaultAppName
         };
         config = _.merge(defaults, config);
 
@@ -45,7 +45,7 @@ class Outbox {
 
         this.validateData(type, data);
 
-        let vidDoc = await VidHelper.getByDid(did, receivingAppName, this._app.config.didServerUrl);
+        let vidDoc = await VidHelper.getByDid(did, receivingAppName);
         if(!vidDoc) {
             throw new Error("Unable to locate VID for "+receivingAppName);
         }
@@ -139,7 +139,7 @@ class Outbox {
         config = config ? config : {};
 
         let defaults = {
-            appName: Config.vaultAppName
+            appName: App.config.vaultAppName
         };
         config = _.merge(defaults, config);
 

@@ -1,13 +1,11 @@
 /*eslint no-console: "off"*/
 import Datastore from "./datastore";
 import Client from "./client";
-import Keyring from "./keyring";
-import { utils, ethers } from "ethers";
 import store from 'store';
-import vidHelper from './helpers/vid';
+import Keyring from './keyring';
 import _ from 'lodash';
 import Database from './database';
-import Config from './config';
+import App from './app';
 import crypto from 'crypto';
 import Utils from './utils';
 
@@ -15,41 +13,67 @@ const STORAGE_KEY = 'VERIDA_SESSION_';
 
 class DataServer {
 
-    constructor(app, config) {
-        this.app = app;
+    constructor(config) {
         let defaults = {
             datastores: {}
         };
         this.config = _.merge(defaults, config);
 
-        this.appName = config.appName ? config.appName : app.name;
-        this.appHost = config.appHost ? config.appHost : "localhost";
+        this.appName = config.appName ? config.appName : App.config.appName;
+        this.appHost = config.appHost ? config.appHost : App.config.appHost;
         this.serverUrl = config.serverUrl;
-        this.didUrl = config.didUrl;
         this.isProfile = config.isProfile ? config.isProfile : false;
 
         this._client = new Client(this);
-        
-        this._keyring = null;
-        this._signature = null;
-        this._dsn = null;
-        this._salt = null;
-        this._key = null;
 
+        // By default, dataserver access is public only
         this._publicCredentials = null;
-        this._datastores = {};
-        this._init = false;
+        this._datastores = {};  // @todo: difference if public v nonpublic?
+
+        this._user = null;
+        this._keyring = null;
         this._vid = null;
+        this._dsn = null;
+
+
+/*
+        // Database connection string to connect to this user's data server for this app
+        this._dsn = null;
+
+        // @todo can this be removed?
+        this._salt = null;
+
+        // default symetric encryption key for this dataserver
+        this._key = null;
+        
+        // VID for the connected user and application
+        this._vid = null;
+
+        // VID doc for the connected user and application
         this._vidDoc = null;
+
+        // Key that caches this dataserver credentials so they can be
+        // rebuilt with re-requesting a user's signature
+        this._storageKey = null;
+*/
     }
 
-    async connect(force) {
+    /**
+     * Authorize a user to have full permissions to this dataserver
+     * 
+     * @param {*} force 
+     */
+    async connect(user, force) {
+        if (this._userConfig && this._userConfig) {
+            return true;
+        }
+
         // Try to load config from local storage
-        this._storageKey = STORAGE_KEY + this.appName + this.app.user.did;
+        this._storageKey = STORAGE_KEY + this.appName + user.did;
         let config = store.get(this._storageKey);
         if (config) {
             this.unserialize(config);
-            this._init = true;
+            this._user = user;
             return true;
         }
         
@@ -57,25 +81,20 @@ class DataServer {
          * Force a connection
          */
         if (force) {
-            this._signature = await this.app.user.requestSignature(this.isProfile ? Config.vaultAppName : this.appName, this.isProfile ? "profile" : "default");
-            let user = await this._getUser();
+            // NOTE: removed the isProfile check. see user.requestSignature
+            let userConfig = await user.getAppConfig(this.appName);
+            let dsUser = await this._getUser(user, userConfig.keyring.signature);
             
             config = {
-                signature: this._signature,
-                dsn: user.dsn,
-                salt: user.salt
+                signature: userConfig.keyring.signature,
+                vid: userConfig.vid,
+                dsn: dsUser.dsn
             };
 
-            this.unserialize(config);
+            this.unserialize(config, user);
             store.set(this._storageKey, this.serialize());
-            this._vidDoc = await this.app.user.getAppVid(this.appName);
-            
-            if (!this._vidDoc) {
-                this._vidDoc = await vidHelper.save(this.app.user.did, this.appName, this.app.config.didServiceUrl, this._keyring, this.didUrl, this.serverUrl);
-            }
+            this._user = user;
 
-            this._vid = this._vidDoc.id;
-            this._init = true;
             return true;
         }
 
@@ -83,63 +102,56 @@ class DataServer {
     }
 
     /**
-     * Load an external data store (only requires limited fields)
-     * 
-     * TODO: Refactor into two types of dataservers (the current user's and external)
+     * Load an external data server
      */
     async loadExternal(config) {
         this._vid = config.vid;
-        this._keyring = config.keyring;
-        this._init = true;
     }
 
     logout() {
+        this._connected = false;
         store.remove(this._storageKey);
     }
 
     serialize() {
         return {
-            signature: this._signature,
+            signature: this._keyring.signature,
             dsn: this._dsn,
-            salt: this._salt,
-            publicCredentials: this._publicCredentials,
-            vid: this._vid
+            vid: this._vid,
+            publicCredentials: this._publicCredentials
         };
     }
 
-    unserialize(data) {
-        let user = this.app.user;
-        this._signature = data.signature;
+    /**
+     * 
+     * @param {*} data 
+     * @param {*} user 
+     */
+    unserialize(data, user) {
+        // configure user related config
+        this._keyring = new Keyring(data.signature);
+        this._vid = data.vid;
+        this._dsn = data.dsn;
 
         // configure client
-        this._client.username = user.did;
-        this._client.signature = this._signature;
-
-        // build keyring
-        const entropy = utils.sha256('0x' + this._signature.slice(2));
-        const seed = ethers.HDNode.mnemonicToSeed(ethers.HDNode.entropyToMnemonic(entropy));
-        this._keyring = new Keyring(seed);
-
-        this._dsn = data.dsn;
-        this._salt = data.salt;
-        this._key = this._keyring.symKey;
+        this._client.username = user ? user.did : null;
+        this._client.signature = data.signature;
         this._publicCredentials = data.publicCredentials;
-        this._vid = data.vid;
     }
 
-    async _getUser() {
-        let user = this.app.user;
-
+    async _getUser(user, signature) {
+        console.log("_getUser()");
+        console.log(this, user, signature);
         // Fetch user details from server
         let response;
         try {
             this._client.username = user.did;
-            this._client.signature = this._signature;
+            this._client.signature = signature;
             response = await this._client.getUser(user.did);
         } catch (err) {
             if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
                 // User doesn't exist, so create
-                response = await this._client.createUser(user.did, this._generatePassword(this._signature));
+                response = await this._client.createUser(user.did, this._generatePassword(signature));
             }
             else if (err.response && err.response.statusText == "Unauthorized") {
                 throw new Error("Invalid signature or permission to access DID server");
@@ -159,51 +171,78 @@ class DataServer {
         }
 
         let response = await this._client.getPublicUser();
-
         this._publicCredentials = response.data.user;
-
         return this._publicCredentials;
     }
 
-    async openDatabase(dbName, did, config) {
-        config = config ? config : {};
-        config.permissions = config.permissions ? config.permissions : {};
-
-        // If permissions require "owner" access, connect the current user
-        if (config.permissions.read == "owner" || config.permissions.write == "owner") {
-            if (!this._init) {
-                await this.connect(true);
-            }
-        }
-
-        // Default to user's did if not specified
-        did = did ? did : this.app.user.did;
-
-        config.isOwner = (did == this.app.user.did);
-
-        // TODO: Cache databases so we don't open the same one more than once
-        let keyring = await this.app.dataserver.getKeyring();
-        return new Database(dbName, did, this.appName, this, keyring, config);
-    }
-
-    async openDatastore(schemaName, did, config) {
-        did = did.toLowerCase();
+    /**
+     * 
+     * @param {*} dbName 
+     * @param {*} config 
+     */
+    async openDatabase(dbName, config) {
         config = _.merge({
             permissions: {
                 read: "owner",
                 write: "owner"
             },
-            isOwner: (did == this.app.user.did),
+            user: this._user,
+            did: this.config.did
         }, config);
 
+        // If permissions require "owner" access, connect the current user
+        if ((config.permissions.read == "owner" || config.permissions.write == "owner") && !config.readOnly) {
+            if (!config.readOnly && !config.user) {
+                throw new Error("Unable to open database. Permissions require \"owner\" access, but no user supplied in config.");
+            }
+
+            await this.connect(config.user, true);
+        }
+
+        // Default to user's did if not specified
+        let did = config.did;
+        if (config.user) {
+            did = config.did || config.user.did;
+            config.isOwner = (did == (config.user ? config.user.did : false));
+        }
+
+        did = did.toLowerCase();
+
+        // TODO: Cache databases so we don't open the same one more than once
+        return new Database(dbName, did, this.appName, this, config);
+    }
+
+    async openDatastore(schemaName, config) {
+        config = _.merge({
+            permissions: {
+                read: "owner",
+                write: "owner"
+            },
+            user: this._user,
+            did: this.config.did
+        }, config);
+
+        // Default to user's did if not specified
+        let did = config.did;
+        if (config.user) {
+            did = config.did || config.user.did;
+            config.isOwner = (did == (config.user ? config.user.did : false));
+        }
+
+        if (!did) {
+            throw new Error("No DID specified in config and no user connected");
+        }
+
+        did = did.toLowerCase();
+
         let datastoreName = config.dbName ? config.dbName : schemaName;
-        did = did ? did : this.app.user.did;
 
         let dsHash = Utils.md5FromArray([
             datastoreName,
             did,
             config.permissions.read,
-            config.permissions.write
+            config.permissions.write,
+            config.readOnly ? true : false
         ]);
 
         if (this._datastores[dsHash]) {
@@ -211,68 +250,55 @@ class DataServer {
         }
 
         // If permissions require "owner" access, connect the current user
-        if (config.permissions.read == "owner" || config.permissions.write == "owner") {
-            if (!this._init) {
-                await this.connect(true);
+        if ((config.permissions.read == "owner" || config.permissions.write == "owner") && !config.readOnly) {
+            if (!config.user) {
+                throw new Error("Unable to open database. Permissions require \"owner\" access, but no user supplied in config.");
             }
-        }
 
-        // merge config with this.config?
+            await this.connect(config.user, true);
+        }
 
         this._datastores[dsHash] = new Datastore(this, schemaName, did, this.appName, config);
         return this._datastores[dsHash];
     }
 
-    async getKey() {
-        if (!this._init) {
-            await this.connect(true);
+    /**
+     * Get the default symmetric encryption key
+     */
+    async getKey(user) {
+        if (!this._keyring) {
+            await this.connect(user, true);
         }
 
-        return this._key;
+        return this._keyring.symKey;
     }
 
-    async getHash() {
-        if (!this._init) {
-            await this.connect(true);
-        }
-
-        return this._hash;
-    }
-
-    async getSignature() {
+    /*async getSignature() {
         if (!this._init) {
             await this.connect(true);
         }
 
         return this._signature;
-    }
+    }*/
 
-    async getClient() {
-        if (!this._init) {
-            await this.connect(true);
+    async getClient(user) {
+        if (!this._keyring) {
+            await this.connect(user, true);
         }
 
         return this._client;
     }
 
-    async getDsn() {
-        if (!this._init) {
-            await this.connect(true);
+    async getDsn(user) {
+        if (!this._keyring) {
+            await this.connect(user, true);
         }
 
         return this._dsn;
     }
 
-    async getKeyring() {
-        if (!this._init) {
-            await this.connect(true);
-        }
-
-        return this._keyring;
-    }
-
-    _generatePassword() {
-        return crypto.createHash('sha256').update(this._signature).digest("hex");
+    _generatePassword(signature) {
+        return crypto.createHash('sha256').update(signature).digest("hex");
     }
 
 }

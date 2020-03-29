@@ -16,12 +16,12 @@ class Database extends EventEmitter {
      * 
      * **Do not instantiate directly.**
      */
-    constructor(dbName, did, appName, dataserver, keyring, config) {
+    constructor(dbName, did, appName, dataserver, config) {
         super();
         this.dbName = dbName;
         this.did = did.toLowerCase();
         this.appName = appName;
-        this.keyring = keyring;
+        this.user = config.user;
         this.dataserver = dataserver;
 
         this.config = config ? config : {};
@@ -344,6 +344,8 @@ class Database extends EventEmitter {
      * @todo Think about signing data and versions / insertedAt etc.
      */
     signData(data) {
+        this.user.signData(data, this.appName);
+        /*
         if (!data.signatures) {
             data.signatures = {};
         }
@@ -353,7 +355,7 @@ class Database extends EventEmitter {
         delete _data['_signatures'];
 
         let vid = VidHelper.getVidFromDid(this.did, this.appName);
-        data.signatures[vid] = this.keyring.sign(_data);
+        data.signatures[vid] = this.keyring.sign(_data);*/
     }
 
 }
