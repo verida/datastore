@@ -8,6 +8,7 @@
   * [Syncronization](sync.md)
   * [Demos](demos.md)
 * [Architecture](architecture.md)
+* [Frameworks](frameworks.md)
 * [API](http://apidocs.datastore.verida.io/)
 * Links
   * [- Discord Chat](https://discord.gg/qb6vS43)
