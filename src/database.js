@@ -102,7 +102,7 @@ class Database extends EventEmitter {
         }
 
         if (insert) {
-            this._beforeInsert(data);
+            await this._beforeInsert(data);
 
             /**
              * Fired before a new record is inserted.
@@ -112,7 +112,7 @@ class Database extends EventEmitter {
              */
             this.emit("beforeInsert", data);
         } else {
-            this._beforeUpdate(data);
+            await this._beforeUpdate(data);
 
             /**
              * Fired before a new record is updated.
@@ -280,16 +280,16 @@ class Database extends EventEmitter {
         }
     }
 
-    _beforeInsert(data) {
+    async _beforeInsert(data) {
         data._id = uuidv1();
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
-        this.signData(data);
+        await this.signData(data);
     }
 
-    _beforeUpdate(data) {
+    async _beforeUpdate(data) {
         data.modifiedAt = (new Date()).toISOString();
-        this.signData(data);
+        await this.signData(data);
     }
 
     _afterInsert(data, response) {}
@@ -343,19 +343,8 @@ class Database extends EventEmitter {
      * @param {*} data 
      * @todo Think about signing data and versions / insertedAt etc.
      */
-    signData(data) {
+    async signData(data) {
         this.user.signData(data, this.appName);
-        /*
-        if (!data.signatures) {
-            data.signatures = {};
-        }
-
-        let _data = _.merge({}, data);
-        delete _data['_signatures'];
-        delete _data['_signatures'];
-
-        let vid = VidHelper.getVidFromDid(this.did, this.appName);
-        data.signatures[vid] = this.keyring.sign(_data);*/
     }
 
 }
