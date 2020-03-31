@@ -72,7 +72,7 @@ class DataServer {
         this._storageKey = STORAGE_KEY + this.appName + user.did;
         let config = store.get(this._storageKey);
         if (config) {
-            this.unserialize(config);
+            this.unserialize(config, user);
             this._user = user;
             return true;
         }
@@ -140,8 +140,6 @@ class DataServer {
     }
 
     async _getUser(user, signature) {
-        console.log("_getUser()");
-        console.log(this, user, signature);
         // Fetch user details from server
         let response;
         try {
@@ -272,14 +270,6 @@ class DataServer {
 
         return this._keyring.symKey;
     }
-
-    /*async getSignature() {
-        if (!this._init) {
-            await this.connect(true);
-        }
-
-        return this._signature;
-    }*/
 
     async getClient(user) {
         if (!this._keyring) {
