@@ -30,28 +30,6 @@ class DataServer {
         this._keyring = null;
         this._vid = null;
         this._dsn = null;
-
-
-/*
-        // Database connection string to connect to this user's data server for this app
-        this._dsn = null;
-
-        // @todo can this be removed?
-        this._salt = null;
-
-        // default symetric encryption key for this dataserver
-        this._key = null;
-        
-        // VID for the connected user and application
-        this._vid = null;
-
-        // VID doc for the connected user and application
-        this._vidDoc = null;
-
-        // Key that caches this dataserver credentials so they can be
-        // rebuilt with re-requesting a user's signature
-        this._storageKey = null;
-*/
     }
 
     /**
@@ -96,27 +74,6 @@ class DataServer {
         this._connected = false;
         this._user.logout(this.appName);
     }
-
-    /*serialize() {
-        return {
-            signature: this._keyring.signature,
-            dsn: this._dsn,
-            vid: this._vid,
-            publicCredentials: this._publicCredentials
-        };
-    }
-
-    unserialize(data, user) {
-        // configure user related config
-        this._keyring = new Keyring(data.signature);
-        this._vid = data.vid;
-        this._dsn = data.dsn;
-
-        // configure client
-        this._client.username = user ? user.did : null;
-        this._client.signature = data.signature;
-        this._publicCredentials = data.publicCredentials;
-    }*/
 
     async getPublicCredentials() {
         if (this._publicCredentials) {
