@@ -59,8 +59,9 @@ class App {
      * 
      * @param {*} config 
      */
-    config(config) {
+    static setConfig(config) {
         App.config = _.merge({}, App.config, config);
+        App.config.server = App.config.servers[App.config.environment];
     }
 
     /**
@@ -74,7 +75,7 @@ class App {
             throw "Application datastore is already connected";
         }
 
-        let connected = await this.dataserver.connect(force);
+        let connected = await this.dataserver.connect(this.user, force);
         this._isConnected = connected;
         if (this._isConnected) {
             await this.inbox.init();
