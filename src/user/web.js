@@ -1,5 +1,10 @@
 const Web3 = require('web3');
+import App from '../app';
 import Base from './base';
+import store from 'store';
+import Keyring from "../keyring";
+
+const STORAGE_KEY = 'VERIDA_SESSION_';
 
 class WebUser extends Base {
 
@@ -24,6 +29,57 @@ class WebUser extends Base {
     async requestSignature(appName, accessType) {
         let signMessage = this._getSignMessage(appName, accessType);
         return await this.web3Provider.eth.personal.sign(signMessage, this.address);
+    }
+
+    saveToSession(appName) {
+        if (!this.appConfigs[appName]) {
+            return false;
+        }
+
+        let _storageKey = WebUser.getSessionKey(this.did, appName);
+        let data = {
+            signature: this.appConfigs[appName].keyring.signature,
+            vid: this.appConfigs[appName].vid
+        }
+
+        store.set(_storageKey, data);
+        return true;
+    }
+
+    restoreFromSession(appName) {
+        let _storageKey = WebUser.getSessionKey(this.did, appName);
+        let data = store.get(_storageKey);
+        if (data) {
+            this.appConfigs[appName] = {
+                keyring: new Keyring(data.signature),
+                vid: data.vid
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    static getSessionKey(did, appName) {
+        appName = appName || App.config.appName;
+        return STORAGE_KEY + appName + did;
+    }
+
+    static hasSessionKey(did, appName) {
+        let _storageKey = WebUser.getSessionKey(did, appName);
+        let data = store.get(_storageKey);
+
+        if (data) {
+            return true;
+        }
+
+        return false;
+    }
+
+    logout(appName) {
+        super.logout(appName);
+        let _storageKey = WebUser.getSessionKey(this.did, appName);
+        store.remove(_storageKey);
     }
 
 }

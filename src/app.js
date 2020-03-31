@@ -92,8 +92,20 @@ class App {
         this._isConnected = false;
     }
 
+    /**
+     * Determine if the current application instnace is connected
+     */
     async isConnected() {
         return await this.connect();
+    }
+
+    /**
+     * Determine if a web session exists for a given DID (indicates they can be autologgedin)
+     * 
+     * @param {*} did 
+     */
+    static async webSessionExists(did, appName) {
+        return WebUser.hasSessionKey(did, appName);
     }
 
     /**
@@ -208,7 +220,6 @@ class App {
      * @param {*} config 
      */
     static async buildDataserver(did, config) {
-        console.log(did);
         did = did.toLowerCase();
 
         config = _.merge({

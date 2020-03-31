@@ -35,9 +35,19 @@ class Base {
         return vidDoc.id;
     }
 
-    async getAppConfig(appName, signature) {
+    async getAppConfig(appName, force, signature) {
+        // Load from in memory cache
         if (this.appConfigs[appName]) {
             return this.appConfigs[appName];
+        }
+
+        // Load from localStorage
+        if (this.restoreFromSession(appName)) {
+            return this.appConfigs[appName];
+        }
+
+        if (!force) {
+            return false;
         }
 
         if (!signature) {
@@ -56,8 +66,18 @@ class Base {
             vid: vid
         };
 
+        this.saveToSession(appName);
         return this.appConfigs[appName];
     }
+
+    saveToSession(appName) {
+        return false;
+    }
+
+    restoreFromSession(appName) {
+        return false;
+    }
+    
 
     /**
      * Sign data as the current user
@@ -65,7 +85,7 @@ class Base {
      * @param {*} data 
      * @todo Think about signing data and versions / insertedAt etc.
      */
-    signData(data, appName) {
+    async signData(data, appName) {
         if (!data.signatures) {
             data.signatures = {};
         }
@@ -75,8 +95,12 @@ class Base {
         let _data = _.merge({}, data);
         delete _data['_signatures'];
 
-        let appConfig = this.getAppConfig(appName);
-        data.signatures[appConfig.vid] = this.keyring.sign(_data);
+        let appConfig = await this.getAppConfig(appName, true);
+        if (!appConfig) {
+            throw new Error("User not authorized to sign for \""+appName+"\"");
+        }
+
+        data.signatures[appConfig.vid] = appConfig.keyring.sign(_data);
     }
 
     /**
@@ -90,7 +114,7 @@ class Base {
             insertedAt: (new Date()).toISOString()
         }, config);
 
-        let userConfig = await this.getAppConfig(config.appName);
+        let userConfig = await this.getAppConfig(config.appName, true);
         let keyring = userConfig.keyring;
         let signer = didJWT.SimpleSigner(keyring.signKey.private);
 
@@ -108,6 +132,10 @@ class Base {
         });
 
         return jwt;
+    }
+
+    logout(appName) {
+        delete this.appConfigs[appName];
     }
 
     _getSignMessage(appName, accessType) {

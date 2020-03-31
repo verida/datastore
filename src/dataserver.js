@@ -1,15 +1,11 @@
 /*eslint no-console: "off"*/
 import Datastore from "./datastore";
 import Client from "./client";
-import store from 'store';
-import Keyring from './keyring';
 import _ from 'lodash';
 import Database from './database';
 import App from './app';
 import crypto from 'crypto';
 import Utils from './utils';
-
-const STORAGE_KEY = 'VERIDA_SESSION_';
 
 class DataServer {
 
@@ -68,37 +64,25 @@ class DataServer {
             return true;
         }
 
-        // Try to load config from local storage
-        this._storageKey = STORAGE_KEY + this.appName + user.did;
-        let config = store.get(this._storageKey);
-        if (config) {
-            this.unserialize(config, user);
-            this._user = user;
-            return true;
+        let userConfig = await user.getAppConfig(this.appName, force);
+        if (!userConfig) {
+            return false;
         }
         
-        /**
-         * Force a connection
-         */
-        if (force) {
-            // NOTE: removed the isProfile check. see user.requestSignature
-            let userConfig = await user.getAppConfig(this.appName);
-            let dsUser = await this._getUser(user, userConfig.keyring.signature);
-            
-            config = {
-                signature: userConfig.keyring.signature,
-                vid: userConfig.vid,
-                dsn: dsUser.dsn
-            };
+        // NOTE: removed the isProfile check. see user.requestSignature
+        
+        let dsUser = await this._getUser(user, userConfig.keyring.signature);
 
-            this.unserialize(config, user);
-            store.set(this._storageKey, this.serialize());
-            this._user = user;
+        this._keyring = userConfig.keyring;
+        this._vid = userConfig.vid;
+        this._dsn = dsUser.dsn;
 
-            return true;
-        }
-
-        return false;
+        // configure client
+        this._client.username = user.did;
+        this._client.signature = userConfig.keyring.signature;
+        
+        this._user = user;
+        return true;
     }
 
     /**
@@ -110,10 +94,10 @@ class DataServer {
 
     logout() {
         this._connected = false;
-        store.remove(this._storageKey);
+        this._user.logout(this.appName);
     }
 
-    serialize() {
+    /*serialize() {
         return {
             signature: this._keyring.signature,
             dsn: this._dsn,
@@ -122,11 +106,6 @@ class DataServer {
         };
     }
 
-    /**
-     * 
-     * @param {*} data 
-     * @param {*} user 
-     */
     unserialize(data, user) {
         // configure user related config
         this._keyring = new Keyring(data.signature);
@@ -137,31 +116,7 @@ class DataServer {
         this._client.username = user ? user.did : null;
         this._client.signature = data.signature;
         this._publicCredentials = data.publicCredentials;
-    }
-
-    async _getUser(user, signature) {
-        // Fetch user details from server
-        let response;
-        try {
-            this._client.username = user.did;
-            this._client.signature = signature;
-            response = await this._client.getUser(user.did);
-        } catch (err) {
-            if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
-                // User doesn't exist, so create
-                response = await this._client.createUser(user.did, this._generatePassword(signature));
-            }
-            else if (err.response && err.response.statusText == "Unauthorized") {
-                throw new Error("Invalid signature or permission to access DID server");
-            }
-            else {
-                // Unknown error
-                throw err;
-            }
-        }
-
-        return response.data.user;
-    }
+    }*/
 
     async getPublicCredentials() {
         if (this._publicCredentials) {
@@ -248,7 +203,7 @@ class DataServer {
         }
 
         // If permissions require "owner" access, connect the current user
-        if ((config.permissions.read == "owner" || config.permissions.write == "owner") && !config.readOnly) {
+        if ((config.permissions.read == "owner" || config.permissions.write == "owner") && !(config.readOnly === true)) {
             if (!config.user) {
                 throw new Error("Unable to open database. Permissions require \"owner\" access, but no user supplied in config.");
             }
@@ -257,6 +212,7 @@ class DataServer {
         }
 
         this._datastores[dsHash] = new Datastore(this, schemaName, did, this.appName, config);
+
         return this._datastores[dsHash];
     }
 
@@ -289,6 +245,30 @@ class DataServer {
 
     _generatePassword(signature) {
         return crypto.createHash('sha256').update(signature).digest("hex");
+    }
+
+    async _getUser(user, signature) {
+        // Fetch user details from server
+        let response;
+        try {
+            this._client.username = user.did;
+            this._client.signature = signature;
+            response = await this._client.getUser(user.did);
+        } catch (err) {
+            if (err.response && err.response.data.data && err.response.data.data.did == "Invalid DID specified") {
+                // User doesn't exist, so create
+                response = await this._client.createUser(user.did, this._generatePassword(signature));
+            }
+            else if (err.response && err.response.statusText == "Unauthorized") {
+                throw new Error("Invalid signature or permission to access DID server");
+            }
+            else {
+                // Unknown error
+                throw err;
+            }
+        }
+
+        return response.data.user;
     }
 
 }
