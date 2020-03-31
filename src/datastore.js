@@ -170,7 +170,6 @@ class DataStore {
         //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);
         //_.merge(dataStoreConfig, this.config);
 
-        console.log(this._dataserver);
         this._db = new Database(dbName, this.did, this.appName, this._dataserver, this.config);
         let indexes = specification.database.indexes;
 

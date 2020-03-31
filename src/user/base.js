@@ -1,6 +1,7 @@
 import VidHelper from '../helpers/vid';
 import Keyring from "../keyring";
 import App from '../app';
+const _ = require('lodash');
 
 class Base {
 
@@ -46,8 +47,6 @@ class Base {
         if (!signature) {
             throw new Error("Unable to obtain signature from user");
         }
-
-        console.log("sig", signature);
 
         let keyring = new Keyring(signature);
         let vid = await this.getAppVid(appName, keyring, this.serverUrl);
