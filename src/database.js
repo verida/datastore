@@ -161,12 +161,11 @@ class Database extends EventEmitter {
         await this._init();
 
         let defaults = {
-            sort: [],
             limit: 20
         }
 
         options = _.merge(defaults, options);
-        filter = this.applySortFix(filter, options.sort);
+        filter = this.applySortFix(filter, options.sort || {});
 
         let raw = options.raw || false;
         delete options['raw'];
