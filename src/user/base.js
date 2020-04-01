@@ -2,6 +2,7 @@ import VidHelper from '../helpers/vid';
 import Keyring from "../keyring";
 import App from '../app';
 const _ = require('lodash');
+import didJWT from 'did-jwt';
 
 class Base {
 
