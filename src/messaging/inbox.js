@@ -125,14 +125,14 @@ class Inbox extends EventEmitter {
         if (!isConnected) {
             throw "Verida application isn't connected";
         }
-console.log("opening public inbox");
+
         this._publicInbox = await this._app.openDatastore("inbox/item", {
             permissions: {
                 read: "public",
                 write: "public"
             }
         });
-        console.log("opening private inbox");
+        
         this._privateInbox = await this._app.openDatastore("inbox/entry", {
             permissions: {
                 read: "owner",
