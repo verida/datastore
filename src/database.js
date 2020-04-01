@@ -153,58 +153,40 @@ class Database extends EventEmitter {
     /**
      * Get many rows from the database.
      * 
-     * @param {*} filter 
-     * @param {*} options 
+     * @param {object} filter Optional query filter matching CouchDB find() syntax.
+     * @param {object} options Options passed to CouchDB find().
+     * @param {object} options.raw Returns the raw CouchDB result, otherwise just returns the documents
      */
     async getMany(filter, options) {
         await this._init();
 
         let defaults = {
-            include_docs: true,
             sort: [],
             limit: 20
         }
+
+        let raw = options.raw || false;
+        delete options['raw'];
 
         options = _.merge(defaults, options);
         filter = this.applySortFix(filter, options.sort);
         
         if (filter) {
-            let request = {
-                selector: filter,
-            };
-
-            if (options.sort.length) {
-                request.sort = options.sort;
-            }
-
-            if (options.limit) {
-                request.limit = options.limit;
-            }
-
-            if (options.use_index) {
-                request.use_index = options.use_index;
-            }
-
-            try {
-                let docs = await this._db.find(request);
-                if (docs) {
-                    return docs.docs;
-                }
-            } catch (err) {
-                console.log(err);
-            }
-
-            return;
+            options.selector = _.merge(options.selector, filter);
         }
-        else {
-            let docs = await this._db.allDocs(options);
 
+        try {
+            console.log(JSON.stringify(options));
+
+            let docs = await this._db.find(options);
             if (docs) {
-                return docs.rows;
+                return raw ? docs : docs.docs;
             }
-
-            return;
+        } catch (err) {
+            console.log(err);
         }
+
+        return;
     }
 
     async delete(doc, options) {
