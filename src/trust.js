@@ -8,8 +8,9 @@ class Trust {
     }
 
     /**
+     * Decode a DID-JWT
      * 
-     * @param {*} didJwt 
+     * @param {string} didJwt 
      */
     decodeDidJwt(didJwt) {
         return didJWT.decodeJWT(didJwt);
@@ -18,8 +19,7 @@ class Trust {
     /**
      * Get a list of the profiles that signed a piece of data
      * 
-     * @param {*} data 
-     * @todo
+     * @param {object} data 
      */
     async getSigners(data) {
         if (!data.signatures) {
@@ -37,10 +37,10 @@ class Trust {
 
     /**
      * 
-     * @param {*} data 
-     * @param {*} did 
-     * @param {*} signature 
-     * @todo
+     * @param {object} data 
+     * @param {string} did 
+     * @param {string} signature 
+     * @todo Implement
      */
     verifySignature(data, did, signature) {
         return true;
