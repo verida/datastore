@@ -165,19 +165,17 @@ class Database extends EventEmitter {
             limit: 20
         }
 
-        let raw = options.raw || false;
-        delete options['raw'];
-
         options = _.merge(defaults, options);
         filter = this.applySortFix(filter, options.sort);
+
+        let raw = options.raw || false;
+        delete options['raw'];
         
         if (filter) {
             options.selector = _.merge(options.selector, filter);
         }
 
         try {
-            console.log(JSON.stringify(options));
-
             let docs = await this._db.find(options);
             if (docs) {
                 return raw ? docs : docs.docs;
