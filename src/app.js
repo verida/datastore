@@ -39,7 +39,7 @@ class App {
         if (process.browser) {
             this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
         } else {
-            this.user = new ServerUser(config.chain, config.address, appServerUrl || App.config.server.appServerUrl, config.privateKey);
+            this.user = new ServerUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.privateKey);
         }
 
         this.outbox = new Outbox(this);
