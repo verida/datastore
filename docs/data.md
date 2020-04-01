@@ -85,6 +85,33 @@ console.log(results);
 
 ?>See [Datastore.getMany()](http://apidocs.datastore.verida.io/DataStore.html#getMany)
 
+#### Pagination
+
+The underlying database is based on CouchDB which doesn't provide a way to count the total number of results. Instead it uses a `bookmark` property that can be used to fetch the next page of results.
+
+This can be used as follows:
+
+```
+let filter = {
+  organization: 'Google'
+};
+
+// Configure our page size (20), start position (0) and request to return the
+// raw result set, which will provide us with a `bookmark` we can use to fetch
+// the next page of results.
+let options = {
+  limit: 20,
+  raw: true
+};
+
+let page1 = contactsDs.getMany(filter, options);
+console.log(page1.docs);
+
+// Request the next 
+options.bookmark = page1.bookmark;
+let page2 = contactsDs.getMany(filter, options);
+```
+
 ### Saving
 
 ```
