@@ -16,10 +16,18 @@ Create an application instance and ask the user to authorize your application:
 import Verida from '@verida/datastore';
 
 // Fetch the users web3Provider and address
-const web3Provider = await Verida.WalletHelper.connectWeb3('ethr');
-const address = await Verida.WalletHelper.getAddress('ethr');
+const web3Provider = await Verida.Helpers.wallet.connectWeb3('ethr');
+const address = await Verida.Helpers.wallet.getAddress('ethr');
 
-let app = new Verida('Your Application Name', 'ethr', address, web3Provider);
+Verida.setConfig({
+  appName: 'Your Application Name'
+});
+
+let app = new Verida({
+    chain: 'ethr',
+    address: address,
+    web3Provider: web3Provider
+});
 ```
 
 At this point, the user will be asked to connect Metamask to your application (if they haven't already).
@@ -28,7 +36,7 @@ You now have an application instance that allows you to create databases, access
 
 See [App API Docs](http://apidocs.datastore.verida.io/App.html) for additional configuration options.
 
-?>Note: You don't have to use the rather basic `Verida.WalletHelper`, it's possible to use your own code to locate the user's web3Provider and address.
+?>Note: You don't have to use the rather basic `Verida.Helpers.wallet`, it's possible to use your own code to locate the user's web3Provider and address.
 
 ### Authorize Application
 

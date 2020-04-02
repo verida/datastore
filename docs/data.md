@@ -1,6 +1,6 @@
 # Data
 
-TODO: Describe the datastore
+This section demonstrates how Databases and Datastores work in Verida.
 
 ## Databases
 
@@ -33,6 +33,8 @@ It's possible to create public databases and connect to other user's public data
 
 ?>See [Permissions](#Permissions), [App.openDatabase()](http://apidocs.datastore.verida.io/App.html#openDatastore), [Database.getMany()](http://apidocs.datastore.verida.io/Database.html#getInstance) for configuration details.
 
+!>We **DO NOT** recommended using databases directly. You are better off using Datastores to ensure your data is validated against a schema and can be interoperable with other applications.
+
 ## Datastores
 
 In a world where users own their own data, it's important their data is portable between applications. Otherwise we end up with the current situation of data silos, where user data is scatterred across lots of different applications.
@@ -42,8 +44,6 @@ Verida solves this problem by creating databases with a defined schema, called `
 Using schemas also ensures data is validated before saving. This ensures data is of the correct format and required fields are defined.
 
 See [Schemas](/Schemas.html) for details on how the **standard** Datastore schemas provided and how to build custom schemas for your application.
-
-?>It is **highly** recommended application developers strive to create appropriate schemas, instead of using schemaless databases.
 
 ### Open a Datastore
 
@@ -113,6 +113,8 @@ let page2 = contactsDs.getMany(filter, options);
 ```
 
 ### Saving
+
+Use the [save()](http://apidocs.datastore.verida.io/global.html#DataStore#save) method to save new records to a database or datastore. If the `save()` fails, you can find an array of errors in the `.errors` property.
 
 ```
 let contactsDs = await app.openDatastore('social/contact');
@@ -222,9 +224,9 @@ let pouchDb = await db.getInstance();
 
 TBA
 
-### Watching for changes
+### Realtime changes
 
-Once a `datastore` or `database` is opened, you can
+Once a `datastore` or `database` is opened, you can bind to the `change` event that fires everytime data changes on the underlying database.
 
 ```
 let db = await datastore.getDb();

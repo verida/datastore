@@ -104,18 +104,66 @@ There is a **very** basic `social/contact` schema provided in the core schemas:
 
 Note the use of `allOf`. That is a native JSON Schema property that combines the base schema (`/schemas/base/schema.json`) with the properties unique for this schema. All custom schemas must include this, to ensure the base schema properties are included in the custom schema.
 
-## Creating New Schemas
+## Creating Schemas
 
-TBA
+You can create your own schemas in a `schema.json` file and publish it to your website.
+
+Here's an example custom schema for a note:
+
+```
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "/general/note/schema.json",
+    "name": "general/note",
+    "title": "Note",
+    "description": "A simple text note",
+    "type": "object",
+    "database": {
+        "name": "general_note",
+        "indexes": {
+            "insertedAt": ["insertedAt"]
+        }
+    },
+    "allOf": [
+        {"$ref": "https://schemas.testnet.verida.io/core/base/schema.json"},
+        {
+            "properties": {
+                "title": {
+                    "title": "Title",
+                    "description": "Title for the note"
+                    "type": "string"
+                },
+                "body": {
+                    "title": "Body",
+                    "description": "Main body content for the note",
+                    "type": "string"
+                },
+                "tags": {
+                    "title": "Tags",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": ["title", "body"]
+        }
+    ]
+  }
+```
+
+By default, the Verida Datastore looks in `/schemas/custom/` for any custom schemas. In this case, make the file available at `http://<your host>/schemas/custom/general/note/schema.json`.
+
+You can then open a new datastore using this schema with:
+
+```
+let datastore = app.openDatastore('general/note')
+```
 
 ## Versioning
 
-TBA
+Schemas do not currently support versioning. We are looking to address this in the near future.
 
 ## Migration
 
-TBA
-
-Be agile.
-
-[ previous ] [ current ] [ draft ]
+Schemas do not currently support migration. We are investigating ways to build an agile migration strategy into the architecture to help improve the process of defining data standards.

@@ -49,17 +49,25 @@ Create an application instance and ask the user to authorize your application:
 import Verida from '@verida/datastore';
 
 // Fetch the users web3Provider and address
-const web3Provider = await Verida.WalletHelper.connectWeb3('ethr');
-const address = await Verida.WalletHelper.getAddress('ethr');
+const web3Provider = await Verida.Helpers.wallet.connectWeb3('ethr');
+const address = await Verida.Helpers.wallet.getAddress('ethr');
 
-let app = new Verida('Your Application Name', 'ethr', address, web3Provider);
+Verida.setConfig({
+  appName: 'Your Application Name'
+});
+
+let app = new Verida({
+    chain: 'ethr',
+    address: address,
+    web3Provider: web3Provider
+});
 ```
 
 At this point, the user will be asked to connect Metamask to your application (if they haven't already).
 
 You now have an application instance that allows you to create databases, access other user's public profiles and receive data via the user's application inbox.
 
-?>Note: You don't have to use the rather basic `Verida.WalletHelper`, it's possible to use your own code to locate the user's web3Provider and address.
+?>Note: You don't have to use the rather basic `Verida.Helpers.wallet` to obtain a web3Provider. You can use your own code or other third party libraries to facilitate this.
 
 ### Authorize Application
 
@@ -123,28 +131,7 @@ let contacts = await contactsDs.getMany();
 console.log(contacts);
 ```
 
-### Syncing a Datastore
-
-In the above example we have created a private, encrypted database in the context of our application. While, we're using a common `social/contact` schema, the data is still trapped within this application.
-
-This data needs to be syncronized with any other contacts the user has. In this way, our application can instantly be populated with the user's existing contacts and **also** make changes to the user's contact list that will propogate across all other applications using the same `social/contact` datastore.
-
-!>Example coming soon
-
-## Getting a Public Profile
-
-All users have a public profile that provides basic information (ie: name, avatar).
-
-```
-// Specify the DID of the user
-let did = 'did:ethr:0x...';
-let profile = await app.openProfile(did);
-
-let allData = await profile.getMany();
-let firstName = await profile.get('name');
-```
-
-?>This is entirely optional &mdash; Users can remain anonymous by not entering any public profile information.
+?>[Learn more about databases and datastores](/data)
 
 ### Receive Inbox Messages
 

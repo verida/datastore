@@ -1,6 +1,7 @@
 * [Welcome](/)
 * [Guide](guide.md)
   * [Initialization](initialization.md)
+  * [Configuration](configuration.md)
   * [Identity](identity.md)
   * [Data](data.md)
   * [Schemas](schemas.md)
