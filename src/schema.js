@@ -18,7 +18,6 @@ class Schema {
      * @constructor
      */
     constructor(path) {
-        this._config = App.config.schemas;
         this.path = path;
         this.errors = [];
 
@@ -94,14 +93,14 @@ class Schema {
 
         // Try to resolve the path as being "custom"
 
-        let tmpPath1 = this._config.customPath + path;
+        let tmpPath1 = App.config.schemas.customSchemasPath + path;
         let exists = await urlExists(tmpPath1);
         if (exists) {
             return tmpPath1;
         }
 
         // Try to resolve the path as being "base"
-        let tmpPath2 = this._config.basePath + path;
+        let tmpPath2 = App.config.server.baseSchemas + path;
         exists = await urlExists(tmpPath2);
         if (exists) {
             return tmpPath2;

@@ -102,7 +102,8 @@ class App {
     /**
      * Determine if a web session exists for a given DID (indicates they can be autologgedin)
      * 
-     * @param {*} did 
+     * @param {string} did User's DID
+     * @param {string} appName Application name
      */
     static async webSessionExists(did, appName) {
         return WebUser.hasSessionKey(did, appName);
