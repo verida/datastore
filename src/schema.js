@@ -93,7 +93,7 @@ class Schema {
 
         // Try to resolve the path as being "custom"
 
-        let tmpPath1 = App.config.schemas.customSchemasPath + path;
+        let tmpPath1 = App.config.customSchemasPath + path;
         let exists = await urlExists(tmpPath1);
         if (exists) {
             return tmpPath1;
