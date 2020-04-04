@@ -64,9 +64,14 @@ class Outbox {
         let outbox = await this.getOutboxDatastore();
         let response = await outbox.save(outboxEntry);
 
-        if (!response.ok === true) {
-            console.error(response);
-            throw new "Unable to save to outbox";
+        if (!response) {
+            console.error(outbox.errors);
+            throw new Error("Unable to save to outbox. See error log above.");
+        }
+
+        if (response.ok !== true) {
+            console.error(outbox.errors);
+            throw new Error("Unable to save to outbox. See error log above.");
         }
 
         // Include the outbox _id and _rev so the recipient user
