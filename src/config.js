@@ -28,6 +28,7 @@ let config = {
     },
     datastores: {},
     customSchemasPath: process.env.VERIDA_SCHEMAS_CUSTOM_PATH || '/schemas/custom/',
+    baseSchemasPath: process.env.VERIDA_SCHEMAS_BASE_PATH,
     vaultAppName: "Verida Vault"
 };
 

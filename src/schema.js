@@ -100,7 +100,8 @@ class Schema {
         }
 
         // Try to resolve the path as being "base"
-        let tmpPath2 = App.config.server.baseSchemas + path;
+        let baseSchemaPath = App.config.baseSchemasPath || App.config.server.baseSchemas
+        let tmpPath2 = baseSchemaPath + path;
         exists = await urlExists(tmpPath2);
         if (exists) {
             return tmpPath2;
