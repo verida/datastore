@@ -77,14 +77,14 @@ class DataStore {
      */
     async save(data, options) {
         await this._init();
+
+        data.schema = this.schemaPath;
         let valid = await this.schema.validate(data);
 
         if (!valid) {
             this.errors = this.schema.errors;
             return false;
         }
-
-        data.schema = this.schemaPath;
         return this._db.save(data, options);
     }
 

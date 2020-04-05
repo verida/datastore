@@ -37,6 +37,7 @@ class Base {
     }
 
     async getAppConfig(appName, force, signature) {
+        appName = appName || App.config.appName;
         // Load from in memory cache
         if (this.appConfigs[appName]) {
             return this.appConfigs[appName];

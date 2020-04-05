@@ -56,7 +56,7 @@ class Outbox {
             message: message,
             sentTo: {
                 did: did,
-                vid: vidDoc.id
+                vid: String(vidDoc.id)
             },
             sent: false
         }
@@ -85,7 +85,8 @@ class Outbox {
          */
         // Use the current application's keyring as we can't request access to
         // the user's private vault
-        let keyring = await this._app.dataserver.getKeyring();
+        let appUserConfig = await this._app.user.getAppConfig();
+        let keyring = appUserConfig.keyring;
         let signer = didJWT.SimpleSigner(keyring.signKey.private);
         let userVid = await this._app.user.getAppVid(sendingAppName);
 
@@ -154,12 +155,16 @@ class Outbox {
         }
 
         // Build dataserver connecting to the recipient user's inbox
-        let dataserver = await this._app.buildDataserver(did, config);
+        let dataserver = await App.buildDataserver(did, config);
         let inbox = new Datastore(dataserver, "inbox/item", did, config.appName, {
             permissions: {
                 read: "public",
                 write: "public"
-            }
+            },
+            isOwner: false,
+            // Sign data as this user and application
+            signUser: this._app.user,
+            signAppName: App.config.appName
         });
 
         this._inboxes[key] = inbox;

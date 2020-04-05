@@ -36,7 +36,8 @@ class Inbox extends EventEmitter {
         
         // Build the shared key using this user's private asymmetric key
         // and the user supplied public key
-        let keyring = await this._app.dataserver.getKeyring();
+        let appUserConfig = await this._app.user.getAppConfig();
+        let keyring = appUserConfig.keyring;
         let publicKeyBytes = Buffer.from(inboxItem.key.slice(2), 'hex');
         let sharedKeyEnd = box.before(publicKeyBytes, keyring.asymKey.privateBytes);
 

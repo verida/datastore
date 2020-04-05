@@ -7,7 +7,6 @@ const _ = require('lodash');
 
 import EncryptedDatabase from "./databases/encrypted";
 import PublicDatabase from "./databases/public";
-import VidHelper from "./helpers/vid";
 
 class Database extends EventEmitter {
 
@@ -21,7 +20,15 @@ class Database extends EventEmitter {
         this.dbName = dbName;
         this.did = did.toLowerCase();
         this.appName = appName;
+
+        // User will be the user who owns this database
+        // Will be null if the user isn't the current user
+        // (ie: for a public / external database)
         this.user = config.user;
+
+        // Signing user will be the logged in user
+        this.signUser = config.signUser || config.user;
+        this.signAppName = config.signAppName || this.appName;
         this.dataserver = dataserver;
 
         this.config = config ? config : {};
@@ -160,6 +167,7 @@ class Database extends EventEmitter {
     async getMany(filter, options) {
         await this._init();
 
+        filter = filter || {};
         let defaults = {
             limit: 20
         }
@@ -228,8 +236,8 @@ class Database extends EventEmitter {
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
-                let encryptionKey = await this.dataserver.getKey();
-                let remoteDsn = await this.dataserver.getDsn();
+                let encryptionKey = await this.dataserver.getKey(this.user);
+                let remoteDsn = await this.dataserver.getDsn(this.user);
                 let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._db = await db.getDb();
             } catch (err) {
@@ -323,7 +331,11 @@ class Database extends EventEmitter {
      * @todo Think about signing data and versions / insertedAt etc.
      */
     async signData(data) {
-        this.user.signData(data, this.appName);
+        if (!this.signUser) {
+            throw new Error("Unable to sign data. No signing user specified.");
+        }
+
+        this.signUser.signData(data, this.signAppName);
     }
 
 }
