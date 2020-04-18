@@ -7,6 +7,7 @@ import VeridaSchema from "./schema";
 import DataServer from './dataserver';
 import Inbox from "./messaging/inbox";
 import Outbox from "./messaging/outbox";
+import Credentials from "./credentials";
 import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import Profile from './profile';
@@ -45,6 +46,7 @@ class App {
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
         this.trust = new Trust(this);
+        this.credentials = new Credentials(this);
 
         this.dataserver = new DataServer({
             datastores: config.datastores,
