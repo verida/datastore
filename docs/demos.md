@@ -47,18 +47,7 @@ npm run serve:receipt-demo
 
 ## Health (health-demo)
 
-This demo shows:
-
-- Requesting access to a client's health note history
-- Creating a new health note and syncronizing
-- Sending the client a Digital Prescription
-- Redeeming a Digital Prescription at a pharmacy
-
-How to run the demo:
-
-```
-npm run serve:health-demo
-```
+Coming soon
 
 ## Contacts
 
