@@ -9,8 +9,9 @@ import Inbox from "./messaging/inbox";
 import Outbox from "./messaging/outbox";
 import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
+import TrustHelper from './helpers/trust';
+import CredentialsHelper from './helpers/credentials';
 import Profile from './profile';
-import Trust from './trust';
 
 const _ = require('lodash');
 
@@ -44,7 +45,6 @@ class App {
 
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
-        this.trust = new Trust(this);
 
         this.dataserver = new DataServer({
             datastores: config.datastores,
@@ -264,7 +264,9 @@ class App {
 
 App.Helpers = {
     vid: VidHelper,
-    wallet: WalletHelper
+    wallet: WalletHelper,
+    trust: TrustHelper,
+    credentials: CredentialsHelper
 };
 
 export default App;

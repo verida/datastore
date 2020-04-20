@@ -24,18 +24,20 @@ class VidHelper {
         doc.addPublicKey({
             id: `${vid}#asym`,
             type: 'Curve25519EncryptionPublicKey',
-            publicKeyHex: publicKeys.asymmetric
+            publicKeyHex: publicKeys.asymmetric,
+            publicKeyBase64: publicKeys.asymmetricBase64
         });
 
         doc.addPublicKey({
             id: `${vid}#sign`,
-            type: 'Secp256k1VerificationKey2018',
-            publicKeyHex: publicKeys.sign
+            type: 'ED25519SignatureVerification',
+            publicKeyHex: publicKeys.sign,
+            publicKeyBase64: publicKeys.signBase64
         });
 
         doc.addAuthentication({
             publicKey: `${vid}#sign`,
-            type: 'Secp256k1SignatureAuthentication2018'
+            type: 'ED25519SignatureAuthentication'
         });
 
         doc.addService({
@@ -104,3 +106,13 @@ class VidHelper {
 
 let vidHelper = new VidHelper();
 export default vidHelper;
+
+export function getResolver() {
+    async function resolve(vid, parsed, didResolver) {
+        return await App.Helpers.vid.getByVid(vid);
+    }
+
+    return {
+        vid: resolve
+    }
+}

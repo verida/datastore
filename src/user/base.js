@@ -128,7 +128,7 @@ class Base {
             veridaApp: config.appName,
             insertedAt: config.insertedAt
         }, {
-            alg: 'ES256K-R',
+            alg: 'Ed25519',
             issuer: this.did,
             signer
         });

@@ -50,12 +50,17 @@ class Keyring {
     }
 
     exportPublicKeys() {
-        return {
+        let keys = {
             asymmetric: this.asymKey.public,
-            asymmetricBytes: decodeUTF8(this.asymKey.public),
+            asymmetricBytes: this.asymKey.publicBytes,
             sign: this.signKey.public,
-            signBytes: decodeUTF8(this.signKey.public)
-        }
+            signBytes: this.signKey.publicBytes
+        };
+
+        keys.asymmetricBase64 = encodeBase64(keys.asymmetricBytes);
+        keys.signBase64 = encodeBase64(keys.signBytes);
+
+        return keys;
     }
 
     _generateKeyPair(hdNode, method) {
