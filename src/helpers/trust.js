@@ -1,18 +1,15 @@
 import _ from 'lodash';
 import didJWT from 'did-jwt';
+import Verida from '../app';
 
 class Trust {
-
-    constructor(app) {
-        this._app = app;
-    }
 
     /**
      * Decode a DID-JWT
      * 
      * @param {string} didJwt 
      */
-    decodeDidJwt(didJwt) {
+    static decodeDidJwt(didJwt) {
         return didJWT.decodeJWT(didJwt);
     }
 
@@ -21,14 +18,14 @@ class Trust {
      * 
      * @param {object} data 
      */
-    async getSigners(data) {
+    static async getSigners(data) {
         if (!data.signatures) {
             return [];
         }
 
         let signers = [];
         for (let did in data.signatures) {
-            let profile = await this.app.openProfile(did);
+            let profile = await Verida.openProfile(did);
             signers[did] = profile;
         }
 
@@ -42,7 +39,7 @@ class Trust {
      * @param {string} signature 
      * @todo Implement
      */
-    verifySignature(data, did, signature) {
+    static verifySignature(data, did, signature) {
         return true;
     }
 

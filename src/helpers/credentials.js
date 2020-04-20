@@ -1,14 +1,10 @@
 import didJWT from 'did-jwt';
 import { createVerifiableCredential, createPresentation, verifyPresentation, verifyCredential } from 'did-jwt-vc';
 import { Resolver } from 'did-resolver';
-import { getResolver } from './helpers/vid';
+import { getResolver } from './vid';
 import { encodeBase64 } from "tweetnacl-util";
 
 class Credentials {
-
-    constructor(app) {
-        this._app = app;
-    }
 
     /*credential = {
         "@context": [
@@ -24,13 +20,10 @@ class Credentials {
             "alumniOf": "Example University"
         }
     };*/
-    async createVerifiableCredential(credential) {
-        let issuer = await this._getIssuer();
-
+    static async createVerifiableCredential(credential, issuer) {
         // Create the payload
         const vcPayload = {
             sub: issuer.did,
-            nbf: 1562950282,
             vc: credential
         };
 
@@ -38,9 +31,7 @@ class Credentials {
         return await createVerifiableCredential(vcPayload, issuer);
     }
 
-    async createVerifiablePresentation(vcJwts) {
-        let issuer = await this._getIssuer();
-
+    static async createVerifiablePresentation(vcJwts, issuer) {
         const vpPayload = {
             vp: {
                 '@context': ['https://www.w3.org/2018/credentials/v1'],
@@ -52,19 +43,19 @@ class Credentials {
         return createPresentation(vpPayload, issuer);
     }
 
-    async verifyPresentation(vpJwt) {
-        let resolver = this._getResolver();
+    static async verifyPresentation(vpJwt) {
+        let resolver = Credentials._getResolver();
         return verifyPresentation(vpJwt, resolver);
     }
 
-    async verifyCredential(vcJwt) {
-        let resolver = this._getResolver();
+    static async verifyCredential(vcJwt) {
+        let resolver = Credentials._getResolver();
         return verifyCredential(vcJwt, resolver);
     }
 
-    async _getIssuer() {
+    static async createIssuer(user) {
         // Get the current user's keyring
-        const appConfig = await this._app.user.getAppConfig();
+        const appConfig = await user.getAppConfig();
         let keyring = appConfig.keyring;
 
         let privateKey = encodeBase64(keyring.signKey.privateBytes);
@@ -79,7 +70,7 @@ class Credentials {
         return issuer;
     }
 
-    _getResolver() {
+    static _getResolver() {
         return new Resolver(getResolver());
     }
 
