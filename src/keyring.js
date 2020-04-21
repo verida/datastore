@@ -21,15 +21,16 @@ class Keyring {
 
     /**
      * Create a new Keyring for an application.
-     * 
+     *
      * @ignore
-     * @param {string} seed Hex string of the seed generated from a message signed by the users's on chain account
+     * @param signature
      */
     constructor(signature) {
         this.signature = signature;
-        
+
         const entropy = utils.sha256('0x' + signature.slice(2));
-        const seed = ethers.HDNode.mnemonicToSeed(ethers.HDNode.entropyToMnemonic(entropy));
+        const mnemonic = ethers.HDNode.entropyToMnemonic(entropy);
+        const seed = ethers.HDNode.mnemonicToSeed(mnemonic);
 
         const seedNode = ethers.HDNode.fromSeed(seed);
         const baseNode = seedNode.derivePath(BASE_PATH);
@@ -65,7 +66,7 @@ class Keyring {
 
     _generateKeyPair(hdNode, method) {
         let seed = Buffer.from(hdNode.privateKey.slice(2), 'hex');
-        
+
         let keyPair;
         switch (method) {
             case 'sign':
@@ -172,7 +173,7 @@ class Keyring {
         const base64FullMessage = encodeBase64(fullMessage);
         return base64FullMessage;
     }
-      
+
     asymDecrypt(messageWithNonce, secretOrSharedKey) {
         const messageWithNonceAsUint8Array = decodeBase64(messageWithNonce);
         const nonce = messageWithNonceAsUint8Array.slice(0, box.nonceLength);

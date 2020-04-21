@@ -5,20 +5,21 @@ class ServerUser extends Base {
 
     /**
      * Create a new user.
-     * 
+     *
      * **Do not instantiate directly.**
-     * 
+     *
      * @property {string} did Decentralised ID for this use (ie: `did:ethr:0xaef....`)
      * @property {string} address Blockchain address for this user (ie: `0xaef....`)
      */
     constructor(chain, address, appServerUrl, privateKey) {
         super(chain, address, appServerUrl);
-        
+
         if (!privateKey) {
             throw new Error("No private key specified for server user");
         }
 
-        this.privateKey = Buffer.from(privateKey, "hex");
+        const key = privateKey.slice(2);
+        this.privateKey = Buffer.from(key, 'hex');
     }
 
     async requestSignature(appName, accessType) {
