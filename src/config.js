@@ -1,8 +1,20 @@
+import {
+    VERIDA_ENVIRONMENT,
+    VERIDA_APP_NAME,
+    VERIDA_APP_HOST,
+    VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
+    VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
+    VERIDA_SERVERS_CUSTOM_SCHEMAS_BASE_PATH,
+    VERIDA_SCHEMAS_CUSTOM_PATH,
+    VERIDA_SCHEMAS_BASE_PATH
+} from 'react-native-dotenv'
+
+const { location } = window;
 
 let config = {
-    environment: process.env.VERIDA_ENVIRONMENT || "testnet",
-    appName: process.env.VERIDA_APP_NAME || "Test App",
-    appHost: process.env.VERIDA_APP_HOST || (process.browser ? window.location.origin : null),
+    environment: VERIDA_ENVIRONMENT || "testnet",
+    appName: VERIDA_APP_NAME || "Test App",
+    appHost: VERIDA_APP_HOST || (process.browser && location ? location.origin : null),
     servers: {
         local: {
             // For core development
@@ -21,14 +33,14 @@ let config = {
             baseSchemas: "https://schemas.mainnet.verida.io/"
         },
         custom: {
-            appServerUrl: process.env.VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
-            didServerUrl: process.env.VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
-            baseSchemas: process.env.VERIDA_SERVERS_CUSTOM_SCHEMAS_BASE_PATH,
+            appServerUrl: VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
+            didServerUrl: VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
+            baseSchemas: VERIDA_SERVERS_CUSTOM_SCHEMAS_BASE_PATH,
         }
     },
     datastores: {},
-    customSchemasPath: process.env.VERIDA_SCHEMAS_CUSTOM_PATH || window.location.origin + '/schemas/custom/',
-    baseSchemasPath: process.env.VERIDA_SCHEMAS_BASE_PATH,
+    customSchemasPath: VERIDA_SCHEMAS_CUSTOM_PATH || (location && location.origin + '/schemas/custom/'),
+    baseSchemasPath: VERIDA_SCHEMAS_BASE_PATH,
     vaultAppName: "Verida Vault"
 };
 
