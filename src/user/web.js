@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 import App from '../app';
 import Base from './base';
-import store from 'store';
+import store from 'react-native-local-storage';
 import Keyring from "../keyring";
 
 const STORAGE_KEY = 'VERIDA_SESSION_';
@@ -10,9 +10,9 @@ class WebUser extends Base {
 
     /**
      * Create a new user.
-     * 
+     *
      * **Do not instantiate directly.**
-     * 
+     *
      * @property {string} did Decentralised ID for this use (ie: `did:ethr:0xaef....`)
      * @property {string} address Blockchain address for this user (ie: `0xaef....`)
      */

@@ -5304,6 +5304,11 @@ react-native-level-fs@^3.0.0:
     level-filesystem "^1.0.1"
     levelup "^0.18.2"
 
+react-native-local-storage@^1.5.2:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/react-native-local-storage/-/react-native-local-storage-1.5.2.tgz#82d4d76549ab21d6529aec7b3d42a2dcd41a9993"
+  integrity sha512-gkNpzZ+1clWg9MigqurfAV6XETW/w05fGD0LJ77vczN8B5Zab42mUy7z89r/2w5Zipdxz3UPcr3zML8cBlqd9w==
+
 react-native-os@^1.0.1:
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/react-native-os/-/react-native-os-1.2.6.tgz#1bb16d78ccad1143972183a04f443cf1af9fbefa"
