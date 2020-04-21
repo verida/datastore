@@ -2,6 +2,7 @@ import $RefParser from "json-schema-ref-parser";
 import Ajv from "ajv";
 const ajv = new Ajv();
 const resolveAllOf = require('json-schema-resolve-allof');
+require('util.promisify/shim')();
 const util = require('util');
 const urlExists = util.promisify(require('url-exists'));
 import App from './app';
@@ -10,9 +11,9 @@ class Schema {
 
     /**
      * An object representation of a JSON Schema.
-     * 
+     *
      * **Do not instantiate directly.**
-     * 
+     *
      * Access via {@link App#getSchema}
      * @param {object} path Path to a schema in the form (http://..../schema.json, /schemas/name/schema.json, name/of/schema)
      * @constructor
@@ -40,7 +41,7 @@ class Schema {
 
     /**
      * Get an object that represents the JSON Schema.
-     * 
+     *
      * @example
      * let schemaDoc = await app.getSchema("social/contact");
      * let spec = schemaDoc.getSpecification();
@@ -54,8 +55,8 @@ class Schema {
 
     /**
      * Validate a data object with this schema.
-     * 
-     * @param {object} data 
+     *
+     * @param {object} data
      * @returns {boolean} True if the data validates against the schema.
      */
     async validate(data) {
