@@ -37,7 +37,7 @@
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
     "did-jwt": "^4.0.0",
-    "did-jwt-vc": "git+https://github.com/verida/did-jwt-vc.git",
+    "did-jwt-vc": "^0.1.4",
     "did-resolver": "^1.1.0",
     "fs": "0.0.1-security",
     "json-schema-ref-parser": "^7.1.2",
