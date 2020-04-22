@@ -12,7 +12,7 @@ class Database extends EventEmitter {
 
     /**
      * Create a new database.
-     * 
+     *
      * **Do not instantiate directly.**
      */
     constructor(dbName, did, appName, dataserver, config) {
@@ -71,7 +71,7 @@ class Database extends EventEmitter {
 
     /**
      * Save data to an application schema.
-     * 
+     *
      * @param {object} data Data to be saved. Will be validated against the schema associated with this Datastore.
      * @param {object} [options] Database options that will be passed through to [PouchDB.put()](https://pouchdb.com/api.html#create_document)
      * @fires Database#beforeInsert Event fired before inserting a new record
@@ -83,7 +83,7 @@ class Database extends EventEmitter {
      *  "firstName": "John",
      *  "lastName": "Doe"
      * });
-     * 
+     *
      * if (!result) {
      *  console.errors(datastore.errors);
      * } else {
@@ -113,7 +113,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired before a new record is inserted.
-             * 
+             *
              * @event Database#beforeInsert
              * @param {object} data Data that was saved
              */
@@ -123,7 +123,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired before a new record is updated.
-             * 
+             *
              * @event Database#beforeUpdate
              * @param {object} data Data that was saved
              */
@@ -137,7 +137,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired after a new record is inserted.
-             * 
+             *
              * @event Database#afterInsert
              * @param {object} data Data that was saved
              */
@@ -147,7 +147,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired after a new record is updated.
-             * 
+             *
              * @event Database#afterUpdate
              * @param {object} data Data that was saved
              */
@@ -159,7 +159,7 @@ class Database extends EventEmitter {
 
     /**
      * Get many rows from the database.
-     * 
+     *
      * @param {object} filter Optional query filter matching CouchDB find() syntax.
      * @param {object} options Options passed to CouchDB find().
      * @param {object} options.raw Returns the raw CouchDB result, otherwise just returns the documents
@@ -177,7 +177,7 @@ class Database extends EventEmitter {
 
         let raw = options.raw || false;
         delete options['raw'];
-        
+
         if (filter) {
             options.selector = _.merge(options.selector, filter);
         }
@@ -198,7 +198,7 @@ class Database extends EventEmitter {
         if (this.readOnly) {
             throw "Unable to delete. Read only.";
         }
-        
+
         let defaults = {};
         options = _.merge(defaults, options);
 
@@ -286,7 +286,7 @@ class Database extends EventEmitter {
 
     /**
      * Get the underlying PouchDB instance associated with this database.
-     * 
+     *
      * @see {@link https://pouchdb.com/api.html#overview|PouchDB documentation}
      * @returns {PouchDB}
      */
@@ -297,10 +297,10 @@ class Database extends EventEmitter {
 
     /**
      * See PouchDB bug: https://github.com/pouchdb/pouchdb/issues/6399
-     * 
+     *
      * This method automatically detects any fields being sorted on and
      * adds them to an $and clause to ensure query indexes are used.
-     * 
+     *
      * Note: This still requires the appropriate index to exist for
      * sorting to work.
      */
@@ -315,7 +315,7 @@ class Database extends EventEmitter {
                     and.push(d);
                 }
             }
-            
+
             filter = {
                 $and: and
             }
@@ -326,8 +326,8 @@ class Database extends EventEmitter {
 
     /**
      * Sign data as the current user
-     * 
-     * @param {*} data 
+     *
+     * @param {*} data
      * @todo Think about signing data and versions / insertedAt etc.
      */
     async signData(data) {

@@ -1,6 +1,6 @@
 /*eslint no-console: "off"*/
 
-import PouchDB from 'pouchdb';
+import PouchDB from 'pouchdb-react-native';
 import PouchDBFind from 'pouchdb-find';
 PouchDB.plugin(PouchDBFind);
 import Utils from "../utils";
@@ -27,11 +27,11 @@ class PublicDatabase {
             let publicCreds = await this.dataserver.getPublicCredentials();
             dsn = publicCreds.dsn;
         }
-        
+
         if (!dsn) {
             throw "Unable to locate DSN for database ("+this.dbName+")";
         }
-        
+
         this._remoteDb = new PouchDB(dsn + this.dbName, {
             cb: function(err) {
                 if (err) {

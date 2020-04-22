@@ -1,7 +1,7 @@
 /*eslint no-console: "off"*/
 
 import PouchDBCrypt from 'pouchdb';
-import PouchDB from 'pouchdb';
+import PouchDB from 'pouchdb-react-native';
 import PouchDBFind from 'pouchdb-find';
 import Utils from "../utils";
 
@@ -25,7 +25,6 @@ class EncryptedDatabase {
     async _init() {
         this._localDbEncrypted = new PouchDB(this.dbName);
         this._localDb = new PouchDBCrypt(this.dbName);
-        
         this._localDb.crypto("", {
             "key": this.encryptionKey,
             cb: function(err) {
@@ -39,7 +38,7 @@ class EncryptedDatabase {
         this._remoteDbEncrypted = new PouchDB(this.remoteDsn + this.dbName, {
             skip_setup: true
         });
-        
+
         try {
             let info = await this._remoteDbEncrypted.info();
             if (info.error && info.error == "not_found") {
