@@ -1,6 +1,6 @@
 /*eslint no-console: "off"*/
 
-import PouchDBCrypt from 'pouchdb';
+import PouchDBCrypt from 'pouchdb-react-native';
 import PouchDB from 'pouchdb-react-native';
 import PouchDBFind from 'pouchdb-find';
 import Utils from "../utils";
@@ -10,6 +10,9 @@ PouchDB.plugin(PouchDBFind);
 
 const CryptoPouch = require('crypto-pouch');
 PouchDBCrypt.plugin(CryptoPouch);
+
+const adapter = require('pouchdb-adapter-asyncstorage');
+PouchDB.plugin(adapter);
 
 class EncryptedDatabase {
 
@@ -23,8 +26,12 @@ class EncryptedDatabase {
     }
 
     async _init() {
-        this._localDbEncrypted = new PouchDB(this.dbName);
-        this._localDb = new PouchDBCrypt(this.dbName);
+        this._localDbEncrypted = new PouchDB(this.dbName, {
+            adapter: 'asyncstorage'
+        });
+        this._localDb = new PouchDBCrypt(this.dbName, {
+            adapter: 'asyncstorage'
+        });
         this._localDb.crypto("", {
             "key": this.encryptionKey,
             cb: function(err) {
@@ -36,7 +43,8 @@ class EncryptedDatabase {
         });
 
         this._remoteDbEncrypted = new PouchDB(this.remoteDsn + this.dbName, {
-            skip_setup: true
+            skip_setup: true,
+            adapter: 'asyncstorage'
         });
 
         try {

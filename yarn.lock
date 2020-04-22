@@ -5265,7 +5265,7 @@ pouchdb-abstract-mapreduce@7.2.1:
     pouchdb-md5 "7.2.1"
     pouchdb-utils "7.2.1"
 
-pouchdb-adapter-asyncstorage@6.4.1:
+pouchdb-adapter-asyncstorage@6.4.1, pouchdb-adapter-asyncstorage@^6.4.1:
   version "6.4.1"
   resolved "https://registry.yarnpkg.com/pouchdb-adapter-asyncstorage/-/pouchdb-adapter-asyncstorage-6.4.1.tgz#f2ff239f498354f6100ffd9a19097a11b3a4efd1"
   integrity sha512-TNFKR/g1fHLaDgEdOo5GiUWSZ0BnlZZPtfaZSFgXEYJ7BbbBw6O0102Jxvvh75imnz8aroTcGSUGw9/OGQ8ZHQ==
@@ -5845,6 +5845,18 @@ react-native-tcp@^3.2.1:
   version "3.3.2"
   resolved "https://registry.yarnpkg.com/react-native-tcp/-/react-native-tcp-3.3.2.tgz#b38c153039acac89294caa4991689c003ec62dce"
   integrity sha512-zjFmjAvYOsBkR1MF7htuPlk+uOzTykKaeu/eN+I7fkZ7UqBCW+9u/gJgWCv6Tjfn2tGgku6hsEWril4Oy3zJhg==
+  dependencies:
+    base64-js "0.0.8"
+    buffer "^5.0.0"
+    events "^1.0.2"
+    ip-regex "^1.0.3"
+    process "^0.11.9"
+    util "^0.10.3"
+
+react-native-tls@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/react-native-tls/-/react-native-tls-0.0.2.tgz#f4cf921a837662ca1ea0a2978e1f61963853a936"
+  integrity sha512-zBN7rMKUfVnKlAeFpU2i2444nY6Ax390TzysSausMwZzKdP54d/hg9JMbqahwHH9tuouzVme6S5P05LqbOSeRQ==
   dependencies:
     base64-js "0.0.8"
     buffer "^5.0.0"

@@ -39,7 +39,8 @@ class PublicDatabase {
                     console.error(err);
                 }
             },
-            skip_setup: true
+            skip_setup: true,
+            adapter: 'asyncstorage'
         });
 
         try {
