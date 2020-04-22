@@ -7,6 +7,21 @@ const util = require('util');
 const urlExists = util.promisify(require('url-exists'));
 import App from './app';
 
+const { ono } = require("ono");
+
+const resolver = {
+    order: 1,
+    canRead: /schemas.testnet.verida.io/i,
+    async read(file) {
+        try {
+            let response = await fetch(file.url);
+            return response.json();
+        } catch (error) {
+            return ono(error, `Error downloading ${file.url}`)
+        }
+    }
+};
+
 class Schema {
 
     /**
@@ -32,7 +47,9 @@ class Schema {
         }
 
         this.path = await this._resolvePath(this.path);
-        this._specification = await $RefParser.dereference(this.path);
+        this._specification = await $RefParser.dereference(this.path, {
+            resolve: { http: resolver }
+        });
         let spec = await resolveAllOf(this._specification);
         this.name = spec.name;
 

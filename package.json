@@ -53,6 +53,7 @@
     "json-schema-ref-parser": "^7.1.2",
     "json-schema-resolve-allof": "^1.5.0",
     "lodash": "^4.17.15",
+    "ono": "^7.1.2",
     "path-browserify": "0.0.0",
     "pouchdb": "^7.2.1",
     "pouchdb-adapter-asyncstorage": "^6.4.1",

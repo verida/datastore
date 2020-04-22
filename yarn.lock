@@ -812,6 +812,11 @@
     lodash "^4.17.13"
     to-fast-properties "^2.0.0"
 
+"@jsdevtools/ono@7.1.2":
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/@jsdevtools/ono/-/ono-7.1.2.tgz#373995bb40a6686589a7fcfec06b0e6e304ef6c6"
+  integrity sha512-qS/a24RA5FEoiJS9wiv6Pwg2c/kiUo3IVUQcfeM9JvsR6pM8Yx+yl/6xWYLckZCT5jpLNhslgjiA8p/XcGyMRQ==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -4994,6 +4999,13 @@ ono@^6.0.0:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/ono/-/ono-6.0.1.tgz#1bc14ffb8af1e5db3f7397f75b88e4a2d64bbd71"
   integrity sha512-5rdYW/106kHqLeG22GE2MHKq+FlsxMERZev9DCzQX1zwkxnFwBivSn5i17a5O/rDmOJOdf4Wyt80UZljzx9+DA==
+
+ono@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/ono/-/ono-7.1.2.tgz#8f2370f414413dca06419cae11e2b4645e5f1ed5"
+  integrity sha512-es7Gfr+OGNFwiYpyHCLgBF+p/RA0qYbWysQKlZbLvvUBis5BygEs8TVJ4r+SgHDfagOgONhaAl6Y4JLy++0MTw==
+  dependencies:
+    "@jsdevtools/ono" "7.1.2"
 
 opencollective-postinstall@^2.0.0:
   version "2.0.2"
