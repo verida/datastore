@@ -11,7 +11,7 @@ const { ono } = require("ono");
 
 const resolver = {
     order: 1,
-    canRead: /schemas.testnet.verida.io/i,
+    canRead: true,
     async read(file) {
         try {
             let response = await fetch(file.url);

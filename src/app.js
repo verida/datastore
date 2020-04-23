@@ -18,14 +18,6 @@ const _ = require('lodash');
  * @property {Wallet} wallet The current user's wallet.
  */
 class App {
-
-    static cache = {
-        schemas: {},
-        dataservers: {}
-    };
-
-    static config = Config;
-
     /**
      * Create a new application.
      *
@@ -265,7 +257,12 @@ App.Helpers = {
     vid: VidHelper,
     wallet: WalletHelper,
     trust: TrustHelper,
-    credentials: CredentialsHelper
+    credentials: CredentialsHelper,
+    config: Config,
+    cache: {
+        schemas: {},
+        dataservers: {}
+    }
 };
 
 export default App;
