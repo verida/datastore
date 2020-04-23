@@ -28,6 +28,7 @@ class App {
      * myApp.connect(true);
      */
     constructor(config) {
+        console.log(process.browser, '@@@@@@@@@@######################');
         if (process.browser) {
             this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
         } else {
@@ -257,12 +258,13 @@ App.Helpers = {
     vid: VidHelper,
     wallet: WalletHelper,
     trust: TrustHelper,
-    credentials: CredentialsHelper,
-    config: Config,
-    cache: {
-        schemas: {},
-        dataservers: {}
-    }
+    credentials: CredentialsHelper
+};
+
+App.config = Config;
+App.cache = {
+    schemas: {},
+    dataservers: {}
 };
 
 export default App;
