@@ -66,6 +66,7 @@
     "react-native-level-fs": "^3.0.0",
     "react-native-local-storage": "^1.5.2",
     "react-native-os": "^1.0.1",
+    "react-native-process-shim": "^1.1.0",
     "react-native-randombytes": "^3.0.0",
     "react-native-tcp": "^3.2.1",
     "react-native-tls": "^0.0.2",
@@ -101,6 +102,7 @@
     "mocha": "^7.0.0"
   },
   "react-native": {
+    "process": "react-native-process-shim",
     "zlib": "browserify-zlib",
     "console": "console-browserify",
     "constants": "constants-browserify",

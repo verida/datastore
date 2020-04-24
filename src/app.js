@@ -28,7 +28,6 @@ class App {
      * myApp.connect(true);
      */
     constructor(config) {
-        console.log(process.browser, '@@@@@@@@@@######################');
         if (process.browser) {
             this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
         } else {
