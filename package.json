@@ -14,18 +14,10 @@
     "prepublish": "npm run build",
     "postinstall": "npm run build"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/verida/datastore.git",
+    "directory": "verida/datastore"
   },
   "dependencies": {
     "@tradle/react-native-http": "^2.0.0",
