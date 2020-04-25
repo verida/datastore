@@ -2,7 +2,7 @@
 import Datastore from "../datastore";
 import _ from "lodash";
 import VidHelper from '../helpers/vid';
-import DIDHelper from '@verida/did-helper';
+import DIDHelper from '@verida/did-helper/src/DIDHelper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
 import App from '../app';

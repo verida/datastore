@@ -1,6 +1,6 @@
 /*eslint no-console: "off"*/
 import { DIDDocument } from 'did-document';
-import DIDHelper from '@verida/did-helper';
+import DIDHelper from '@verida/did-helper/src/DIDHelper';
 import { utils } from 'ethers';
 import App from '../app';
 
