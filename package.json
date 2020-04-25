@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@tradle/react-native-http": "^2.0.0",
-    "@verida/did-helper": "^0.4.3",
+    "@verida/did-helper": "verida/did-helper#react-native",
     "assert": "^1.1.1",
     "browserify-zlib": "^0.1.4",
     "buffer": "^4.9.1",
