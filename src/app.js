@@ -19,19 +19,11 @@ const _ = require('lodash');
  * @property {Wallet} wallet The current user's wallet.
  */
 class App {
-
-    static cache = {
-        schemas: {},
-        dataservers: {}
-    };
-
-    static config = Config;
-
     /**
      * Create a new application.
-     * 
+     *
      * @constructor
-     * @example 
+     * @example
      * import VeridaApp from 'verida-datastore';
      * let myApp = new VeridaApp("My Application Name");
      * myApp.connect(true);
@@ -56,8 +48,8 @@ class App {
 
     /**
      * Override the default config
-     * 
-     * @param {*} config 
+     *
+     * @param {*} config
      */
     static setConfig(config) {
         App.config = _.merge({}, App.config, config);
@@ -65,9 +57,9 @@ class App {
     }
 
     /**
-     * Connect a user to the application. Similar to "logging in" to an application. 
+     * Connect a user to the application. Similar to "logging in" to an application.
      * This will popup a metamask window asking the user to authorize the application.
-     * 
+     *
      * The user will remain logged in for all subsequent page loads until `app.logout()` is called.
      */
     async connect(force) {
@@ -101,7 +93,7 @@ class App {
 
     /**
      * Determine if a web session exists for a given DID (indicates they can be autologgedin)
-     * 
+     *
      * @param {string} did User's DID
      * @param {string} appName Application name
      */
@@ -111,7 +103,7 @@ class App {
 
     /**
      * Open an application datastore owned by the current suer
-     * 
+     *
      * @param {string} schemaName
      * @param {object} [config] Optional data store configuration
      * @returns {DataStore} Datastore instance for the requested schema
@@ -127,9 +119,9 @@ class App {
 
     /**
      * Open an application database owned by the current user
-     * 
-     * @param {*} dbName 
-     * @param {*} config 
+     *
+     * @param {*} dbName
+     * @param {*} config
      */
     async openDatabase(dbName, config) {
         config = _.merge(config, {
@@ -141,10 +133,10 @@ class App {
 
     /**
      * Open an application datastore owned by an external user
-     * 
-     * @param {*} schemaName 
-     * @param {*} did 
-     * @param {*} config 
+     *
+     * @param {*} schemaName
+     * @param {*} did
+     * @param {*} config
      */
     static async openExternalDatastore(schemaName, did, config) {
         did = did.toLowerCase();
@@ -158,10 +150,10 @@ class App {
 
     /**
      * Open an application database owned by an external user
-     * 
-     * @param {*} dbName 
-     * @param {*} did 
-     * @param {*} config 
+     *
+     * @param {*} dbName
+     * @param {*} did
+     * @param {*} config
      */
     static async openExternalDatabase(dbName, did, config) {
         did = did.toLowerCase();
@@ -175,7 +167,7 @@ class App {
 
     /**
      * Opens the public profile of any user in read only mode
-     * 
+     *
      * @param {*} did
      * @example
      * let profile = app.openProfile(userDid);
@@ -197,7 +189,7 @@ class App {
 
     /**
      * Get a JSON Schema object by name
-     * 
+     *
      * @param {string} schemaName That may be a name (ie: "social/contact") or a URL of a schema (ie: "https://test.com/schema.json")
      * @returns {Schema}
      */
@@ -215,10 +207,10 @@ class App {
 
     /**
      * Build a dataserver connection to an external dataserver.
-     * 
-     * 
-     * @param {*} did 
-     * @param {*} config 
+     *
+     *
+     * @param {*} did
+     * @param {*} config
      */
     static async buildDataserver(did, config) {
         did = did.toLowerCase();
@@ -227,7 +219,7 @@ class App {
             appName: App.config.appName,
             did: did
         }, config);
-        
+
 
         if (App.cache.dataservers[did + ':' + config.appName]) {
             return App.cache.dataservers[did + ':' + config.appName];
@@ -268,5 +260,13 @@ App.Helpers = {
     trust: TrustHelper,
     credentials: CredentialsHelper
 };
+
+
+App.cache = {
+    schemas: {},
+    dataservers: {}
+};
+
+App.config = Config;
 
 export default App;
