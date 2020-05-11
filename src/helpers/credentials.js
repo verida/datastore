@@ -64,7 +64,7 @@ class Credentials {
         const issuer = {
             did: appConfig.vid,
             signer,
-            alg: "Ed25519"
+            alg: "ed25519"
         };
 
         return issuer;
