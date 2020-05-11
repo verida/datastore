@@ -64,7 +64,7 @@ class Credentials {
         const issuer = {
             did: appConfig.vid,
             signer,
-            alg: "ed25519"
+            alg: "Ed25519"  // must be this casing due to did-jwt/src/JWT.ts
         };
 
         return issuer;
