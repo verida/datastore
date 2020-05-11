@@ -1,6 +1,7 @@
-import { box } from "tweetnacl";
-import didJWT from 'did-jwt';
+//import { box } from "tweetnacl";
+//import didJWT from 'did-jwt';
 const EventEmitter = require('events');
+import DIDComm from 'DIDComm-js';
 
 class Inbox extends EventEmitter {
 
@@ -33,13 +34,41 @@ class Inbox extends EventEmitter {
 
     async processItem(inboxItem) {
         await this.init();
-        
-        // Build the shared key using this user's private asymmetric key
-        // and the user supplied public key
+
         let appUserConfig = await this._app.user.getAppConfig();
         let keyring = appUserConfig.keyring;
         let publicKeyBytes = Buffer.from(inboxItem.key.slice(2), 'hex');
+
+        let receiver = {
+            publicKey: keyring.asymKey.publicBytes,
+            privateKey: keyring.asymKey.privateBytes,
+            keyType: 'ed25519'
+        };
+
+        const didcomm = new DIDComm();
+        await didcomm.Ready;
+        let item = await didcomm.unpackMessage(inboxItem.content, receiver);
+
+        let inboxEntry = {
+            _id: inboxItem._id, // Use the same _id to avoid duplicates
+            type: item.type,
+            data: item.data,
+            message: item.message,
+            originator: item.originator,
+            recipient: item.recipient,
+            sentAt: item.insertedAt,
+            original: item,
+            read: false
+        }
+
+        
+        // Build the shared key using this user's private asymmetric key
+        // and the user supplied public key
+        /*let appUserConfig = await this._app.user.getAppConfig();
+        let keyring = appUserConfig.keyring;
+        let publicKeyBytes = Buffer.from(inboxItem.key.slice(2), 'hex');
         let sharedKeyEnd = box.before(publicKeyBytes, keyring.asymKey.privateBytes);
+
 
         // Decrypt the inbox/tem to obtain the JWT
         let jwt;
@@ -68,7 +97,7 @@ class Inbox extends EventEmitter {
                 app: item.veridaApp
             },
             read: false
-        }
+        }*/
 
         // Save a new inbox entry into the user's private inbox
         try {

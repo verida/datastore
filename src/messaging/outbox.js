@@ -3,9 +3,10 @@ import Datastore from "../datastore";
 import _ from "lodash";
 import VidHelper from '../helpers/vid';
 import DIDHelper from '@verida/did-helper';
-import didJWT from 'did-jwt';
-import { box, randomBytes } from "tweetnacl";
+//import didJWT from 'did-jwt';
+//import { box, randomBytes } from "tweetnacl";
 import App from '../app';
+import DIDComm from 'DIDComm-js';
 
 class Outbox {
 
@@ -50,13 +51,21 @@ class Outbox {
             throw new Error("Unable to locate VID for "+receivingAppName);
         }
 
+        let userVid = await this._app.user.getAppVid(sendingAppName);
+
         let outboxEntry = {
             type: type,
             data: data,
             message: message,
-            sentTo: {
+            originator: {
+                did: this._app.user.did,
+                vid: userVid.id,
+                app: sendingAppName,
+            },
+            recipient: {
                 did: did,
-                vid: String(vidDoc.id)
+                vid: String(vidDoc.id),
+                app: receivingAppName
             },
             sent: false
         }
@@ -87,8 +96,24 @@ class Outbox {
         // the user's private vault
         let appUserConfig = await this._app.user.getAppConfig();
         let keyring = appUserConfig.keyring;
-        let signer = didJWT.SimpleSigner(keyring.signKey.private);
-        let userVid = await this._app.user.getAppVid(sendingAppName);
+
+        // Note: outboxEntry is a signed message, so no need to re-sign
+
+        let publicAsymKey = DIDHelper.getKeyBytes(vidDoc, 'asym');
+        let sender = {
+            publicKey: keyring.asymKey.publicBytes,
+            privateKey: keyring.asymKey.privateBytes,
+            keyType: 'ed25519'
+        };
+
+        outboxEntry['@id'] = outboxEntry._id + '/' + outboxEntry._rev;
+        outboxEntry['@type'] = outboxEntry.schema;
+
+        const didcomm = new DIDComm();
+        await didcomm.Ready;
+        let encrypted = await didcomm.pack_auth_msg_for_recipients(JSON.stringify(message), [publicAsymKey], sender, false);
+        
+        /*let signer = didJWT.SimpleSigner(keyring.signKey.private);
 
         let jwt = await didJWT.createJWT({
             aud: this._app.user.did,
@@ -106,7 +131,7 @@ class Outbox {
         // Encrypt this message using the receipients public key and this apps private key
         let publicAsymKey = DIDHelper.getKeyBytes(vidDoc, 'asym');
         let sharedKey = box.before(publicAsymKey, keyring.asymKey.privateBytes);
-        let encrypted = keyring.asymEncrypt(jwt, sharedKey);
+        let encrypted = keyring.asymEncrypt(jwt, sharedKey);*/
 
         // Save the encrypted JWT to the user's inbox
         let inbox = await this.getInboxDatastore(did, {
