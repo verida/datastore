@@ -67,6 +67,7 @@ class Inbox extends EventEmitter {
                 vid: item.vid,
                 app: item.veridaApp
             },
+            insertedAt: (new Date()).toISOString(),
             read: false
         }
 
