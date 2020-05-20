@@ -42,6 +42,10 @@ class DataServer {
             return true;
         }
 
+        if (!user) {
+            return false;
+        }
+
         let userConfig = await user.getAppConfig(this.appName, force);
         if (!userConfig) {
             return false;
