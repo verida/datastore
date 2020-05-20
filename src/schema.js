@@ -1,23 +1,51 @@
 import $RefParser from "json-schema-ref-parser";
 import Ajv from "ajv";
-const ajv = new Ajv();
 const resolveAllOf = require('json-schema-resolve-allof');
-const util = require('util');
-const urlExists = util.promisify(require('url-exists'));
 import App from './app';
 
-const { ono } = require("ono");
+// Force schema paths to be applied to URLs
+const resolvePath = function(uri) {
+    const resolvePaths = App.config.server.schemaPaths;
 
+    for (let searchPath in resolvePaths) {
+        let resolvePath = resolvePaths[searchPath];
+        if (uri.substring(0, searchPath.length) == searchPath) {
+            uri = uri.replace(searchPath, resolvePath);
+        }
+    }
+
+    return uri;
+}
+
+// Used by AJV for resolving URL refs
+const loadSchema = async function(uri) {
+    uri = resolvePath(uri);
+    let request = await fetch(uri);
+
+    // @todo: check valid uri
+    let json = await request.json();
+    return json;
+}
+
+const ajv = new Ajv({loadSchema: loadSchema});
+
+// Add support for JSON Schema draft 06
+// @todo make the list of supported drafts customisable
+ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+
+// Custom resolver for RefParser
+//const { ono } = require("ono");
 const resolver = {
     order: 1,
     canRead: true,
     async read(file) {
-        try {
+        return loadSchema(file.url);
+        /*try {
             let response = await fetch(file.url);
             return response.json();
         } catch (error) {
             return ono(error, `Error downloading ${file.url}`)
-        }
+        }*/
     }
 };
 
@@ -36,27 +64,15 @@ class Schema {
         this.path = path;
         this.errors = [];
 
-        this.name = null;
+        this._finalPath = null;
         this._specification = null;
-    }
-
-    async init() {
-        if (this._specification) {
-            return;
-        }
-
-        this.path = await this._resolvePath(this.path);
-        this._specification = await $RefParser.dereference(this.path, {
-            resolve: { http: resolver }
-        });
-        let spec = await resolveAllOf(this._specification);
-        this.name = spec.name;
-
-        this._init = true;
+        this._validate = null;
     }
 
     /**
-     * Get an object that represents the JSON Schema.
+     * @todo: Deprecate in favour of `getProperties()`
+     * Get an object that represents the JSON Schema. Fully resolved.
+     * Warning: This can cause issues with very large schemas.
      * 
      * @example
      * let schemaDoc = await app.getSchema("social/contact");
@@ -65,42 +81,70 @@ class Schema {
      * @returns {object} JSON object representing the defereferenced schema
      */
     async getSpecification() {
-        await this.init();
+        if (this._specification) {
+            return this._specification;
+        }
+
+        let path = await this.getPath();
+        this._specification = await $RefParser.dereference(path, {
+            resolve: { http: resolver }
+        });
+
+        await resolveAllOf(this._specification);
         return this._specification;
     }
 
     /**
-     * Validate a data object with this schema.
+     * Validate a data object with this schema, using AJV
      * 
      * @param {object} data 
      * @returns {boolean} True if the data validates against the schema.
      */
     async validate(data) {
-        await this.init();
-        let specification = this._specification;
-        let schema = ajv.getSchema(specification['$id']);
-        if (!schema) {
-            ajv.addSchema(specification);
+        if (!this._validate) {
+            let path = await this.getPath();
+            let fileData = await fetch(path);
+            let json = await fileData.json();
+            this._validate = await ajv.compileAsync(json);
         }
 
-        var valid = ajv.validate(specification['$id'], data);
+        let valid = await this._validate(data);
         if (!valid) {
-            this.errors = ajv.errors;
-            return false;
+            this.errors = this._validate.errors;
         }
-
-        return true;
+        
+        return valid;
     }
 
     async getIcon() {
-        await this.init();
-        return this.path.replace("schema.json","icon.svg");
+        let path = await this.getPath();
+        return path.replace("schema.json","icon.svg");
     }
 
-    async _resolvePath(path) {
+    /**
+     * Get a rully resolveable path for a URL
+     * 
+     * Handle shortened paths:
+     *  - `health/activity` -> `https://schemas.verida.io/health/activity/schema.json`
+     *  - `https://schemas.verida.io/health/activity` -> `https://schemas.verida.io/health/activity/schema.json`
+     *  - `/health/activity/test.json` -> `https://schemas.verida.io/health/activity/test.json`
+     */
+    async getPath() {
+        if (this._finalPath) {
+            return this._finalPath;
+        }
+
+        let path = this.path;
+
         // If we have a full HTTP path, simply return it
         if (path.match("http")) {
-            return path;
+            this._finalPath = resolvePath(path);
+            return this._finalPath;
+        }
+
+        // Prepend `/` if required (ie: "profile/public")
+        if (path.substring(1) != '/') {
+            path = '/' + path;
         }
 
         // Append /schema.json if required
@@ -108,23 +152,8 @@ class Schema {
             path += "/schema.json";
         }
 
-        // Try to resolve the path as being "custom"
-
-        let tmpPath1 = App.config.customSchemasPath + path;
-        let exists = await urlExists(tmpPath1);
-        if (exists) {
-            return tmpPath1;
-        }
-
-        // Try to resolve the path as being "base"
-        let baseSchemaPath = App.config.baseSchemasPath || App.config.server.baseSchemas
-        let tmpPath2 = baseSchemaPath + path;
-        exists = await urlExists(tmpPath2);
-        if (exists) {
-            return tmpPath2;
-        }
-
-        throw new Error("Unable to resolve the path for: "+path+" (tried "+tmpPath1+" & "+tmpPath2+")");
+        this._finalPath = resolvePath(path);
+        return this._finalPath;
     }
 
 }

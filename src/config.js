@@ -8,27 +8,36 @@ let config = {
             // For core development
             appServerUrl: "http://localhost:5000/",
             didServerUrl: "http://localhost:5001/",
-            baseSchemas: "http://localhost:8080/schemas/base/"
+            schemaPaths: {
+                '/': 'https://schemas.verida.io/',
+                'https://schemas.verida.io/': 'http://localhost:5010/'
+            }
         },
         testnet: {
             appServerUrl: "https://dataserver.testnet.verida.io:5000/",
             didServerUrl: "https://did.testnet.verida.io:5001/",
-            baseSchemas: "https://schemas.testnet.verida.io/"
+            baseSchemas: "https://schemas.testnet.verida.io/",
+            schemaPaths: {
+                '/': 'https://schemas.verida.io/',
+                'https://schemas.verida.io/': 'https://schemas.testnet.verida.io/'
+            }
         },
         mainnet: {
             appServerUrl: "https://dataserver.mainnet.verida.io:5000/",
             didServerUrl: "https://did.mainnet.verida.io:5001/",
-            baseSchemas: "https://schemas.mainnet.verida.io/"
+            schemaPaths: {
+                '/': 'https://schemas.verida.io/'
+            }
         },
         custom: {
             appServerUrl: process.env.VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
             didServerUrl: process.env.VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
-            baseSchemas: process.env.VERIDA_SERVERS_CUSTOM_SCHEMAS_BASE_PATH,
+            schemaPaths: {
+                '/': 'https://schemas.verida.io/'
+            }
         }
     },
     datastores: {},
-    customSchemasPath: process.env.VERIDA_SCHEMAS_CUSTOM_PATH || window.location.origin + '/schemas/custom/',
-    baseSchemasPath: process.env.VERIDA_SCHEMAS_BASE_PATH,
     vaultAppName: "Verida Vault"
 };
 
