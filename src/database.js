@@ -249,17 +249,22 @@ class Database extends EventEmitter {
                 let db = new PublicDatabase(dbHashName, this.dataserver, this.did, this.permissions, this.config.isOwner);
                 this._db = await db.getDb();
             } catch (err) {
-                throw new Error("Error creating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
+                throw new Error("Error instantiating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
             }
         } else if (this.permissions.read == "users" || this.permissions.write == "users") {
             // Create encrypted database with generated encryption key
             try {
                 let encryptionKey = this.config.encryptionKey; // TODO: Where and how to generate?
-                let remoteDsn = await this.dataserver.getDsn();
-                let db = new EncryptedDatabase(dbHashName, encryptionKey, remoteDsn, this.did, this.permissions);
+                let remoteDsn = await this.dataserver.getDsn(this.user);
+                if (!remoteDsn) {
+                    throw new Error("Unable to determine remote DSN")
+                }
+                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
-                throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
+                console.log(err);
+                throw new Error("Error instantiating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
             }
         }
         else {
