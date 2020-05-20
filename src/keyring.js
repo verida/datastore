@@ -11,7 +11,8 @@ import { utils, ethers } from 'ethers';
 const newSymNonce = () => randomBytes(secretbox.nonceLength);
 const newAsymNonce = () => randomBytes(box.nonceLength);
 
-const BASE_PATH = "m/6696500'/0'/0'"
+const BASE_PATH = "m/6696500'/0'/0'";
+const DB_PATH = "m/42"
 //const ETH_PATH = "m/44'/60'/0'/0"
 
 /**
@@ -33,21 +34,51 @@ class Keyring {
         const seed = ethers.HDNode.mnemonicToSeed(mnemonic);
 
         const seedNode = ethers.HDNode.fromSeed(seed);
-        const baseNode = seedNode.derivePath(BASE_PATH);
+        this.baseNode = seedNode.derivePath(BASE_PATH);
 
         // Build symmetric key
-        let symKey = baseNode.derivePath("0");
+        let symKey = this.baseNode.derivePath("0");
         this.symKey = Buffer.from(symKey.privateKey.slice(2), 'hex');
 
         // Build asymmetric keys
-        let asymKey = baseNode.derivePath("1");
+        let asymKey = this.baseNode.derivePath("1");
         this.asymKey = this._generateKeyPair(asymKey, "box");
 
         // Build signing keys
-        let signKey = baseNode.derivePath("2");
+        let signKey = this.baseNode.derivePath("2");
         this.signKey = this._generateKeyPair(signKey, "sign");
 
+        const dbNode = this.baseNode.derivePath("3");
+        this.dbSignKey = this._generateKeyPair(dbNode, "sign");
+        this.dbSymKeys = {};
+
         //this.ethKey = seedNode.derivePath(ETH_PATH);
+    }
+
+    getDbKey(dbName) {
+        if (this.dbSymKeys[dbName]) {
+            return this.dbSymKeys[dbName];
+        }
+
+        // Sign a consent message using the current db signing key
+        const consent = "Authorized to own database: " + dbName;
+        const signature = this.sign(consent, this.dbSignKey);
+        const signatureBytes = ethers.utils.toUtf8Bytes(signature)
+
+        // Use the signature as entropy to create a new seed
+        const entropy = utils.keccak256(signatureBytes);
+        const mnemonic = ethers.HDNode.entropyToMnemonic(entropy);
+        const seed = ethers.HDNode.mnemonicToSeed(mnemonic);
+        
+        // Use the seed to create a new HDNode
+        const seedNode = ethers.HDNode.fromSeed(seed);
+        const dbNode = seedNode.derivePath(DB_PATH);
+
+        // Use the HDNode to create a symmetric key for this database
+        let dbSymKey = Buffer.from(dbNode.privateKey.slice(2), 'hex');
+        this.dbSymKeys[dbName] = dbSymKey;
+
+        return this.dbSymKeys[dbName];
     }
 
     exportPublicKeys() {
@@ -86,9 +117,10 @@ class Keyring {
     }
 
     // get a signature
-    sign(data) {
+    sign(data, key) {
+        key = key ? key : this.signKey;
         let messageUint8 = decodeUTF8(JSON.stringify(data));
-        return encodeBase64(sign.detached(messageUint8, this.signKey.privateBytes));
+        return encodeBase64(sign.detached(messageUint8, key.privateBytes));
     }
 
     verifySig(data, sig) {

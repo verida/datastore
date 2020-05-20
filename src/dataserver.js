@@ -176,12 +176,12 @@ class DataServer {
     /**
      * Get the default symmetric encryption key
      */
-    async getKey(user) {
+    async getDbKey(user, dbName) {
         if (!this._keyring) {
             await this.connect(user, true);
         }
 
-        return this._keyring.symKey;
+        return this._keyring.getDbKey(dbName);
     }
 
     async getClient(user) {

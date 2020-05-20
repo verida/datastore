@@ -42,7 +42,6 @@ class Database extends EventEmitter {
         }, this.config.permissions ? this.config.permissions : {});
 
         this.readOnly = this.config.readOnly ? true : false;
-        this.syncToWallet = this.config.syncToWallet ? true : false;
 
         this._dbHash = null;
         this._db = null;
@@ -236,9 +235,10 @@ class Database extends EventEmitter {
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
-                let encryptionKey = await this.dataserver.getKey(this.user);
+                let encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
                 let remoteDsn = await this.dataserver.getDsn(this.user);
                 let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating owner database ("+this.dbName+") for "+this.did+": " + err.message);
@@ -252,11 +252,15 @@ class Database extends EventEmitter {
                 throw new Error("Error creating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
             }
         } else if (this.permissions.read == "users" || this.permissions.write == "users") {
-            // Create encrypted database with generated encryption key
             try {
-                let encryptionKey = this.config.encryptionKey; // TODO: Where and how to generate?
+                let encryptionKey = this.config.encryptionKey;
+                if (!encryptionKey && this.config.isOwner) {
+                    encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
+                }
+
                 let remoteDsn = await this.dataserver.getDsn();
                 let db = new EncryptedDatabase(dbHashName, encryptionKey, remoteDsn, this.did, this.permissions);
+                this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
