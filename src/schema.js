@@ -153,6 +153,7 @@ class Schema {
         }
 
         this._finalPath = resolvePath(path);
+        this.path = this._finalPath;
         return this._finalPath;
     }
 
