@@ -33,6 +33,11 @@ const ajv = new Ajv({loadSchema: loadSchema});
 // @todo make the list of supported drafts customisable
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 
+// Temporary includes for testing hyperjump  property fetching
+import jsonSchema from '@hyperjump/json-schema'
+import HJSchema from '@hyperjump/json-schema-core'
+import Pact from '@hyperjump/pact'
+
 // Custom resolver for RefParser
 //const { ono } = require("ono");
 const resolver = {
@@ -64,9 +69,48 @@ class Schema {
         this.path = path;
         this.errors = [];
 
+        this._name = null;
         this._finalPath = null;
         this._specification = null;
         this._validate = null;
+
+        // @todo remove
+        this._ajv = ajv;
+        this._refparser = $RefParser;
+        this._jsonSchema = jsonSchema;
+        this.Schema = HJSchema;
+        this.Pact = Pact;
+    }
+
+    // @todo: this works on FHIR, but not basic schemas.. :/
+    // @todo: not working at all now
+    async getProperties() {
+        let path = await this.getPath();
+        console.log(path);
+        let propertySchema = await HJSchema.Schema.get(path + '#/properties');
+        console.log(propertySchema);
+        const entries = await this.Pact.pipeline([
+            HJSchema.Schema.entries,
+            this.Pact.map(async (entry) => {
+                console.log(entry);
+                const [propertyName, propertySchema] = await entry;
+                const properties = ['type', 'title', 'description', 'default', 'format', 'enum', 
+            'items'];
+                let item = {};
+                for (var p in properties) {
+                    let prop = properties[p];
+                    const type = await HJSchema.Schema.step(prop, propertySchema);
+                    let value = HJSchema.Schema.value(type);
+                    item[prop] = value;
+                }
+
+                console.log(propertyName, item);   
+                return item;
+            }),
+            this.Pact.all
+          ], propertySchema);
+
+          return entries;
     }
 
     /**
@@ -90,12 +134,33 @@ class Schema {
             resolve: { http: resolver }
         });
 
-        await resolveAllOf(this._specification);
+        let spec = await resolveAllOf(this._specification);
+        //this.name = spec.name;
+
         return this._specification;
     }
 
     /**
-     * Validate a data object with this schema, using AJV
+     * 
+     */
+    async getName() {
+        if (this._name) {
+            return this.name;
+        }
+
+        let path = await this.getPath();
+        let parts = path.split('#');
+
+        if (!parts.length) {
+            throw new Error('Unable to determine schema name')
+        }
+
+        this.name = parts[0];
+        return this.name;
+    }
+
+    /**
+     * Validate a data object with this schema.
      * 
      * @param {object} data 
      * @returns {boolean} True if the data validates against the schema.
@@ -121,14 +186,6 @@ class Schema {
         return path.replace("schema.json","icon.svg");
     }
 
-    /**
-     * Get a rully resolveable path for a URL
-     * 
-     * Handle shortened paths:
-     *  - `health/activity` -> `https://schemas.verida.io/health/activity/schema.json`
-     *  - `https://schemas.verida.io/health/activity` -> `https://schemas.verida.io/health/activity/schema.json`
-     *  - `/health/activity/test.json` -> `https://schemas.verida.io/health/activity/test.json`
-     */
     async getPath() {
         if (this._finalPath) {
             return this._finalPath;
