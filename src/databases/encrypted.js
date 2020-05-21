@@ -13,6 +13,15 @@ PouchDBCrypt.plugin(CryptoPouch);
 
 class EncryptedDatabase {
 
+    /**
+     * 
+     * @param {*} dbName 
+     * @param {*} dataserver 
+     * @param {string} encryptionKey sep256k1 hex string representing encryption key (0x)
+     * @param {*} remoteDsn 
+     * @param {*} did 
+     * @param {*} permissions 
+     */
     constructor(dbName, dataserver, encryptionKey, remoteDsn, did, permissions) {
         this.dbName = dbName;
         this.dataserver = dataserver;
@@ -26,8 +35,10 @@ class EncryptedDatabase {
         this._localDbEncrypted = new PouchDB(this.dbName);
         this._localDb = new PouchDBCrypt(this.dbName);
         
+        let encryptionKey = Buffer.from(this.encryptionKey.slice(2), 'hex');
+        
         this._localDb.crypto("", {
-            "key": this.encryptionKey,
+            "key": encryptionKey,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');

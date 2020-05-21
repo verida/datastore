@@ -75,9 +75,7 @@ class Keyring {
         const dbNode = seedNode.derivePath(DB_PATH);
 
         // Use the HDNode to create a symmetric key for this database
-        let dbSymKey = Buffer.from(dbNode.privateKey.slice(2), 'hex');
-        this.dbSymKeys[dbName] = dbSymKey;
-
+        this.dbSymKeys[dbName] = dbNode.privateKey;
         return this.dbSymKeys[dbName];
     }
 

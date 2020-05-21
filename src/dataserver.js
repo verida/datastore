@@ -17,6 +17,7 @@ class DataServer {
 
         this.appName = config.appName ? config.appName : App.config.appName;
         this.appHost = config.appHost ? config.appHost : App.config.appHost;
+        this.dbManager = config.dbManager;
         this.serverUrl = config.serverUrl;
         this.isProfile = config.isProfile ? config.isProfile : false;
 
@@ -97,7 +98,8 @@ class DataServer {
                 write: "owner"
             },
             user: this._user,
-            did: this.config.did
+            did: this.config.did,
+            saveDatabase: true
         }, config);
 
         // If permissions require "owner" access, connect the current user
@@ -118,8 +120,15 @@ class DataServer {
 
         did = did.toLowerCase();
 
-        // TODO: Cache databases so we don't open the same one more than once
-        return new Database(dbName, did, this.appName, this, config);
+        // @todo Cache databases so we don't open the same one more than once
+        let db = new Database(dbName, did, this.appName, this, config);
+        await db._init();
+
+        if (config.saveDatabase && db._originalDb) {
+            this.dbManager.saveDb(dbName, config.did, this.appName, config.permissions, db._originalDb.encryptionKey);
+        }
+
+        return db;
     }
 
     async openDatastore(schemaName, config) {
