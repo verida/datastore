@@ -32,7 +32,6 @@ class DbManager {
             }
         };
 
-        console.log(id);
         let doc = await this._dbStore.getOne({
             _id: id
         });
