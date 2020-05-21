@@ -31,7 +31,7 @@ class Database extends EventEmitter {
         this.signAppName = config.signAppName || this.appName;
         this.dataserver = dataserver;
 
-        this.config = config ? config : {};
+        this.config = _.merge({}, config);
         this.permissions = {};
 
         this.permissions = _.merge({
@@ -56,9 +56,7 @@ class Database extends EventEmitter {
         let text = [
             this.did,
             this.appName,
-            this.dbName,
-            this.permissions.read,
-            this.permissions.write
+            this.dbName
         ].join("/");
 
         let hash = crypto.createHash('md5').update(text).digest("hex");
@@ -96,14 +94,16 @@ class Database extends EventEmitter {
             throw "Unable to save. Read only.";
         }
 
-        let defaults = {};
+        let defaults = {
+            forceInsert: false
+        };
         options = _.merge(defaults, options);
 
         let insert = false;
 
         // Set inserted at if not defined
         // (Assuming it's not defined as we have an insert)
-        if (data._id === undefined) {
+        if (data._id === undefined || options.forceInsert) {
             insert = true;
         }
 
@@ -272,7 +272,10 @@ class Database extends EventEmitter {
     }
 
     async _beforeInsert(data) {
-        data._id = uuidv1();
+        if (!data._id) {
+            data._id = uuidv1();
+        }
+
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
         await this.signData(data);
