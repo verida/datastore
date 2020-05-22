@@ -64,6 +64,7 @@ class Schema {
         this.path = path;
         this.errors = [];
 
+        this._schemaJson = null;
         this._finalPath = null;
         this._specification = null;
         this._validate = null;
@@ -102,10 +103,8 @@ class Schema {
      */
     async validate(data) {
         if (!this._validate) {
-            let path = await this.getPath();
-            let fileData = await fetch(path);
-            let json = await fileData.json();
-            this._validate = await ajv.compileAsync(json);
+            let schemaJson = await this.getSchemaJson();
+            this._validate = await ajv.compileAsync(schemaJson);
         }
 
         let valid = await this._validate(data);
@@ -114,6 +113,20 @@ class Schema {
         }
         
         return valid;
+    }
+
+    /**
+     * Fetch unresolved JSON schema
+     */
+    async getSchemaJson() {
+        if (this._schemaJson) {
+            return this._schemaJson;
+        }
+
+        let path = await this.getPath();
+        let fileData = await fetch(path);
+        this._schemaJson = await fileData.json();
+        return this._schemaJson;
     }
 
     async getIcon() {
