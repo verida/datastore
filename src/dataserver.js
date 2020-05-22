@@ -125,7 +125,7 @@ class DataServer {
         await db._init();
 
         if (config.saveDatabase && db._originalDb) {
-            this.dbManager.saveDb(dbName, config.did, this.appName, config.permissions, db._originalDb.encryptionKey);
+            this.dbManager.saveDb(dbName, did, this.appName, config.permissions, db._originalDb.encryptionKey);
         }
 
         return db;
@@ -159,8 +159,6 @@ class DataServer {
         let dsHash = Utils.md5FromArray([
             datastoreName,
             did,
-            config.permissions.read,
-            config.permissions.write,
             config.readOnly ? true : false
         ]);
 
