@@ -27,7 +27,7 @@ const loadSchema = async function(uri) {
     return json;
 }
 
-const ajv = new Ajv({loadSchema: loadSchema});
+const ajv = new Ajv({loadSchema: loadSchema, logger: false});
 
 // Add support for JSON Schema draft 06
 // @todo make the list of supported drafts customisable
