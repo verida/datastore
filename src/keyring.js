@@ -30,10 +30,10 @@ class Keyring {
         this.signature = signature;
 
         const entropy = utils.sha256('0x' + signature.slice(2));
-        const mnemonic = ethers.HDNode.entropyToMnemonic(entropy);
-        const seed = ethers.HDNode.mnemonicToSeed(mnemonic);
+        const mnemonic = ethers.utils.HDNode.entropyToMnemonic(entropy);
+        const seed = ethers.utils.HDNode.mnemonicToSeed(mnemonic);
 
-        const seedNode = ethers.HDNode.fromSeed(seed);
+        const seedNode = ethers.utils.HDNode.fromSeed(seed);
         this.baseNode = seedNode.derivePath(BASE_PATH);
 
         // Build symmetric key
@@ -67,15 +67,16 @@ class Keyring {
 
         // Use the signature as entropy to create a new seed
         const entropy = utils.keccak256(signatureBytes);
-        const mnemonic = ethers.HDNode.entropyToMnemonic(entropy);
-        const seed = ethers.HDNode.mnemonicToSeed(mnemonic);
+        const mnemonic = ethers.utils.HDNode.entropyToMnemonic(entropy);
+        const seed = ethers.utils.HDNode.mnemonicToSeed(mnemonic);
         
         // Use the seed to create a new HDNode
-        const seedNode = ethers.HDNode.fromSeed(seed);
+        const seedNode = ethers.utils.HDNode.fromSeed(seed);
         const dbNode = seedNode.derivePath(DB_PATH);
 
         // Use the HDNode to create a symmetric key for this database
         this.dbSymKeys[dbName] = dbNode.privateKey;
+
         return this.dbSymKeys[dbName];
     }
 
