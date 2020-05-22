@@ -159,9 +159,8 @@ class DataStore {
         }
 
         this.schema = await App.getSchema(this.schemaName);
-
-        let specification = await this.schema.getSpecification();
-        let dbName = this.config.dbName ? this.config.dbName : specification.database.name;
+        let schemaJson = await this.schema.getSchemaJson();
+        let dbName = this.config.dbName ? this.config.dbName : schemaJson.database.name;
         this.schemaPath = this.schema.path;
 
         let config = _.merge({
@@ -170,7 +169,7 @@ class DataStore {
         }, this.config);
 
         this._db = await this._dataserver.openDatabase(dbName, config);
-        let indexes = specification.database.indexes;
+        let indexes = schemaJson.database.indexes;
 
         if (indexes) {
             await this.ensureIndexes(indexes);
