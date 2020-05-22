@@ -258,8 +258,8 @@ class Database extends EventEmitter {
                     encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
                 }
 
-                let remoteDsn = await this.dataserver.getDsn();
-                let db = new EncryptedDatabase(dbHashName, encryptionKey, remoteDsn, this.did, this.permissions);
+                let remoteDsn = await this.dataserver.getDsn(this.user);
+                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
