@@ -4,6 +4,8 @@ const resolveAllOf = require('json-schema-resolve-allof');
 import App from './app';
 import _ from 'lodash';
 
+const draft6 = require('ajv/lib/refs/json-schema-draft-06.json');
+
 // Custom resolver for RefParser
 //const { ono } = require("ono");
 const resolver = {
@@ -31,7 +33,7 @@ class Schema {
 
         options = _.merge({
             metaSchemas: [
-                'ajv/lib/refs/json-schema-draft-06.json'
+                draft6
             ],
             ajv: {
                 loadSchema: Schema.loadJson,
@@ -42,7 +44,7 @@ class Schema {
         this.ajv = new Ajv(options.ajv);
 
         for (let s in options.metaSchemas) {
-            this.ajv.addMetaSchema(require(options.metaSchemas[s]));
+            this.ajv.addMetaSchema(options.metaSchemas[s]);
         }
 
         this._schemaJson = null;
