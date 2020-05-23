@@ -262,7 +262,8 @@ App.Helpers = {
     vid: VidHelper,
     wallet: WalletHelper,
     trust: TrustHelper,
-    credentials: CredentialsHelper
+    credentials: CredentialsHelper,
+    schema: VeridaSchema
 };
 
 
