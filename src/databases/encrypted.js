@@ -60,7 +60,11 @@ class EncryptedDatabase {
             await this.createDb();
         }
 
-        // Start syncing the local encrypted database with the remote encrypted database
+        // do a once off sync to ensure the local database pulls all data
+        // from remote server before continuing
+        await this._localDbEncrypted.replicate.from(this._remoteDbEncrypted);
+
+        // then two-way, continuous, retriable sync
         PouchDB.sync(this._localDbEncrypted, this._remoteDbEncrypted, {
             live: true,
             retry: true
