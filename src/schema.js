@@ -148,7 +148,7 @@ class Schema {
             path += "/schema.json";
         }
 
-        this._finalPath = Schema.resolvePath(path);
+        this._finalPath = await Schema.resolvePath(path);
         this.path = this._finalPath;
         return this._finalPath;
     }
