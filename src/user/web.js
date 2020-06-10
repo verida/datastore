@@ -28,7 +28,7 @@ class WebUser extends Base {
 
     async requestSignature(appName, accessType) {
         let signMessage = this._getSignMessage(appName, accessType);
-        return await this.web3Provider.eth.personal.sign(signMessage, this.address);
+        return this.web3Provider.eth.personal.sign(signMessage, this.address);
     }
 
     saveToSession(appName) {

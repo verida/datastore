@@ -30,7 +30,8 @@ class Base {
 
         // User doesn't exist, so try to create
         if (!vidDoc) {
-            vidDoc = await VidHelper.save(this.did, appName, keyring, this.serverUrl);
+            let signature = await this.requestSignature(appName, "default");
+            vidDoc = await VidHelper.save(this.did, appName, keyring, this.serverUrl, signature);
         }
 
         return vidDoc.id;
@@ -61,7 +62,7 @@ class Base {
         }
 
         let keyring = new Keyring(signature);
-        let vid = await this.getAppVid(appName, keyring, this.serverUrl);
+        let vid = await this.getAppVid(appName, keyring);
 
         this.appConfigs[appName] = {
             keyring: keyring,
@@ -70,6 +71,11 @@ class Base {
 
         this.saveToSession(appName);
         return this.appConfigs[appName];
+    }
+
+    async setUsername(username) {
+        let signature = await this.requestSignature(username, "username");
+        return VidHelper.commitUsername(username, this.did, signature);
     }
 
     saveToSession(appName) {
@@ -140,12 +146,14 @@ class Base {
         delete this.appConfigs[appName];
     }
 
-    _getSignMessage(appName, accessType) {
+    _getSignMessage(context, accessType) {
         switch (accessType) {
+            case 'username':
+                return "Set my username to " + context + " for DID " + this.did;
             case 'profile':
                 return "Do you approve this application to update your Verida public profile?\n\n" + this.did;
             default:
-                return "Do you approve access to view and update \""+appName+"\"?\n\n" + this.did;
+                return "Do you approve access to view and update \""+context+"\"?\n\n" + this.did;
         }
     }
 

@@ -11,7 +11,7 @@ class VidHelper {
      * 
      * @todo: Replace with decentralised lookup
      */
-    async save(did, appName, keyring, userDataserverUrl) {
+    async save(did, appName, keyring, userDataserverUrl, signature) {
         let vid = this.getVidFromDid(did, appName);
         let publicKeys = keyring.exportPublicKeys();
         let appUrl = App.config.appHost;
@@ -54,7 +54,7 @@ class VidHelper {
         });
 
         DIDHelper.createProof(doc, keyring.signKey.private);
-        let response = await DIDHelper.commit(did, doc, App.config.server.didServerUrl);
+        let response = await DIDHelper.commit(did, doc, signature, App.config.server.didServerUrl);
         if (response) {
             return doc;
         }
@@ -100,6 +100,14 @@ class VidHelper {
     getDidFromAddress(address, chain) {
         chain = chain || "ethr";
         return 'did:'+chain+':'+address.toLowerCase();
+    }
+
+    async getDidFromUsername(username) {
+        return DIDHelper.getDidFromUsername(username, App.config.server.didServerUrl);
+    }
+
+    async commitUsername(username, did, signature) {
+        return DIDHelper.commitUsername(username, did, signature, App.config.server.didServerUrl);
     }
 
 }
