@@ -3,6 +3,7 @@ import Keyring from "../keyring";
 import App from '../app';
 const _ = require('lodash');
 import didJWT from 'did-jwt';
+import { utils } from 'ethers';
 
 class Base {
 
@@ -19,6 +20,7 @@ class Base {
         this.did = VidHelper.getDidFromAddress(address, chain);
 
         this.appConfigs = {};
+        this.signatures = {};
     }
 
     async getAppVid(appName, keyring) {
@@ -85,7 +87,6 @@ class Base {
     restoreFromSession(appName) {
         return false;
     }
-    
 
     /**
      * Sign data as the current user
@@ -144,6 +145,23 @@ class Base {
 
     logout(appName) {
         delete this.appConfigs[appName];
+    }
+
+    async requestSignature(context, accessType) {
+        let hex = Buffer.from(JSON.stringify([context, accessType])).toString("hex");
+        let hash = utils.sha256('0x' + hex);
+        
+        if (this.signatures[hash]) {
+            return this.signatures[hash];
+        }
+
+        let signMessage = this._getSignMessage(context, accessType);
+        this.signatures[hash] = await this._requestSignature(signMessage);
+        return this.signatures[hash];
+    }
+
+    async _requestSignature() {
+        throw new Error("Not implemented");
     }
 
     _getSignMessage(context, accessType) {
