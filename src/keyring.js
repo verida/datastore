@@ -1,15 +1,11 @@
 /*eslint no-console: "off"*/
-import { secretbox, box, sign, randomBytes } from "tweetnacl";
+import { box, sign } from "tweetnacl";
 import {
   decodeUTF8,
-  encodeUTF8,
   encodeBase64,
   decodeBase64
 } from "tweetnacl-util";
 import { utils, ethers } from 'ethers';
-
-const newSymNonce = () => randomBytes(secretbox.nonceLength);
-const newAsymNonce = () => randomBytes(box.nonceLength);
 
 const BASE_PATH = "m/6696500'/0'/0'";
 const DB_PATH = "m/42"
@@ -128,99 +124,27 @@ class Keyring {
     }
 
     symEncryptBuffer(data) {
-        const keyUint8Array = this.symKey;
-
-        const nonce = newSymNonce();
-        const messageUint8 = data;
-        const box = secretbox(messageUint8, nonce, keyUint8Array);
-
-        const fullMessage = new Uint8Array(nonce.length + box.length);
-        fullMessage.set(nonce);
-        fullMessage.set(box, nonce.length);
-
-        const base64FullMessage = encodeBase64(fullMessage);
-        return base64FullMessage;
+        return EncryptionHelper.symEncryptBuffer(data, this.symKey);
     }
 
     symDecryptBuffer(messageWithNonce) {
-        const keyUint8Array = this.symKey;
-        const messageWithNonceAsUint8Array = decodeBase64(messageWithNonce);
-        const nonce = messageWithNonceAsUint8Array.slice(0, secretbox.nonceLength);
-        const message = messageWithNonceAsUint8Array.slice(
-            secretbox.nonceLength,
-            messageWithNonce.length
-        );
-
-        const decrypted = secretbox.open(message, nonce, keyUint8Array);
-        if (!decrypted) {
-            throw new Error("Could not decrypt message");
-        }
-
-        return decrypted;
+        return EncryptionHelper.symDecryptBuffer(messageWithNonce, this.symKey);
     }
 
     symEncrypt(data) {
-        const keyUint8Array = this.symKey;
-
-        const nonce = newSymNonce();
-        const messageUint8 = decodeUTF8(JSON.stringify(data));
-        const box = secretbox(messageUint8, nonce, keyUint8Array);
-
-        const fullMessage = new Uint8Array(nonce.length + box.length);
-        fullMessage.set(nonce);
-        fullMessage.set(box, nonce.length);
-
-        const base64FullMessage = encodeBase64(fullMessage);
-        return base64FullMessage;
+        return EncryptionHelper.symEncrypt(data, this.symKey);
     }
 
     symDecrypt(messageWithNonce) {
-        const keyUint8Array = this.symKey;
-        const messageWithNonceAsUint8Array = decodeBase64(messageWithNonce);
-        const nonce = messageWithNonceAsUint8Array.slice(0, secretbox.nonceLength);
-        const message = messageWithNonceAsUint8Array.slice(
-            secretbox.nonceLength,
-            messageWithNonce.length
-        );
-
-        const decrypted = secretbox.open(message, nonce, keyUint8Array);
-        if (!decrypted) {
-            throw new Error("Could not decrypt message");
-        }
-
-        const base64DecryptedMessage = encodeUTF8(decrypted);
-        return JSON.parse(base64DecryptedMessage);
+        return EncryptionHelper.symDecrypt(messageWithNonce, this.symKey);
     }
 
     asymEncrypt(data, secretOrSharedKey) {
-        const nonce = newAsymNonce();
-        const messageUint8 = decodeUTF8(JSON.stringify(data));
-        const encrypted = box.after(messageUint8, nonce, secretOrSharedKey);
-
-        const fullMessage = new Uint8Array(nonce.length + encrypted.length);
-        fullMessage.set(nonce);
-        fullMessage.set(encrypted, nonce.length);
-
-        const base64FullMessage = encodeBase64(fullMessage);
-        return base64FullMessage;
+        return EncryptionHelper.asymEncrypt(data, secretOrSharedKey);
     }
 
     asymDecrypt(messageWithNonce, secretOrSharedKey) {
-        const messageWithNonceAsUint8Array = decodeBase64(messageWithNonce);
-        const nonce = messageWithNonceAsUint8Array.slice(0, box.nonceLength);
-        const message = messageWithNonceAsUint8Array.slice(
-            box.nonceLength,
-            messageWithNonce.length
-        );
-
-        const decrypted = box.open.after(message, nonce, secretOrSharedKey);
-
-        if (!decrypted) {
-            throw new Error('Could not decrypt message');
-        }
-
-        const base64DecryptedMessage = encodeUTF8(decrypted);
-        return JSON.parse(base64DecryptedMessage);
+        return EncryptionHelper.asymDecrypt(messageWithNonce, secretOrSharedKey);
     }
 
     buildSharedKeyStart(privateKey) {
