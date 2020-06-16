@@ -24,6 +24,8 @@ class Base {
     }
 
     async getAppVid(appName, keyring) {
+        appName = appName || App.config.appName;
+        
         if (this.appConfigs[appName]) {
             return this.appConfigs[appName].vid;
         }
