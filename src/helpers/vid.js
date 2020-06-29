@@ -103,6 +103,10 @@ class VidHelper {
     }
 
     async getDidFromUsername(username) {
+        if (usernameOrDid.match(/^did\:/)) {
+            return username;
+        }
+
         return DIDHelper.getDidFromUsername(username, App.config.server.didServerUrl);
     }
 
