@@ -8,7 +8,7 @@ import {
 
 const newSymNonce = () => randomBytes(secretbox.nonceLength);
 const newAsymNonce = () => randomBytes(box.nonceLength);
-const newKey = () => randomBytes(secretbox.keyLength);
+const newKey = (length) => randomBytes(length ? length : secretbox.keyLength);
 
 class Encryption {
 
@@ -83,8 +83,8 @@ class Encryption {
         return JSON.parse(base64DecryptedMessage);
     }
 
-    static randomKey() {
-        return newKey();
+    static randomKey(length) {
+        return newKey(length);
     }
 
 }
