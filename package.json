@@ -33,6 +33,8 @@
     }
   },
   "dependencies": {
+    "@vechain/connex-framework": "^1.1.3",
+    "@vechain/connex.driver-nodejs": "^1.2.0-beta6",
     "@verida/did-helper": "^0.4.3",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
