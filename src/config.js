@@ -2,7 +2,7 @@
 let config = {
     environment: process.env.VERIDA_ENVIRONMENT || "testnet",
     appName: process.env.VERIDA_APP_NAME || "Test App",
-    appHost: process.env.VERIDA_APP_HOST || (process.browser ? window.location.origin : null),
+    appHost: process.env.VERIDA_APP_HOST || (process.browser && window ? window.location.origin : null),
     servers: {
         local: {
             // For core development
