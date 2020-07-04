@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@verida/did-helper": "^0.4.4",
+    "axios": "^0.19.2",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
     "did-jwt": "^4.4.0",
