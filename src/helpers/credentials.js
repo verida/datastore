@@ -86,8 +86,6 @@ class Credentials {
             throw new Error("Invalid URI");
         }
 
-        console.log(matches)
-
         const vid = matches[1];
         const dbName = matches[2];
         const id = matches[3];

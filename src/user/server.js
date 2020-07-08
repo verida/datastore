@@ -1,6 +1,5 @@
 import { ecsign, hashPersonalMessage, toRpcSig } from 'ethereumjs-util';
-import { Framework } from '@vechain/connex-framework'
-import { Driver, SimpleNet, SimpleWallet, options } from '@vechain/connex.driver-nodejs'
+import { cry } from 'thor-devkit';
 
 import Base from './base';
 
@@ -13,6 +12,8 @@ class ServerUser extends Base {
      *
      * @property {string} did Decentralised ID for this use (ie: `did:ethr:0xaef....`)
      * @property {string} address Blockchain address for this user (ie: `0xaef....`)
+     * @property {string} appServerUrl URL of the Verida app server 
+     * @property {string} privateKey Private key (with leading `0x`)
      */
     constructor(chain, address, appServerUrl, privateKey) {
         super(chain, address, appServerUrl);
@@ -35,20 +36,8 @@ class ServerUser extends Base {
         }
 
         if (this.chain == 'vechain') {
-            const wallet = new SimpleWallet();
-            wallet.import(this.privateKeyHex);
-            const driver = await Driver.connect(new SimpleNet('http://localhost:8669/'), wallet);
-            const connex = new Framework(driver);
-            const signingService = connex.vendor.sign('cert');
-            const signature = await signingService.request({
-                purpose: 'agreement',
-                payload: {
-                    type: 'text',
-                    content: message
-                }
-            });
-
-            return signature;
+            const sig = cry.secp256k1.sign(cry.keccak256(signMessage), this.privateKey)
+            return sig.toString('hex')
         }
     }
 
