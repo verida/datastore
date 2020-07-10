@@ -1,5 +1,4 @@
-import { ecsign, hashPersonalMessage, toRpcSig } from 'ethereumjs-util';
-import { cry } from 'thor-devkit';
+import utils from '@verida/wallet-utils';
 
 import Base from './base';
 
@@ -27,18 +26,7 @@ class ServerUser extends Base {
     }
 
     async _requestSignature(signMessage) {
-        const message = Buffer.from(signMessage);
-
-        if (this.chain == 'ethr') {
-            const messageHash = hashPersonalMessage(message);
-            const sig = ecsign(messageHash, this.privateKey);
-            return toRpcSig(sig.v, sig.r, sig.s);
-        }
-
-        if (this.chain == 'vechain') {
-            const sig = cry.secp256k1.sign(cry.keccak256(signMessage), this.privateKey)
-            return sig.toString('hex')
-        }
+        return utils.signMessage(this.chain)
     }
 
 }
