@@ -3,12 +3,12 @@ import VidHelper from './vid';
 import DIDHelper from '@verida/did-helper';
 import Verida from '../app';
 
-const EventEmitter = require('events');
+//const EventEmitter = require('events');
 
 /**
  * 
  */
-class WalletHelper extends EventEmmitter {
+class WalletHelper {
 
     /**
      * Helper to connect a wallet.
