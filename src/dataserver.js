@@ -92,6 +92,10 @@ class DataServer {
      * @param {*} config 
      */
     async openDatabase(dbName, config) {
+        if (!dbName) {
+            throw new Error("No database name provided");
+        }
+        
         config = _.merge({
             permissions: {
                 read: "owner",

@@ -52,7 +52,7 @@ class Encryption {
         return JSON.parse(base64DecryptedMessage);
     }
 
-    asymEncrypt(data, secretOrSharedKey) {
+    static asymEncrypt(data, secretOrSharedKey) {
         const nonce = newAsymNonce();
         const messageUint8 = decodeUTF8(JSON.stringify(data));
         const encrypted = box.after(messageUint8, nonce, secretOrSharedKey);
@@ -65,7 +65,7 @@ class Encryption {
         return base64FullMessage;
     }
 
-    asymDecrypt(messageWithNonce, secretOrSharedKey) {
+    static asymDecrypt(messageWithNonce, secretOrSharedKey) {
         const messageWithNonceAsUint8Array = decodeBase64(messageWithNonce);
         const nonce = messageWithNonceAsUint8Array.slice(0, box.nonceLength);
         const message = messageWithNonceAsUint8Array.slice(

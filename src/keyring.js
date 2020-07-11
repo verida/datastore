@@ -6,6 +6,7 @@ import {
   decodeBase64
 } from "tweetnacl-util";
 import { utils, ethers } from 'ethers';
+import EncryptionHelper from './helpers/encryption';
 
 const BASE_PATH = "m/6696500'/0'/0'";
 const DB_PATH = "m/42"

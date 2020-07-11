@@ -33,12 +33,13 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.4.3",
+    "@verida/did-helper": "^0.4.4",
     "@verida/wallet-utils": "git+https://github.com/verida/wallet-utils.git",
+    "axios": "^0.19.2",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
-    "did-jwt": "^4.0.0",
-    "did-jwt-vc": "^0.1.4",
+    "did-jwt": "^4.4.0",
+    "did-jwt-vc": "^0.1.6",
     "did-resolver": "^1.1.0",
     "ethers": "^4.0.47",
     "fs": "0.0.1-security",
@@ -54,20 +55,20 @@
     "tweetnacl-util": "^0.15.0",
     "url-exists": "^1.0.3",
     "uuid": "^3.3.3",
-    "web3": "^1.2.4"
+    "web3": "^1.2.9"
   },
   "devDependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.3",
-    "@babel/node": "^7.8.3",
-    "@babel/plugin-proposal-class-properties": "^7.8.3",
-    "@babel/polyfill": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/cli": "^7.10.4",
+    "@babel/core": "^7.10.4",
+    "@babel/node": "^7.10.4",
+    "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/polyfill": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
     "babel-core": "^6.26.3",
-    "babel-loader": "^8.0.6",
+    "babel-loader": "^8.1.0",
     "babel-register": "^6.26.0",
-    "jsdoc": "^3.6.3",
+    "jsdoc": "^3.6.4",
     "minami": "^1.2.3",
-    "mocha": "^7.0.0"
+    "mocha": "^7.2.0"
   }
 }
