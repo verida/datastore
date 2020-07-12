@@ -45,11 +45,21 @@ class PublicDatabase {
         try {
             let info = await this._remoteDb.info();
             if (info.error && info.error == "not_found") {
-                await this.createDb();
+                if (this.isOwner) {
+                    await this.createDb();
+                }
+                else {
+                    throw new Error("Database not found");
+                }
             }
         } catch(err) {
             console.log(err);
-            await this.createDb();
+            if (this.isOwner) {
+                await this.createDb();
+            }
+            else {
+                throw new Error("Database not found");
+            }
         }
     }
 
