@@ -17,7 +17,7 @@ class Inbox extends EventEmitter {
         await this.init();
         
         let items = await this._publicInbox.getMany();
-        if (items.length == 0) {
+        if (!items || items.length == 0) {
             return 0;
         }
 
