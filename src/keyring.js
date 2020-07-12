@@ -60,12 +60,8 @@ class Keyring {
         const signatureBytes = ethers.utils.toUtf8Bytes(signature)
 
         // Use the signature as entropy to create a new seed
-        const entropy = utils.keccak256(signatureBytes);
-        const mnemonic = ethers.utils.HDNode.entropyToMnemonic(entropy);
-        const seed = ethers.utils.HDNode.mnemonicToSeed(mnemonic);
-        
-        // Use the seed to create a new HDNode
-        const seedNode = ethers.utils.HDNode.fromSeed(seed);
+        const entropy = ethers.utils.keccak256(signatureBytes);
+        const seedNode = ethers.utils.HDNode.fromSeed(entropy);
         const dbNode = seedNode.derivePath(DB_PATH);
 
         // Use the HDNode to create a symmetric key for this database
