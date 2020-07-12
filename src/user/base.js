@@ -3,7 +3,7 @@ import Keyring from "../keyring";
 import App from '../app';
 const _ = require('lodash');
 import didJWT from 'did-jwt';
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 
 class Base {
 
