@@ -59,10 +59,6 @@ class VidHelper {
         if (response) {
             return doc;
         }
-
-        // Future: Have did-helper include consent message in the proof
-        // and have did-server verify the consent message is from a
-        // chain address that is linked to the DID (unless it's the only one)?
     }
 
     /**
@@ -106,7 +102,7 @@ class VidHelper {
     getVidFromDid(did, appName) {
         appName = appName || App.config.appName;
         did = did.toLowerCase();
-        return 'did:vid:' + utils.id(appName + did);
+        return 'did:verida:' + utils.id(appName + did);
     }
 
     /**
