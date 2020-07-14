@@ -86,9 +86,7 @@ class ProfileManager {
        * @returns {boolean} Boolean indicating if the save was successful
        */
     async set (doc, value) {
-        console.log("innit")
       await this.init()
-      console.log("init done")
   
       if (typeof doc === 'string') {
         doc = {
