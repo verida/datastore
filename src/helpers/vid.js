@@ -168,6 +168,6 @@ export function getResolver() {
     }
 
     return {
-        vid: resolve
+        verida: resolve
     }
 }
