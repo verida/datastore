@@ -39,7 +39,7 @@
     "did-jwt": "^4.4.0",
     "did-jwt-vc": "^0.1.6",
     "did-resolver": "^1.1.0",
-    "ethers": "^4.0.47",
+    "ethers": "4.0",
     "fs": "0.0.1-security",
     "json-schema-ref-parser": "^7.1.2",
     "json-schema-resolve-allof": "^1.5.0",
