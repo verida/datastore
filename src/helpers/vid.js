@@ -1,6 +1,6 @@
 /*eslint no-console: "off"*/
 import { DIDDocument } from 'did-document';
-import DIDHelper from '@verida/did-helper';
+import DIDHelper from '@verida/did-helper/src/DIDHelper';
 import { utils } from 'ethers';
 import App from '../app';
 
@@ -8,7 +8,7 @@ class VidHelper {
 
     /**
      * Save a DID document
-     * 
+     *
      * @todo: Replace with decentralised lookup
      */
     async save(did, appName, keyring, userDataserverUrl, signature) {
@@ -85,7 +85,7 @@ class VidHelper {
 
     /**
      * Get DID for a given VID
-     * 
+     *
      * @param {*} vid
      */
     async getDidFromVid(vid) {
@@ -95,9 +95,9 @@ class VidHelper {
 
     /**
      * Get the VID for a given DID and application name
-     * 
-     * @param {*} did 
-     * @param {*} appName 
+     *
+     * @param {*} did
+     * @param {*} appName
      */
     getVidFromDid(did, appName) {
         appName = appName || App.config.appName;

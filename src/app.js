@@ -1,5 +1,4 @@
 /*eslint no-console: "off"*/
-
 import Config from './config';
 import WebUser from "./user/web";
 import ServerUser from "./user/server";
@@ -277,5 +276,9 @@ App.cache = {
 };
 
 App.config = Config;
+App.cache = {
+    schemas: {},
+    dataservers: {}
+};
 
 export default App;

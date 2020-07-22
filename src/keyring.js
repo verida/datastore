@@ -26,8 +26,12 @@ class Keyring {
     constructor(signature) {
         this.signature = signature;
 
-        const entropy = ethers.utils.sha256('0x' + signature.slice(2));
-        const seedNode = ethers.utils.HDNode.fromSeed(entropy);
+        const entropy = utils.sha256('0x' + signature.slice(2));
+        // ethers.utils?
+        const mnemonic = ethers.HDNode.entropyToMnemonic(entropy);
+        const seed = ethers.HDNode.mnemonicToSeed(mnemonic);
+
+        const seedNode = ethers.utils.HDNode.fromSeed(seed);
         this.baseNode = seedNode.derivePath(BASE_PATH);
 
         // Build symmetric key
