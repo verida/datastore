@@ -3,7 +3,7 @@ import Keyring from "../keyring";
 import App from '../app';
 const _ = require('lodash');
 import didJWT from 'did-jwt';
-import { utils } from 'ethers';
+import { ethers } from 'ethers';
 
 class Base {
 
@@ -151,7 +151,7 @@ class Base {
 
     async requestSignature(context, accessType) {
         let hex = Buffer.from(JSON.stringify([context, accessType])).toString("hex");
-        let hash = utils.sha256('0x' + hex);
+        let hash = ethers.utils.sha256('0x' + hex);
         
         if (this.signatures[hash]) {
             return this.signatures[hash];

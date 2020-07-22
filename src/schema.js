@@ -3,6 +3,7 @@ import Ajv from "ajv";
 const resolveAllOf = require('json-schema-resolve-allof');
 import App from './app';
 import _ from 'lodash';
+import axios from 'axios'
 
 const draft6 = require('ajv/lib/refs/json-schema-draft-06.json');
 
@@ -107,8 +108,10 @@ class Schema {
         }
 
         let path = await this.getPath();
-        let fileData = await fetch(path);
-        this._schemaJson = await fileData.json();
+        let fileData = await axios.get(path, {
+            responseType: 'json'
+        });
+        this._schemaJson = await fileData.data;
         return this._schemaJson;
     }
 
@@ -179,10 +182,12 @@ class Schema {
      */
     static async loadJson(uri) {
         uri = await Schema.resolvePath(uri);
-        let request = await fetch(uri);
+        let request = await axios.get(uri, {
+            responseType: 'json'
+        });
 
         // @todo: check valid uri
-        let json = await request.json();
+        let json = await request.data;
         return json;
     }
 

@@ -86,29 +86,12 @@ class Credentials {
             throw new Error("Invalid URI");
         }
 
-        console.log(matches)
-
         const vid = matches[1];
         const dbName = matches[2];
         const id = matches[3];
         const query = url.parse(uri,true).query;
 
-        // Determine application name
-        const didDoc = await Verida.Helpers.vid.getByVid(vid);
-        if (!didDoc) {
-            throw new Error("Unable to locate VID: " + JSON.stringify(Verida.config.servers.local.didServerUrl)  + vid);
-        }
-
-        const applicationService = didDoc.service.find(entry => entry.type.includes("verida.Application"));
-        const appName = applicationService.description;
-        if (!appName) {
-            throw new Error("Unable to locate application name");
-        }
-
-        const did = await Verida.Helpers.vid.getDidFromVid(vid);
-        if (!did) {
-            throw new Error("Unable to locate DID");
-        }
+        const { did, appName } = await Verida.Helpers.vid.convertVid(vid)
 
         let db = await Verida.openExternalDatabase(dbName, did, {
             permissions: {

@@ -1,6 +1,6 @@
 {
   "name": "@verida/datastore",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "Verida Datastore",
   "main": "dist/app.js",
   "author": "Verida",
@@ -33,7 +33,9 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.4.4",
+    "@verida/did-helper": "^0.5.0",
+    "@verida/wallet-utils": "^1.0.0",
+    "axios": "^0.19.2",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
     "did-jwt": "^4.4.0",
@@ -48,6 +50,7 @@
     "pouchdb": "^7.2.1",
     "pouchdb-find": "^7.1.1",
     "store": "^2.0.12",
+    "thor-devkit": "^1.2.5",
     "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.0",
     "url-exists": "^1.0.3",

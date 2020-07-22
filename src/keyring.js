@@ -5,7 +5,7 @@ import {
   encodeBase64,
   decodeBase64
 } from "tweetnacl-util";
-import { utils, ethers } from 'ethers';
+import { ethers } from 'ethers';
 import EncryptionHelper from './helpers/encryption';
 
 const BASE_PATH = "m/6696500'/0'/0'";
@@ -26,11 +26,8 @@ class Keyring {
     constructor(signature) {
         this.signature = signature;
 
-        const entropy = utils.sha256('0x' + signature.slice(2));
-        const mnemonic = ethers.utils.HDNode.entropyToMnemonic(entropy);
-        const seed = ethers.utils.HDNode.mnemonicToSeed(mnemonic);
-
-        const seedNode = ethers.utils.HDNode.fromSeed(seed);
+        const entropy = ethers.utils.sha256('0x' + signature.slice(2));
+        const seedNode = ethers.utils.HDNode.fromSeed(entropy);
         this.baseNode = seedNode.derivePath(BASE_PATH);
 
         // Build symmetric key
@@ -63,12 +60,8 @@ class Keyring {
         const signatureBytes = ethers.utils.toUtf8Bytes(signature)
 
         // Use the signature as entropy to create a new seed
-        const entropy = utils.keccak256(signatureBytes);
-        const mnemonic = ethers.utils.HDNode.entropyToMnemonic(entropy);
-        const seed = ethers.utils.HDNode.mnemonicToSeed(mnemonic);
-        
-        // Use the seed to create a new HDNode
-        const seedNode = ethers.utils.HDNode.fromSeed(seed);
+        const entropy = ethers.utils.keccak256(signatureBytes);
+        const seedNode = ethers.utils.HDNode.fromSeed(entropy);
         const dbNode = seedNode.derivePath(DB_PATH);
 
         // Use the HDNode to create a symmetric key for this database
