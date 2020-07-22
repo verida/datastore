@@ -41,7 +41,6 @@
     "json-schema-ref-parser": "^7.1.2",
     "json-schema-resolve-allof": "^1.5.0",
     "lodash": "^4.17.15",
-    "ono": "^7.1.2",
     "path-browserify": "0.0.0",
     "pouchdb": "^7.2.1",
     "pouchdb-adapter-asyncstorage": "^6.4.1",
@@ -72,8 +71,7 @@
     "util": "^0.10.4",
     "util.promisify": "^1.0.1",
     "uuid": "^3.3.3",
-    "vm-browserify": "0.0.4",
-    "web3": "^1.2.4"
+    "vm-browserify": "0.0.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.4",
