@@ -12,6 +12,7 @@ import CredentialsHelper from './helpers/credentials';
 import EncryptionHelper from './helpers/encryption';
 import Profile from './profile';
 import DbManager from './managers/dbManager';
+import ProfileManager from './managers/profileManager';
 
 const _ = require('lodash');
 
@@ -34,6 +35,7 @@ class App {
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
         this.dbManager = new DbManager(this);
+        this.profileManager = new ProfileManager(this);
 
         this.dataserver = new DataServer({
             datastores: config.datastores,
@@ -173,7 +175,7 @@ class App {
      * @returns {DataStore} Datastore instance for the requested user profile
      */
     static async openProfile(did, appName) {
-        let datastore = await App.openExternalDatastore("profile/public", did, {
+        const datastore = await App.openExternalDatastore("profile/public", did, {
             appName: appName || App.config.vaultAppName,
             permissions: {
                 read: "public",
@@ -182,7 +184,7 @@ class App {
             readOnly: true
         });
 
-        return new Profile(dataStore);
+        return new Profile(datastore);
     }
 
     /**

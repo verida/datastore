@@ -54,22 +54,30 @@ class VidHelper {
         });
 
         DIDHelper.createProof(doc, keyring.signKey.private);
+
         let response = await DIDHelper.commit(did, doc, signature, App.config.server.didServerUrl);
         if (response) {
             return doc;
         }
-
-        // Future: Have did-helper include consent message in the proof
-        // and have did-server verify the consent message is from a
-        // chain address that is linked to the DID (unless it's the only one)?
     }
 
+    /**
+     * Get a DID Document for the VID by DID and application name
+     * 
+     * @param {*} did Blockchain DID (ie: did:ethr:0x...)
+     * @param {*} appName Application name
+     */
     async getByDid(did, appName) {
         appName = appName || App.config.appName;
         did = did.toLowerCase();
         return await DIDHelper.loadForApp(did, appName, App.config.server.didServerUrl);
     }
 
+    /**
+     * Get a DID Document representing the VID
+     * 
+     * @param {string} vid VID to locate
+     */
     async getByVid(vid) {
         vid = vid.toLowerCase();
         return await DIDHelper.load(vid, App.config.server.didServerUrl);
@@ -94,14 +102,41 @@ class VidHelper {
     getVidFromDid(did, appName) {
         appName = appName || App.config.appName;
         did = did.toLowerCase();
-        return 'did:vid:' + utils.id(appName + did);
+        return 'did:verida:' + utils.id(appName + did);
     }
 
+    /**
+     * Convert a VID to the underlying DID and application name
+     * 
+     * @param {*} vid 
+     */
+    async convertVid(vid) {
+        const didDoc = await this.getByVid(vid);
+        const applicationService = didDoc.service.find(entry => entry.type.includes("verida.Application"));
+        const appName = applicationService.description;
+        const did = await this.getDidFromVid(vid);
+        
+        return {
+            did: did,
+            appName: appName
+        };
+    }
+
+    /**
+     * Construct a DID given a chain and address
+     * 
+     * @param {*} address 
+     * @param {*} chain 
+     */
     getDidFromAddress(address, chain) {
         chain = chain || "ethr";
         return 'did:'+chain+':'+address.toLowerCase();
     }
 
+    /**
+     * Convert a username to a DID
+     * 
+     */
     async getDidFromUsername(username) {
         if (usernameOrDid.match(/^did\:/)) {
             return username;
@@ -110,6 +145,14 @@ class VidHelper {
         return DIDHelper.getDidFromUsername(username, App.config.server.didServerUrl);
     }
 
+    /**
+     * Save a username for a given DID. Requires a valid signature signed
+     * by the DID.
+     * 
+     * @param {*} username 
+     * @param {*} did 
+     * @param {*} signature 
+     */
     async commitUsername(username, did, signature) {
         return DIDHelper.commitUsername(username, did, signature, App.config.server.didServerUrl);
     }
@@ -125,6 +168,6 @@ export function getResolver() {
     }
 
     return {
-        vid: resolve
+        verida: resolve
     }
 }

@@ -267,7 +267,7 @@ class Database extends EventEmitter {
             }
         }
         else {
-            throw "Unknown database permissions requested";
+            throw "Unable to create database or it doesn't exist";
         }
     }
 

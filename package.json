@@ -1,6 +1,6 @@
 {
   "name": "@verida/datastore",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "description": "Verida Datastore",
   "main": "dist/app.js",
   "author": "Verida",
@@ -20,6 +20,8 @@
     "directory": "verida/datastore"
   },
   "dependencies": {
+    "@verida/wallet-utils": "https://github.com/verida/wallet-utils.git#react-native",
+    "axios": "^0.19.2",
     "@tradle/react-native-http": "^2.0.0",
     "@verida/did-helper": "verida/did-helper#react-native",
     "assert": "^1.1.1",
@@ -61,6 +63,7 @@
     "react-native-udp": "^2.1.0",
     "readable-stream": "^1.0.33",
     "store": "^2.0.12",
+    "thor-devkit": "^1.2.5",
     "stream-browserify": "^1.0.0",
     "timers-browserify": "^1.0.1",
     "tty-browserify": "0.0.0",

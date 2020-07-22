@@ -6,11 +6,11 @@ const util = require('util');
 const urlExists = util.promisify(require('url-exists'));
 import App from './app';
 import _ from 'lodash';
+import axios from 'axios'
 
 const draft6 = require('ajv/lib/refs/json-schema-draft-06.json');
 
 // Custom resolver for RefParser
-//const { ono } = require("ono");
 const resolver = {
     order: 1,
     canRead: true,
@@ -18,21 +18,6 @@ const resolver = {
         return Schema.loadJson(file.url);
     }
 };
-
-/*const { ono } = require("ono");
-
-const resolver = {
-    order: 1,
-    canRead: true,
-    async read(file) {
-        try {
-            let response = await fetch(file.url);
-            return response.json();
-        } catch (error) {
-            return ono(error, `Error downloading ${file.url}`)
-        }
-    }
-};*/
 
 class Schema {
 
@@ -128,8 +113,10 @@ class Schema {
         }
 
         let path = await this.getPath();
-        let fileData = await fetch(path);
-        this._schemaJson = await fileData.json();
+        let fileData = await axios.get(path, {
+            responseType: 'json'
+        });
+        this._schemaJson = await fileData.data;
         return this._schemaJson;
     }
 
@@ -200,10 +187,12 @@ class Schema {
      */
     static async loadJson(uri) {
         uri = await Schema.resolvePath(uri);
-        let request = await fetch(uri);
+        let request = await axios.get(uri, {
+            responseType: 'json'
+        });
 
         // @todo: check valid uri
-        let json = await request.json();
+        let json = await request.data;
         return json;
     }
 

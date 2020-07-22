@@ -9,12 +9,12 @@ import {
     VERIDA_SCHEMAS_BASE_PATH
 } from 'react-native-dotenv'
 
-const { location } = window;
+const host = process.browser && window && window.location.origin
 
-let config = {
+const config = {
     environment: VERIDA_ENVIRONMENT || "testnet",
     appName: VERIDA_APP_NAME || "Test App",
-    appHost: VERIDA_APP_HOST || (process.browser && location ? location.origin : null),
+    appHost: VERIDA_APP_HOST || host || null,
     servers: {
         local: {
             // For core development
