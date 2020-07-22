@@ -1,11 +1,23 @@
 import $RefParser from "json-schema-ref-parser";
 import Ajv from "ajv";
-const ajv = new Ajv();
 const resolveAllOf = require('json-schema-resolve-allof');
 require('util.promisify/shim')();
 const util = require('util');
 const urlExists = util.promisify(require('url-exists'));
 import App from './app';
+import _ from 'lodash';
+
+const draft6 = require('ajv/lib/refs/json-schema-draft-06.json');
+
+// Custom resolver for RefParser
+//const { ono } = require("ono");
+const resolver = {
+    order: 1,
+    canRead: true,
+    async read(file) {
+        return Schema.loadJson(file.url);
+    }
+};
 
 const { ono } = require("ono");
 
@@ -33,18 +45,21 @@ class Schema {
      * @param {object} path Path to a schema in the form (http://..../schema.json, /schemas/name/schema.json, name/of/schema)
      * @constructor
      */
-    constructor(path) {
+    constructor(path, options) {
         this.path = path;
         this.errors = [];
 
-        this.name = null;
-        this._specification = null;
-    }
+        options = _.merge({
+            metaSchemas: [
+                draft6
+            ],
+            ajv: {
+                loadSchema: Schema.loadJson,
+                logger: false
+            }
+        }, options);
 
-    async init() {
-        if (this._specification) {
-            return;
-        }
+        this.ajv = new Ajv(options.ajv);
 
         this.path = await this._resolvePath(this.path);
         this._specification = await $RefParser.dereference(this.path, {
@@ -53,7 +68,10 @@ class Schema {
         let spec = await resolveAllOf(this._specification);
         this.name = spec.name;
 
-        this._init = true;
+        this._schemaJson = null;
+        this._finalPath = null;
+        this._specification = null;
+        this._validate = null;
     }
 
     /**
@@ -66,7 +84,16 @@ class Schema {
      * @returns {object} JSON object representing the defereferenced schema
      */
     async getSpecification() {
-        await this.init();
+        if (this._specification) {
+            return this._specification;
+        }
+
+        let path = await this.getPath();
+        this._specification = await $RefParser.dereference(path, {
+            resolve: { http: resolver }
+        });
+
+        await resolveAllOf(this._specification);
         return this._specification;
     }
 
@@ -77,31 +104,62 @@ class Schema {
      * @returns {boolean} True if the data validates against the schema.
      */
     async validate(data) {
-        await this.init();
-        let specification = this._specification;
-        let schema = ajv.getSchema(specification['$id']);
-        if (!schema) {
-            ajv.addSchema(specification);
+        if (!this._validate) {
+            let schemaJson = await this.getSchemaJson();
+            this._validate = await this.ajv.compileAsync(schemaJson);
         }
 
-        var valid = ajv.validate(specification['$id'], data);
+        let valid = await this._validate(data);
         if (!valid) {
-            this.errors = ajv.errors;
-            return false;
+            this.errors = this._validate.errors;
+        }
+        
+        return valid;
+    }
+
+    /**
+     * Fetch unresolved JSON schema
+     */
+    async getSchemaJson() {
+        if (this._schemaJson) {
+            return this._schemaJson;
         }
 
-        return true;
+        let path = await this.getPath();
+        let fileData = await fetch(path);
+        this._schemaJson = await fileData.json();
+        return this._schemaJson;
     }
 
     async getIcon() {
-        await this.init();
-        return this.path.replace("schema.json","icon.svg");
+        let path = await this.getPath();
+        return path.replace("schema.json","icon.svg");
     }
 
-    async _resolvePath(path) {
+    /**
+     * Get a rully resolveable path for a URL
+     * 
+     * Handle shortened paths:
+     *  - `health/activity` -> `https://schemas.verida.io/health/activity/schema.json`
+     *  - `https://schemas.verida.io/health/activity` -> `https://schemas.verida.io/health/activity/schema.json`
+     *  - `/health/activity/test.json` -> `https://schemas.verida.io/health/activity/test.json`
+     */
+    async getPath() {
+        if (this._finalPath) {
+            return this._finalPath;
+        }
+
+        let path = this.path;
+
         // If we have a full HTTP path, simply return it
         if (path.match("http")) {
-            return path;
+            this._finalPath = Schema.resolvePath(path);
+            return this._finalPath;
+        }
+
+        // Prepend `/` if required (ie: "profile/public")
+        if (path.substring(1) != '/') {
+            path = '/' + path;
         }
 
         // Append /schema.json if required
@@ -109,23 +167,42 @@ class Schema {
             path += "/schema.json";
         }
 
-        // Try to resolve the path as being "custom"
+        this._finalPath = await Schema.resolvePath(path);
+        this.path = this._finalPath;
+        return this._finalPath;
+    }
 
-        let tmpPath1 = App.config.customSchemasPath + path;
-        let exists = await urlExists(tmpPath1);
-        if (exists) {
-            return tmpPath1;
+    /**
+     * Force schema paths to be applied to URLs
+     * 
+     */
+    static async resolvePath(uri) {
+        const resolvePaths = App.config.server.schemaPaths;
+
+        for (let searchPath in resolvePaths) {
+            let resolvePath = resolvePaths[searchPath];
+            if (uri.substring(0, searchPath.length) == searchPath) {
+                uri = uri.replace(searchPath, resolvePath);
+            }
         }
 
-        // Try to resolve the path as being "base"
-        let baseSchemaPath = App.config.baseSchemasPath || App.config.server.baseSchemas
-        let tmpPath2 = baseSchemaPath + path;
-        exists = await urlExists(tmpPath2);
-        if (exists) {
-            return tmpPath2;
-        }
+        return uri;
+    }
 
-        throw new Error("Unable to resolve the path for: "+path+" (tried "+tmpPath1+" & "+tmpPath2+")");
+    /**
+     * Load JSON from a url that is fully resolved.
+     * 
+     * Used by AJV.
+     * 
+     * @param {*} uri 
+     */
+    static async loadJson(uri) {
+        uri = await Schema.resolvePath(uri);
+        let request = await fetch(uri);
+
+        // @todo: check valid uri
+        let json = await request.json();
+        return json;
     }
 
 }

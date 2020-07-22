@@ -17,6 +17,7 @@ class DataServer {
 
         this.appName = config.appName ? config.appName : App.config.appName;
         this.appHost = config.appHost ? config.appHost : App.config.appHost;
+        this.dbManager = config.dbManager;
         this.serverUrl = config.serverUrl;
         this.isProfile = config.isProfile ? config.isProfile : false;
 
@@ -91,13 +92,18 @@ class DataServer {
      * @param {*} config 
      */
     async openDatabase(dbName, config) {
+        if (!dbName) {
+            throw new Error("No database name provided");
+        }
+        
         config = _.merge({
             permissions: {
                 read: "owner",
                 write: "owner"
             },
             user: this._user,
-            did: this.config.did
+            did: this.config.did,
+            saveDatabase: true
         }, config);
 
         // If permissions require "owner" access, connect the current user
@@ -118,8 +124,15 @@ class DataServer {
 
         did = did.toLowerCase();
 
-        // TODO: Cache databases so we don't open the same one more than once
-        return new Database(dbName, did, this.appName, this, config);
+        // @todo Cache databases so we don't open the same one more than once
+        let db = new Database(dbName, did, this.appName, this, config);
+        await db._init();
+
+        if (config.saveDatabase && db._originalDb) {
+            this.dbManager.saveDb(dbName, did, this.appName, config.permissions, db._originalDb.encryptionKey);
+        }
+
+        return db;
     }
 
     async openDatastore(schemaName, config) {
@@ -150,8 +163,6 @@ class DataServer {
         let dsHash = Utils.md5FromArray([
             datastoreName,
             did,
-            config.permissions.read,
-            config.permissions.write,
             config.readOnly ? true : false
         ]);
 
@@ -176,12 +187,12 @@ class DataServer {
     /**
      * Get the default symmetric encryption key
      */
-    async getKey(user) {
+    async getDbKey(user, dbName) {
         if (!this._keyring) {
             await this.connect(user, true);
         }
 
-        return this._keyring.symKey;
+        return this._keyring.getDbKey(dbName);
     }
 
     async getClient(user) {

@@ -3,6 +3,8 @@ import { createVerifiableCredential, createPresentation, verifyPresentation, ver
 import { Resolver } from 'did-resolver';
 import { getResolver } from './vid';
 import { encodeBase64 } from "tweetnacl-util";
+import Verida from "../app";
+const url = require('url');
 
 class Credentials {
 
@@ -64,10 +66,65 @@ class Credentials {
         const issuer = {
             did: appConfig.vid,
             signer,
-            alg: "Ed25519"
+            alg: "Ed25519"  // must be this casing due to did-jwt/src/JWT.ts
         };
 
         return issuer;
+    }
+
+    /**
+     * Fetch a credential from a Verida URI
+     * 
+     * @param {*} uri
+     * @return string DIDJWT representation of the credential
+     */
+    static async fetch(uri) {
+        let regex = /^verida:\/\/(.*)\/(.*)\/(.*)\?(.*)$/i;
+        let matches = uri.match(regex);
+
+        if (!matches) {
+            throw new Error("Invalid URI");
+        }
+
+        console.log(matches)
+
+        const vid = matches[1];
+        const dbName = matches[2];
+        const id = matches[3];
+        const query = url.parse(uri,true).query;
+
+        // Determine application name
+        const didDoc = await Verida.Helpers.vid.getByVid(vid);
+        if (!didDoc) {
+            throw new Error("Unable to locate VID: " + JSON.stringify(Verida.config.servers.local.didServerUrl)  + vid);
+        }
+
+        const applicationService = didDoc.service.find(entry => entry.type.includes("verida.Application"));
+        const appName = applicationService.description;
+        if (!appName) {
+            throw new Error("Unable to locate application name");
+        }
+
+        const did = await Verida.Helpers.vid.getDidFromVid(vid);
+        if (!did) {
+            throw new Error("Unable to locate DID");
+        }
+
+        let db = await Verida.openExternalDatabase(dbName, did, {
+            permissions: {
+                read: "public",
+                write: "owner"
+            },
+            appName: appName,
+            readOnly: true
+        });
+
+        const item = await db.get(id);
+        const encrypted = item.content;
+        const key = Buffer.from(query.key, 'hex');
+
+        const decrypted = Verida.Helpers.encryption.symDecrypt(encrypted, key);
+        return decrypted;
     }
 
     static _getResolver() {

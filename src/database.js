@@ -31,7 +31,7 @@ class Database extends EventEmitter {
         this.signAppName = config.signAppName || this.appName;
         this.dataserver = dataserver;
 
-        this.config = config ? config : {};
+        this.config = _.merge({}, config);
         this.permissions = {};
 
         this.permissions = _.merge({
@@ -42,7 +42,6 @@ class Database extends EventEmitter {
         }, this.config.permissions ? this.config.permissions : {});
 
         this.readOnly = this.config.readOnly ? true : false;
-        this.syncToWallet = this.config.syncToWallet ? true : false;
 
         this._dbHash = null;
         this._db = null;
@@ -57,9 +56,7 @@ class Database extends EventEmitter {
         let text = [
             this.did,
             this.appName,
-            this.dbName,
-            this.permissions.read,
-            this.permissions.write
+            this.dbName
         ].join("/");
 
         let hash = crypto.createHash('md5').update(text).digest("hex");
@@ -97,14 +94,16 @@ class Database extends EventEmitter {
             throw "Unable to save. Read only.";
         }
 
-        let defaults = {};
+        let defaults = {
+            forceInsert: false
+        };
         options = _.merge(defaults, options);
 
         let insert = false;
 
         // Set inserted at if not defined
         // (Assuming it's not defined as we have an insert)
-        if (data._id === undefined) {
+        if (data._id === undefined || options.forceInsert) {
             insert = true;
         }
 
@@ -236,9 +235,10 @@ class Database extends EventEmitter {
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
-                let encryptionKey = await this.dataserver.getKey(this.user);
+                let encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
                 let remoteDsn = await this.dataserver.getDsn(this.user);
                 let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating owner database ("+this.dbName+") for "+this.did+": " + err.message);
@@ -252,11 +252,15 @@ class Database extends EventEmitter {
                 throw new Error("Error creating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
             }
         } else if (this.permissions.read == "users" || this.permissions.write == "users") {
-            // Create encrypted database with generated encryption key
             try {
-                let encryptionKey = this.config.encryptionKey; // TODO: Where and how to generate?
-                let remoteDsn = await this.dataserver.getDsn();
-                let db = new EncryptedDatabase(dbHashName, encryptionKey, remoteDsn, this.did, this.permissions);
+                let encryptionKey = this.config.encryptionKey;
+                if (!encryptionKey && this.config.isOwner) {
+                    encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
+                }
+
+                let remoteDsn = await this.dataserver.getDsn(this.user);
+                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
@@ -268,7 +272,10 @@ class Database extends EventEmitter {
     }
 
     async _beforeInsert(data) {
-        data._id = uuidv1();
+        if (!data._id) {
+            data._id = uuidv1();
+        }
+
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
         await this.signData(data);

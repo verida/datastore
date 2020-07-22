@@ -16,6 +16,15 @@ PouchDB.plugin(adapter);
 
 class EncryptedDatabase {
 
+    /**
+     * 
+     * @param {*} dbName 
+     * @param {*} dataserver 
+     * @param {string} encryptionKey sep256k1 hex string representing encryption key (0x)
+     * @param {*} remoteDsn 
+     * @param {*} did 
+     * @param {*} permissions 
+     */
     constructor(dbName, dataserver, encryptionKey, remoteDsn, did, permissions) {
         this.dbName = dbName;
         this.dataserver = dataserver;
@@ -32,8 +41,11 @@ class EncryptedDatabase {
         this._localDb = new PouchDBCrypt(this.dbName, {
             adapter: 'asyncstorage'
         });
+
+        let encryptionKey = Buffer.from(this.encryptionKey.slice(2), 'hex');
+        
         this._localDb.crypto("", {
-            "key": this.encryptionKey,
+            "key": encryptionKey,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');
@@ -56,7 +68,11 @@ class EncryptedDatabase {
             await this.createDb();
         }
 
-        // Start syncing the local encrypted database with the remote encrypted database
+        // do a once off sync to ensure the local database pulls all data
+        // from remote server before continuing
+        await this._localDbEncrypted.replicate.from(this._remoteDbEncrypted);
+
+        // then two-way, continuous, retriable sync
         PouchDB.sync(this._localDbEncrypted, this._remoteDbEncrypted, {
             live: true,
             retry: true

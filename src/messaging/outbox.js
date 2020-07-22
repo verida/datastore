@@ -40,7 +40,7 @@ class Outbox {
         };
         config = _.merge(defaults, config);
 
-        let sendingAppName = this._app.name;
+        let sendingAppName = App.config.appName;
         let receivingAppName = config.appName;
 
         this.validateData(type, data);

@@ -10,7 +10,9 @@ import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import TrustHelper from './helpers/trust';
 import CredentialsHelper from './helpers/credentials';
+import EncryptionHelper from './helpers/encryption';
 import Profile from './profile';
+import DbManager from './managers/dbManager';
 
 const _ = require('lodash');
 
@@ -36,10 +38,12 @@ class App {
 
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
+        this.dbManager = new DbManager(this);
 
         this.dataserver = new DataServer({
             datastores: config.datastores,
-            serverUrl: this.user.serverUrl
+            serverUrl: this.user.serverUrl,
+            dbManager: this.dbManager
         });
 
         this._isConnected = false;
@@ -237,7 +241,8 @@ class App {
         // Build dataserver config, merging defaults and user defined config
         config = _.merge({
             isProfile: false,
-            serverUrl: dataserverUrl
+            serverUrl: dataserverUrl,
+            dbManager: this.dbManager
         }, config);
 
         // Build dataserver
@@ -257,7 +262,15 @@ App.Helpers = {
     vid: VidHelper,
     wallet: WalletHelper,
     trust: TrustHelper,
-    credentials: CredentialsHelper
+    credentials: CredentialsHelper,
+    schema: VeridaSchema,
+    encryption: EncryptionHelper
+};
+
+
+App.cache = {
+    schemas: {},
+    dataservers: {}
 };
 
 App.config = Config;

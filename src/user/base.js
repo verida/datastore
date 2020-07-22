@@ -3,6 +3,7 @@ import Keyring from "../keyring";
 import App from '../app';
 const _ = require('lodash');
 import didJWT from 'did-jwt';
+import { utils } from 'ethers';
 
 class Base {
 
@@ -19,9 +20,12 @@ class Base {
         this.did = VidHelper.getDidFromAddress(address, chain);
 
         this.appConfigs = {};
+        this.signatures = {};
     }
 
     async getAppVid(appName, keyring) {
+        appName = appName || App.config.appName;
+        
         if (this.appConfigs[appName]) {
             return this.appConfigs[appName].vid;
         }
@@ -30,7 +34,8 @@ class Base {
 
         // User doesn't exist, so try to create
         if (!vidDoc) {
-            vidDoc = await VidHelper.save(this.did, appName, keyring, this.serverUrl);
+            let signature = await this.requestSignature(appName, "default");
+            vidDoc = await VidHelper.save(this.did, appName, keyring, this.serverUrl, signature);
         }
 
         return vidDoc.id;
@@ -61,7 +66,7 @@ class Base {
         }
 
         let keyring = new Keyring(signature);
-        let vid = await this.getAppVid(appName, keyring, this.serverUrl);
+        let vid = await this.getAppVid(appName, keyring);
 
         this.appConfigs[appName] = {
             keyring: keyring,
@@ -72,6 +77,11 @@ class Base {
         return this.appConfigs[appName];
     }
 
+    async setUsername(username) {
+        let signature = await this.requestSignature(username, "username");
+        return VidHelper.commitUsername(username, this.did, signature);
+    }
+
     saveToSession(appName) {
         return false;
     }
@@ -79,7 +89,6 @@ class Base {
     restoreFromSession(appName) {
         return false;
     }
-    
 
     /**
      * Sign data as the current user
@@ -140,12 +149,31 @@ class Base {
         delete this.appConfigs[appName];
     }
 
-    _getSignMessage(appName, accessType) {
+    async requestSignature(context, accessType) {
+        let hex = Buffer.from(JSON.stringify([context, accessType])).toString("hex");
+        let hash = utils.sha256('0x' + hex);
+        
+        if (this.signatures[hash]) {
+            return this.signatures[hash];
+        }
+
+        let signMessage = this._getSignMessage(context, accessType);
+        this.signatures[hash] = await this._requestSignature(signMessage);
+        return this.signatures[hash];
+    }
+
+    async _requestSignature() {
+        throw new Error("Not implemented");
+    }
+
+    _getSignMessage(context, accessType) {
         switch (accessType) {
+            case 'username':
+                return "Set my username to " + context + " for DID " + this.did;
             case 'profile':
                 return "Do you approve this application to update your Verida public profile?\n\n" + this.did;
             default:
-                return "Do you approve access to view and update \""+appName+"\"?\n\n" + this.did;
+                return "Do you approve access to view and update \""+context+"\"?\n\n" + this.did;
         }
     }
 

@@ -22,8 +22,7 @@ class ServerUser extends Base {
         this.privateKey = Buffer.from(key, 'hex');
     }
 
-    async requestSignature(appName, accessType) {
-        let signMessage = this._getSignMessage(appName, accessType);
+    async _requestSignature(signMessage) {
         let message = Buffer.from(signMessage);
         let messageHash = hashPersonalMessage(message);
         let sig = ecsign(messageHash, this.privateKey);
