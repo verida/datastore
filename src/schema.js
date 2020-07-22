@@ -19,7 +19,7 @@ const resolver = {
     }
 };
 
-const { ono } = require("ono");
+/*const { ono } = require("ono");
 
 const resolver = {
     order: 1,
@@ -32,7 +32,7 @@ const resolver = {
             return ono(error, `Error downloading ${file.url}`)
         }
     }
-};
+};*/
 
 class Schema {
 
@@ -60,7 +60,9 @@ class Schema {
         }, options);
 
         this.ajv = new Ajv(options.ajv);
+    }
 
+    async init() {
         this.path = await this._resolvePath(this.path);
         this._specification = await $RefParser.dereference(this.path, {
             resolve: { http: resolver }
