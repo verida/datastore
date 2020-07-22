@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@verida/did-helper": "^0.5.0",
-    "@verida/wallet-utils": "^1.0.0",
+    "@verida/wallet-utils": "https://github.com/verida/wallet-utils.git#react-native",
     "axios": "^0.19.2",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
     "did-document": "github:arablocks/did-document",
