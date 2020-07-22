@@ -1,6 +1,5 @@
 /*eslint no-console: "off"*/
 import Config from './config';
-import WebUser from "./user/web";
 import ServerUser from "./user/server";
 import VeridaSchema from "./schema";
 import DataServer from './dataserver';
@@ -30,11 +29,7 @@ class App {
      * myApp.connect(true);
      */
     constructor(config) {
-        if (process.browser) {
-            this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
-        } else {
-            this.user = new ServerUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.privateKey);
-        }
+        this.user = new ServerUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.privateKey);
 
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
