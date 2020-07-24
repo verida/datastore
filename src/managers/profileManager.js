@@ -126,7 +126,11 @@ class ProfileManager {
       // Force fetching something to ensure the database gets loaded.
       // This ensures a new user always has a public profile database
       // created so other applications can query it.
-      await this.get('')
+      try {
+        await this.get('')
+      } catch (err) {
+        // May be not found, which is fine
+      }
     }
   
     async getDatastore () {
