@@ -9,12 +9,10 @@ import {
     VERIDA_SCHEMAS_BASE_PATH
 } from 'react-native-dotenv'
 
-const host = process.browser && window && window.location.origin
-
 const config = {
     environment: VERIDA_ENVIRONMENT || "testnet",
     appName: VERIDA_APP_NAME || "Test App",
-    appHost: VERIDA_APP_HOST || host || null,
+    appHost: VERIDA_APP_HOST || null,
     servers: {
         local: {
             // For core development
@@ -48,7 +46,7 @@ const config = {
         }
     },
     datastores: {},
-    customSchemasPath: VERIDA_SCHEMAS_CUSTOM_PATH || (location && location.origin + '/schemas/custom/'),
+    customSchemasPath: VERIDA_SCHEMAS_CUSTOM_PATH,
     baseSchemasPath: VERIDA_SCHEMAS_BASE_PATH,
     vaultAppName: "Verida Vault"
 };
