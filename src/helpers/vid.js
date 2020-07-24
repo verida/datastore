@@ -53,7 +53,7 @@ class VidHelper {
             serviceEndpoint: userDataserverUrl
         });
 
-        DIDHelper.createProof(doc, keyring.signKey.private);
+        doc = DIDHelper.createProof(doc, keyring.signKey.private);
 
         let response = await DIDHelper.commit(did, doc, signature, App.config.server.didServerUrl);
         if (response) {
