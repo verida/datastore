@@ -22,7 +22,7 @@
   "dependencies": {
     "@tradle/react-native-http": "^2.0.0",
     "@verida/did-helper": "^0.5.1",
-    "@verida/wallet-utils": "^1.1.0",
+    "@verida/wallet-utils": "https://github.com/verida/wallet-utils.git",
     "assert": "^1.1.1",
     "axios": "^0.19.2",
     "browserify-zlib": "^0.1.4",
