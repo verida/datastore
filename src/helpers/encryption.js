@@ -1,4 +1,4 @@
-import { secretbox, box, randomBytes } from "tweetnacl";
+import { secretbox, sign, box, randomBytes } from "tweetnacl";
 import {
   decodeUTF8,
   encodeUTF8,
@@ -85,6 +85,16 @@ class Encryption {
 
     static randomKey(length) {
         return newKey(length);
+    }
+
+    static sign(data, privateKeyBytes) {
+        let messageUint8 = decodeUTF8(JSON.stringify(data));
+        return encodeBase64(sign.detached(messageUint8, privateKeyBytes));
+    }
+
+    static verifySig(data, sig, publicKeyByts) {
+        let messageUint8 = decodeUTF8(JSON.stringify(data));
+        return sign.detached.verify(messageUint8, decodeBase64(sig), publicBytes);
     }
 
 }
