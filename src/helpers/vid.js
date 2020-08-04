@@ -8,7 +8,7 @@ class VidHelper {
 
     /**
      * Save a DID document
-     * 
+     *
      * @todo: Replace with decentralised lookup
      */
     async save(did, appName, keyring, userDataserverUrl, signature) {
@@ -53,7 +53,7 @@ class VidHelper {
             serviceEndpoint: userDataserverUrl
         });
 
-        DIDHelper.createProof(doc, keyring.signKey.private);
+        doc = DIDHelper.createProof(doc, keyring.signKey.private);
 
         let response = await DIDHelper.commit(did, doc, signature, App.config.server.didServerUrl);
         if (response) {
@@ -85,7 +85,7 @@ class VidHelper {
 
     /**
      * Get DID for a given VID
-     * 
+     *
      * @param {*} vid
      */
     async getDidFromVid(vid) {
@@ -95,9 +95,9 @@ class VidHelper {
 
     /**
      * Get the VID for a given DID and application name
-     * 
-     * @param {*} did 
-     * @param {*} appName 
+     *
+     * @param {*} did
+     * @param {*} appName
      */
     getVidFromDid(did, appName) {
         appName = appName || App.config.appName;
