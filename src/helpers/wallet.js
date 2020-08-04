@@ -1,4 +1,4 @@
-import EncryptionHelper from './encryption';
+import Encryption from "./helpers/encryption";
 import VidHelper from './vid';
 import DIDHelper from '@verida/did-helper';
 import Verida from '../app';
@@ -63,7 +63,7 @@ class WalletHelper {
      */
     static async remoteRequest(did, requestData) {
         // add an encryption key for the mobile app to encrypt the response with
-        requestData.responseKey = EncryptionHelper.randomKey();
+        requestData.responseKey = Encryption.randomKey();
 
         // send the user a login request message to their "wallet_request" database
         const remoteDatastore = Verida.openExternalDatastore("https://schemas.verida.io/wallet/request/schema.json", {
@@ -76,7 +76,7 @@ class WalletHelper {
         // encrypt with the recipients public key
         const vidDoc = await VidHelper.getByDid(did, Verida.config.vaultAppName);
         const publicAsymKey = DIDHelper.getKeyBytes(vidDoc, 'asym');
-        const encrypted = EncryptionHelper.symEncrypt(requestData, publicAsymKey);
+        const encrypted = Encryption.symEncrypt(requestData, publicAsymKey);
         
         // send request
         const request = {

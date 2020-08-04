@@ -11,7 +11,7 @@ import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import TrustHelper from './helpers/trust';
 import CredentialsHelper from './helpers/credentials';
-import EncryptionHelper from './helpers/encryption';
+import Encryption from '@verida/encryption-utils';
 import Profile from './profile';
 import DbManager from './managers/dbManager';
 import ProfileManager from './managers/profileManager';
@@ -267,7 +267,7 @@ App.Helpers = {
     trust: TrustHelper,
     credentials: CredentialsHelper,
     schema: VeridaSchema,
-    encryption: EncryptionHelper
+    encryption: Encryption
 };
 
 

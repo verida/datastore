@@ -1,12 +1,10 @@
 /*eslint no-console: "off"*/
 import { box, sign } from "tweetnacl";
 import {
-  decodeUTF8,
-  encodeBase64,
-  decodeBase64
+  encodeBase64
 } from "tweetnacl-util";
 import { ethers } from 'ethers';
-import EncryptionHelper from './helpers/encryption';
+import Encryption from "./helpers/encryption";
 
 const BASE_PATH = "m/6696500'/0'/0'";
 const DB_PATH = "m/42"
@@ -108,37 +106,35 @@ class Keyring {
     // get a signature
     sign(data, key) {
         key = key ? key : this.signKey;
-        let messageUint8 = decodeUTF8(JSON.stringify(data));
-        return encodeBase64(sign.detached(messageUint8, key.privateBytes));
+        return Encryption.verifySig(data, sig, key.privateBytes)
     }
 
     verifySig(data, sig) {
-        let messageUint8 = decodeUTF8(JSON.stringify(data));
-        return sign.detached.verify(messageUint8, decodeBase64(sig), this.signKey.publicBytes);
+        return Encryption.verifySig(data, sig, this.signKey.publicBytes)
     }
 
     symEncryptBuffer(data) {
-        return EncryptionHelper.symEncryptBuffer(data, this.symKey);
+        return Encryption.symEncryptBuffer(data, this.symKey);
     }
 
     symDecryptBuffer(messageWithNonce) {
-        return EncryptionHelper.symDecryptBuffer(messageWithNonce, this.symKey);
+        return Encryption.symDecryptBuffer(messageWithNonce, this.symKey);
     }
 
     symEncrypt(data) {
-        return EncryptionHelper.symEncrypt(data, this.symKey);
+        return Encryption.symEncrypt(data, this.symKey);
     }
 
     symDecrypt(messageWithNonce) {
-        return EncryptionHelper.symDecrypt(messageWithNonce, this.symKey);
+        return Encryption.symDecrypt(messageWithNonce, this.symKey);
     }
 
     asymEncrypt(data, secretOrSharedKey) {
-        return EncryptionHelper.asymEncrypt(data, secretOrSharedKey);
+        return Encryption.asymEncrypt(data, secretOrSharedKey);
     }
 
     asymDecrypt(messageWithNonce, secretOrSharedKey) {
-        return EncryptionHelper.asymDecrypt(messageWithNonce, secretOrSharedKey);
+        return Encryption.asymDecrypt(messageWithNonce, secretOrSharedKey);
     }
 
     buildSharedKeyStart(privateKey) {
