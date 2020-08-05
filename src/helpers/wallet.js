@@ -1,4 +1,4 @@
-import Encryption from "./helpers/encryption";
+import Encryption from "@verida/encryption-utils";
 import VidHelper from './vid';
 import DIDHelper from '@verida/did-helper';
 import Verida from '../app';
