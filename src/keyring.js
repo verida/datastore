@@ -4,7 +4,7 @@ import {
   encodeBase64
 } from "tweetnacl-util";
 import { ethers } from 'ethers';
-import Encryption from "./helpers/encryption";
+import Encryption from "@verida/encryption-utils";
 
 const BASE_PATH = "m/6696500'/0'/0'";
 const DB_PATH = "m/42"
