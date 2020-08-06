@@ -263,6 +263,7 @@ class Database extends EventEmitter {
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
+                console.error(err)
                 throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
             }
         }

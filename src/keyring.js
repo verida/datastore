@@ -103,10 +103,9 @@ class Keyring {
         };
     }
 
-    // get a signature
-    sign(data, key) {
-        key = key ? key : this.signKey;
-        return Encryption.verifySig(data, sig, key.privateBytes)
+    // Sign arbitrary data
+    sign(data) {
+        return Encryption.signData(data, this.signKey.privateBytes)
     }
 
     verifySig(data, sig) {
