@@ -33,7 +33,7 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.5.0",
+    "@verida/did-helper": "git+https://github.com/verida/did-helper.git",
     "@verida/encryption-utils": "git+https://github.com/verida/encryption-utils.git",
     "@verida/wallet-utils": "^1.0.0",
     "axios": "^0.19.2",
