@@ -3,10 +3,8 @@ import VidHelper from './vid';
 import DIDHelper from '@verida/did-helper';
 import Verida from '../app';
 
-//const EventEmitter = require('events');
-
 /**
- * 
+ * Very basic web3 wallet helper. Needs deprecating.
  */
 class WalletHelper {
 

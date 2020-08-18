@@ -9,7 +9,7 @@ class VidHelper {
     /**
      * Save a DID document
      *
-     * @todo: Replace with decentralised lookup
+     * @todo: Replace with decentralised DID management (ie: sidetree)
      */
     async save(did, appName, keyring, userDataserverUrl, signature) {
         let vid = this.getVidFromDid(did, appName);
