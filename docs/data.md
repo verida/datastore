@@ -253,7 +253,7 @@ db.changes({
 
 ### Shared Databases
 
-It's possible to create public shared databases, for example creating a directory of all the users of your application.
+It's possible to create public databases for shared data across all users.
 
 Here is an overview of the process:
 

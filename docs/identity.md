@@ -19,7 +19,7 @@ It's also entirely anonymous. No information is known about the holder of the DI
 Data created by applications is encrypted with the user's private keys and stored in off-chain databases. By default, Verida provides hosting of these databases, however both application developers and users can take control of this data:
 
 1. Application developers can host their own Verida Dataserver(s) and use that as the default for their application users
-2. Users can host their own Verida Dataserver(s) and force an application to use that server
+2. Users can host their own Verida Dataserver(s) and force an application to use that server by updating their DID document with the new server address
 
 See the [VID Document](#vid-document) section below for details on how this is achieved.
 
@@ -127,4 +127,4 @@ This database is accessible via a public API, used internally by the Verida Data
 
 You can access the [Public API Source Code](https://github.com/verida/did-server). The API is currently deployed at `https://did.alpha.verida.io:5001/`
 
-!>This API will be replaced with a decentralized smart contract in the near future
+!>Therer is currently a centralised API for managing DID Documents and mappings. This will be replaced with a decentralized solution in the near future (possibly using Sidechain or Ceramic).

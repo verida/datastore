@@ -7,7 +7,7 @@
   * [Schemas](schemas.md)
   * [Messaging](messaging.md)
   * [Syncronization](sync.md)
-  * [Demos](demos.md)
+* [Sandbox](sandbox.md)
 * [Architecture](architecture.md)
 * [Frameworks](frameworks.md)
 * [API](http://apidocs.datastore.verida.io/)
