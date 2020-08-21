@@ -8,11 +8,17 @@ All databases in Verida are **User Databases**. They are owned by a specific use
 
 As such, application owners don't have access to this data. This ensures user data is private, owned and controlled entirely by the user.
 
-There is no concept of a `central` database, however many applications need to access aggregated data. Traditional API's and databases can be used for this purpose, however it must be made clear to a user when their data is being copied in that way.
+Applications can have an unlimited number of databases.
+
+As applications have per-user databases, unique database names are generated based on a hash of:
+
+ - Owner's `did`
+ - Application name
+ - Human readable database name
+
+ There is no concept of a `central` database, however many applications need to access aggregated data. Traditional API's and databases can be used for this purpose, however it must be made clear to a user when their data is being duplicated and used in that way. Also see the [shared databases](#shared-databases) section below for an alternative approach.
 
 We have some early thoughts on how to provide privacy preserving aggregated data for applications, but they are not a current priority.
-
-Applications can have an unlimited number of databases.
 
 ### Using Databases
 
@@ -150,7 +156,7 @@ await contactsDb.delete(contact);
 
 ## Permissions
 
-When a database is created, you specify the `read` and `write` permissions, out of a possible 3 options:
+When a database / datastore is created, you specify the `read` and `write` permissions, out of a possible 3 options:
 
 - `public` &mdash; Everyone has permission
 - `users` &mdash;  Only the specific list of users have permission
@@ -166,18 +172,18 @@ Here are some real world examples:
 Permissions are specified when opening a `database` or `datastore`:
 
 ```
-let permissions = {
+const permissions = {
   read: 'owner',
   write: 'owner'
 }
 
 // Open a database
-let privateDb = await app.openDatabase('private/data', app.user.did, {
+const privateDb = await app.openDatabase('private/data', app.user.did, {
   permissions: permissions
 });
 
 // Open a datastore
-let healthNotes = await app.openDatastore('health/note', app.user.did, {
+const healthNotes = await app.openDatastore('health/note', app.user.did, {
   permissions: permissions
 });
 ```
@@ -185,46 +191,54 @@ let healthNotes = await app.openDatastore('health/note', app.user.did, {
 When specifying the `users` permission type, you must also specify the list of valid user DID's with `userList`:
 
 ```
-let permissions = {
+const permissions = {
   read: 'users',
-  readList: ['did:ethr:0xefa01d332...', 'did:ethr:0xcfa01d332...'],
+  readList: ['did:vid:0xefa01d332...', 'did:vid:0xcfa01d332...'],
   write: 'users',
-  writeList: ['did:ethr:0xefa01d332...', 'did:ethr:0x1fa01d332...']
+  writeList: ['did:vid:0xefa01d332...', 'did:vid:0x1fa01d332...']
 }
 
 // Open a database
-let restrictedDb = await app.openDatabase('restricted/data', app.user.did, {
+const restrictedDb = await app.openDatabase('restricted/data', app.user.did, {
   permissions: permissions
 });
 ```
 
-!>Note: `users` permission type is not fully implemented in the alpha, so don't use just yet.
+!>Note: `readList` and `writeList` must specify Verida DID's, not public blockchain DID's.
 
-!>Note: Assigning a database `write=public` currently results in `read=public` also being applied. This is an issue caused by CouchDB not supporting a user having `write` access, but not `read` access. It's expected a modified version of CouchDB will be used to work around this current limitation in production environments.
+!>Note: Assigning a database `write=public` currently results in `read=public` also being applied. This is an issue caused by CouchDB not supporting a user having `write` access, but not `read` access. It's expected a modified version of CouchDB will be used to work around this current limitation in the future.
 
-Databases are unique based on a hash of their `name` combined with their `permissions`. You could open two databases with the same name, but different permissions and they would be different databases.
-
-## Advanced
-
-### Datatore or Database?
+## Datatore v Database
 
 You can access the underlying `Database` object from a `Datastore` object:
 
 ```
-let db = await datastore.getDb();
+const db = await datastore.getDb();
 ```
 
 The Verida Database object is a wrapper around a native [PouchDb instance](https://pouchdb.com/api.html). You can fetch this PouchDb instance from a `Database` object:
 
 ```
-let pouchDb = await db.getInstance();
+const pouchDb = await db.getInstance();
 ```
 
-### Indexes
+## Indexes
 
-TBA
+You can create **database indexes** by utilising the underlying [PouchDB index API methods](https://pouchdb.com/api.html#create_index):
 
-### Realtime changes
+```
+const veridaDb = await app.openDatabase('test_db');
+const pouchDb = await veridaDb.getInstance();
+await pouchDb.createIndex({
+  index: {
+    fields: ['foo]
+  }
+})
+```
+
+**Datastore indexes** are defined in the underlying JSON schema document for the datastore. These indexes are automatically managed by Verida Datastore. See [schemas](schemas) for details on defining indexes in your custom schemas.
+
+## Real-time changes
 
 Once a `datastore` or `database` is opened, you can bind to the `change` event that fires everytime data changes on the underlying database.
 
@@ -251,7 +265,7 @@ db.changes({
 
 ?>See [PouchDB Changes](https://pouchdb.com/api.html#changes)
 
-### Shared Databases
+## Shared Databases
 
 It's possible to create public databases for shared data across all users.
 
@@ -261,11 +275,11 @@ Here is an overview of the process:
 2. Create the shared database using your application DID account.
 3. Enable your users to connect and read / write from this shared database.
 
-#### 1. Create a DID for your application
+### 1. Create a DID for your application
 
 This is a simple as creating a new Ethereum account using Metamask
 
-#### 2. Create a shared database
+### 2. Create a shared database
 
 You only need to do this once to "seed" your application database. This ensures it is created with the appropriate permissions.
 
@@ -284,7 +298,7 @@ let results = await db.getMany();
 
 Where `dbName` is the name of your shared database and `did` is the DID you created in step 1 (ie: `did:ethr:0xefa....`).
 
-#### 3. Enable users to access the shared database
+### 3. Enable users to access the shared database
 
 You can now write code for your application to read and write from this shared database:
 
@@ -299,6 +313,8 @@ let db = await app.openDatabase(dbName, did, {
 let results = await db.getMany();
 ```
 
-?>The steps above create a generic schemaless database. It's possible to define your own application schema the shared database will use and then use `app.openDatastore()`.
+The steps above create a generic schemaless database. It's possible to define your own application schema the shared database will use and then call `app.openDatastore()` using your schema definition.
 
-?>Alternatively, for a more traditional approach you could create a database with `write=owner`, `read=public` and use an API to write data to the shared database.
+One limitation with the above approach is the data is public, so non-logged in users could access this data as it's entirely public.
+
+Alternatively, for a more traditional approach you could create a database with `write=owner`, `read=public` and use an API to write data to the shared database.

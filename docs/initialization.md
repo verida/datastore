@@ -8,7 +8,7 @@ Install into your application:
 npm install @verida/datastore
 ```
 
-### Initialize Application
+### Client side: Initialize Application
 
 Create an application instance and ask the user to authorize your application:
 
@@ -20,10 +20,10 @@ const web3Provider = await Verida.Helpers.wallet.connectWeb3('ethr');
 const address = await Verida.Helpers.wallet.getAddress('ethr');
 
 Verida.setConfig({
-  appName: 'Your Application Name'
+  appName: '<Company>: <Application Name>'
 });
 
-let app = new Verida({
+const app = new Verida({
     chain: 'ethr',
     address: address,
     web3Provider: web3Provider
@@ -38,12 +38,12 @@ See [App API Docs](http://apidocs.datastore.verida.io/App.html) for additional c
 
 ?>Note: You don't have to use the rather basic `Verida.Helpers.wallet`, it's possible to use your own code to locate the user's web3Provider and address.
 
-### Authorize Application
+### Client side: Authorize Application
 
-You can now connect the user to your application:
+You can now ask the user to authorize your application:
 
 ```
-let connected = await app.connect(true);
+const connected = await app.connect(true);
 ```
 
 A popup will appear asking the user to sign a consent message authorizing the application to use their data. The first time a user connects, the Datastore library will create new encryption keys that are used by this user and this application only.
@@ -54,4 +54,24 @@ You can access the user's DID via:
 
 ```
 console.log(app.user.did);
+```
+
+### Server side: Authorize Application
+
+It's possible to use the Datastore library on the server-side, within a NodeJs application. In this instance, you will need to have already generated a blockchain wallet with private key.
+
+Initialize the Verida Datastore library as follows:
+
+```
+const chain = 'ethr'
+const address = '0xf3beac30c498d9e26865f34fcaa57dbb935b0d74'
+const privateKey = '<hex private key>`
+
+const app = new Verida({
+  chain: chain,
+  address: address,
+  privateKey: privateKey
+})
+
+await app.connect(true)
 ```

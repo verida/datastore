@@ -20,18 +20,65 @@ The rest of this Architecture document provides an overview of the key design de
 
 ?> The Verida Datastore is in active development, so some of these capabilities are not yet implemented.
 
-## System Design
+## Application Architecture
 
 <div>
   <div><img src="images/Personal Data Store v1.png" style="width: 75%" /></div>
-  <div><caption>Personal Data Store - System Architecture</caption></div>
+  <div><caption>Verida Datastore - Application Architecture</caption></div>
 </div>
 
-The Verida Data Store is basically a per user database that exists within your application. It manages syncronising data between your application and the Datastore within the user's Verida Vault. This is akin to the user's **master database**. Once data is synced with the user's Vault, it is synced with all other applications attached to the user's Vault based on the data schemas and permissions of that application.
+The Verida Data Store provides encrypted per user databases for your application.
 
-This ensures data entered into one application is automatically made available to all other applications.
+Here's is the basic flow.
 
-?> For example: A user may add a new contact to their `social/contact` schema in an email client. That contact will then automatically appear in their phone contact list and any other applications that have an embedded Verida Data Store into their application.
+### 1. Users authorize access
+
+Users authorize access to your application by signing a consent message. See [initialization](initialization).
+
+If this is the first time the user has authorized your application, a new DID document is created (see [identity](identity)).
+
+This DID document includes the URI of the CouchDB database hosting the user's encrypted data along with public keys. The DID document is public, allowing other users and applications to discover user's database endpoints and public keys for securely sending data.
+
+### 2. Create user databases
+
+User databases have data stored in two locations:
+
+- Locally, within the browser, using [PouchDB](https://pouchdb.com/)
+- Remote, managed by the application developer or the user, using [CouchDB](https://couchdb.apache.org/)
+
+When a database is created (via `app.openDatabase(...)`) a local unencrypted database is created in the browser and remote encrypted database is created on the remote CouchDB server.
+
+Remote user databases are created by sending an API request to the Datastore Server. This server manages the underlying database permissions of the CouchDB database server.
+
+All requests to the Datastore Server API must include a signed consent message by the user. This ensures only the user holding the private key of the public blockchain account can set their database permissions.
+
+### 3. Reading and writing data
+
+When a database is opened, the Verida Datastore connects to the encrypted remote database and syncronizes it's local copy, automatically decrypting the data into the unencrypted PouchDB database.
+
+This allows your application to run queries within the browser on the decrypted data.
+
+Any changes to data are syncronized in real-time between the local and cloud databases. Data is automatically decrypted / encrypted between the local database and the remote encrypted database.
+
+## Decentralised self-hosting
+
+The application architecture diagram above only shows one CouchDB server for the whole application which is obviously centralised. However, users can use their public blockchain private keys to update their DID document and point to a server they control.
+
+-- insert diagram --
+
+In this updated diagram you can see there are 5 users. User 1 and User 5 have chosen to host their data on their own CouchDB server, whereas Users 2-3 are using the default CouchDB server provided by the application developer.
+
+## Cross application data sharing
+
+-- insert diagram --
+
+Data can be easily shared between different applications and users, provided you have access to the database.
+
+User 5 of Application 1 can read / write to a database owned by User 1 of Application 2, provided they have the database URI, know the database name and have permission.
+
+The database URI can be obtained from User 1's DID document. The database name will be known by the developer (ie: social/contacts) or be built into a shared schema being used by both applications.
+
+# -- remove below this line? --
 
 ## Security
 
