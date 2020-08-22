@@ -38,7 +38,7 @@ const config = {
         }
     },
     datastores: {},
-    vaultAppName: "Verida Vault"
+    vaultAppName: "Verida: Vault"
 };
 
 config.server = config.servers[config.environment];
