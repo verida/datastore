@@ -1,4 +1,16 @@
-2020-07-12 (0.5.0)
+2020-08-26 (0.6.0)
+--------------------
+
+- Upgrade to ethers 5.0.9
+- Update Vault appname to be `Verida: Vault`
+- Update documentation
+- Fix keyring verifiy signature method
+- Refactor to use `@verida/encryption-utils` library
+- Fix DID resolver format issue
+- Fix generated DID document not returning with a valid proof
+- Ensure profile manager doesn't error if no profile data
+
+2020-07-12 (0.5.1)
 --------------------
 
 - Migrate DID chain format from `vid` to `verida`
