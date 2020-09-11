@@ -2,14 +2,16 @@
   "name": "@verida/datastore",
   "version": "0.6.0",
   "description": "Verida Datastore",
-  "main": "dist/app.js",
+  "main": "lib/app.js",
   "author": "Verida",
   "license": "Apache-2.0",
   "scripts": {
     "test": "mocha -mocha --require @babel/polyfill --require @babel/register './test/**/*.js'",
     "generate-api-docs": "./node_modules/.bin/jsdoc ./ -r -c .jsdoc.conf -d apidocs -u tutorials --readme README.api.md",
     "serve-docs": "~/.npm-global/bin/docsify serve docs",
-    "build": "./node_modules/.bin/babel src -d dist",
+    "build:dist": "./node_modules/.bin/webpack --config webpack.config.js --mode=development",
+    "build:es5": "./node_modules/.bin/babel src -d lib",
+    "build": "npm run build:es5; npm run build:dist;",
     "prepublishOnly": "npm run build"
   },
   "eslintConfig": {
@@ -61,6 +63,7 @@
     "@babel/core": "^7.10.4",
     "@babel/node": "^7.10.4",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/polyfill": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
     "babel-core": "^6.26.3",
@@ -68,6 +71,8 @@
     "babel-register": "^6.26.0",
     "jsdoc": "^3.6.4",
     "minami": "^1.2.3",
-    "mocha": "^7.2.0"
+    "mocha": "^7.2.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
   }
 }
