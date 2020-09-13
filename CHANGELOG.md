@@ -1,3 +1,9 @@
+2020-09-13 (0.6.1)
+--------------------
+
+- Update verida dependencies to latest
+- Add webpack build
+
 2020-08-26 (0.6.0)
 --------------------
 
