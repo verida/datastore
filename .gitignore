@@ -3,6 +3,7 @@ node_modules
 coverage
 apidocs
 dist
+lib
 
 # Editor directories and files
 .idea
