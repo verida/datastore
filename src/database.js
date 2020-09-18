@@ -28,6 +28,7 @@ class Database extends EventEmitter {
 
         // Signing user will be the logged in user
         this.signUser = config.signUser || config.user;
+        this.signData = config.signData === false ? false : true;
         this.signAppName = config.signAppName || this.appName;
         this.dataserver = dataserver;
 
@@ -279,12 +280,18 @@ class Database extends EventEmitter {
 
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
-        await this.signData(data);
+        
+        if (this.signData) {
+            await this._signData(data);
+        }
     }
 
     async _beforeUpdate(data) {
         data.modifiedAt = (new Date()).toISOString();
-        await this.signData(data);
+
+        if (this.signData) {
+            await this._signData(data);
+        }
     }
 
     _afterInsert(data, response) {}
@@ -338,7 +345,7 @@ class Database extends EventEmitter {
      * @param {*} data
      * @todo Think about signing data and versions / insertedAt etc.
      */
-    async signData(data) {
+    async _signData(data) {
         if (!this.signUser) {
             throw new Error("Unable to sign data. No signing user specified.");
         }
