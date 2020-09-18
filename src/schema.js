@@ -2,36 +2,10 @@ import $RefParser from "json-schema-ref-parser";
 import Ajv from "ajv";
 const resolveAllOf = require('json-schema-resolve-allof');
 import App from './app';
+import _ from 'lodash';
+import axios from 'axios'
 
-// Force schema paths to be applied to URLs
-const resolvePath = function(uri) {
-    const resolvePaths = App.config.server.schemaPaths;
-
-    for (let searchPath in resolvePaths) {
-        let resolvePath = resolvePaths[searchPath];
-        if (uri.substring(0, searchPath.length) == searchPath) {
-            uri = uri.replace(searchPath, resolvePath);
-        }
-    }
-
-    return uri;
-}
-
-// Used by AJV for resolving URL refs
-const loadSchema = async function(uri) {
-    uri = resolvePath(uri);
-    let request = await fetch(uri);
-
-    // @todo: check valid uri
-    let json = await request.json();
-    return json;
-}
-
-const ajv = new Ajv({loadSchema: loadSchema});
-
-// Add support for JSON Schema draft 06
-// @todo make the list of supported drafts customisable
-ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
+const draft6 = require('ajv/lib/refs/json-schema-draft-06.json');
 
 // Custom resolver for RefParser
 //const { ono } = require("ono");
@@ -39,13 +13,7 @@ const resolver = {
     order: 1,
     canRead: true,
     async read(file) {
-        return loadSchema(file.url);
-        /*try {
-            let response = await fetch(file.url);
-            return response.json();
-        } catch (error) {
-            return ono(error, `Error downloading ${file.url}`)
-        }*/
+        return Schema.loadJson(file.url);
     }
 };
 
@@ -60,10 +28,27 @@ class Schema {
      * @param {object} path Path to a schema in the form (http://..../schema.json, /schemas/name/schema.json, name/of/schema)
      * @constructor
      */
-    constructor(path) {
+    constructor(path, options) {
         this.path = path;
         this.errors = [];
 
+        options = _.merge({
+            metaSchemas: [
+                draft6
+            ],
+            ajv: {
+                loadSchema: Schema.loadJson,
+                logger: false
+            }
+        }, options);
+
+        this.ajv = new Ajv(options.ajv);
+
+        for (let s in options.metaSchemas) {
+            this.ajv.addMetaSchema(options.metaSchemas[s]);
+        }
+
+        this._schemaJson = null;
         this._finalPath = null;
         this._specification = null;
         this._validate = null;
@@ -102,10 +87,8 @@ class Schema {
      */
     async validate(data) {
         if (!this._validate) {
-            let path = await this.getPath();
-            let fileData = await fetch(path);
-            let json = await fileData.json();
-            this._validate = await ajv.compileAsync(json);
+            let schemaJson = await this.getSchemaJson();
+            this._validate = await this.ajv.compileAsync(schemaJson);
         }
 
         let valid = await this._validate(data);
@@ -114,6 +97,22 @@ class Schema {
         }
         
         return valid;
+    }
+
+    /**
+     * Fetch unresolved JSON schema
+     */
+    async getSchemaJson() {
+        if (this._schemaJson) {
+            return this._schemaJson;
+        }
+
+        let path = await this.getPath();
+        let fileData = await axios.get(path, {
+            responseType: 'json'
+        });
+        this._schemaJson = await fileData.data;
+        return this._schemaJson;
     }
 
     async getIcon() {
@@ -138,7 +137,7 @@ class Schema {
 
         // If we have a full HTTP path, simply return it
         if (path.match("http")) {
-            this._finalPath = resolvePath(path);
+            this._finalPath = Schema.resolvePath(path);
             return this._finalPath;
         }
 
@@ -152,8 +151,44 @@ class Schema {
             path += "/schema.json";
         }
 
-        this._finalPath = resolvePath(path);
+        this._finalPath = await Schema.resolvePath(path);
+        this.path = this._finalPath;
         return this._finalPath;
+    }
+
+    /**
+     * Force schema paths to be applied to URLs
+     * 
+     */
+    static async resolvePath(uri) {
+        const resolvePaths = App.config.server.schemaPaths;
+
+        for (let searchPath in resolvePaths) {
+            let resolvePath = resolvePaths[searchPath];
+            if (uri.substring(0, searchPath.length) == searchPath) {
+                uri = uri.replace(searchPath, resolvePath);
+            }
+        }
+
+        return uri;
+    }
+
+    /**
+     * Load JSON from a url that is fully resolved.
+     * 
+     * Used by AJV.
+     * 
+     * @param {*} uri 
+     */
+    static async loadJson(uri) {
+        uri = await Schema.resolvePath(uri);
+        let request = await axios.get(uri, {
+            responseType: 'json'
+        });
+
+        // @todo: check valid uri
+        let json = await request.data;
+        return json;
     }
 
 }

@@ -1,8 +1,8 @@
-
-let config = {
+const host = process.browser && window && window.location.origin
+const config = {
     environment: process.env.VERIDA_ENVIRONMENT || "testnet",
     appName: process.env.VERIDA_APP_NAME || "Test App",
-    appHost: process.env.VERIDA_APP_HOST || (process.browser ? window.location.origin : null),
+    appHost: process.env.VERIDA_APP_HOST || host || null,
     servers: {
         local: {
             // For core development
@@ -38,7 +38,7 @@ let config = {
         }
     },
     datastores: {},
-    vaultAppName: "Verida Vault"
+    vaultAppName: "Verida: Vault"
 };
 
 config.server = config.servers[config.environment];

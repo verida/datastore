@@ -1,5 +1,4 @@
 /*eslint no-console: "off"*/
-import Database from "./database";
 import App from './app';
 const _ = require('lodash');
 
@@ -160,18 +159,17 @@ class DataStore {
         }
 
         this.schema = await App.getSchema(this.schemaName);
-
-        let specification = await this.schema.getSpecification();
-        let dbName = this.config.dbName ? this.config.dbName : specification.database.name;
-        this.schemaName = this.schema.name;
+        let schemaJson = await this.schema.getSchemaJson();
+        let dbName = this.config.dbName ? this.config.dbName : schemaJson.database.name;
         this.schemaPath = this.schema.path;
 
-        // TODO: How and where to configure app specific datastore configs?
-        //let dataStoreConfig = this._dataserver.getDataStoreConfig(this.schemaName);
-        //_.merge(dataStoreConfig, this.config);
+        let config = _.merge({
+            appName: this.appName,
+            did: this.did
+        }, this.config);
 
-        this._db = new Database(dbName, this.did, this.appName, this._dataserver, this.config);
-        let indexes = specification.database.indexes;
+        this._db = await this._dataserver.openDatabase(dbName, config);
+        let indexes = schemaJson.database.indexes;
 
         if (indexes) {
             await this.ensureIndexes(indexes);

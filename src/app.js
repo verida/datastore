@@ -11,7 +11,10 @@ import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import TrustHelper from './helpers/trust';
 import CredentialsHelper from './helpers/credentials';
+import Encryption from '@verida/encryption-utils';
 import Profile from './profile';
+import DbManager from './managers/dbManager';
+import ProfileManager from './managers/profileManager';
 
 const _ = require('lodash');
 
@@ -37,10 +40,13 @@ class App {
 
         this.outbox = new Outbox(this);
         this.inbox = new Inbox(this);
+        this.dbManager = new DbManager(this);
+        this.profileManager = new ProfileManager(this);
 
         this.dataserver = new DataServer({
             datastores: config.datastores,
-            serverUrl: this.user.serverUrl
+            serverUrl: this.user.serverUrl,
+            dbManager: this.dbManager
         });
 
         this._isConnected = false;
@@ -94,6 +100,8 @@ class App {
     /**
      * Determine if a web session exists for a given DID (indicates they can be autologgedin)
      *
+     * @todo Deprecate and move into a helper
+     * 
      * @param {string} did User's DID
      * @param {string} appName Application name
      */
@@ -134,9 +142,10 @@ class App {
     /**
      * Open an application datastore owned by an external user
      *
-     * @param {*} schemaName
-     * @param {*} did
-     * @param {*} config
+     * @param {string} schemaName
+     * @param {string} did
+     * @param {object} config
+     * @return {object} Datastore instance
      */
     static async openExternalDatastore(schemaName, did, config) {
         did = did.toLowerCase();
@@ -151,9 +160,10 @@ class App {
     /**
      * Open an application database owned by an external user
      *
-     * @param {*} dbName
-     * @param {*} did
-     * @param {*} config
+     * @param {string} dbName
+     * @param {string} did
+     * @param {object} config
+     * @return {object} Database instance
      */
     static async openExternalDatabase(dbName, did, config) {
         did = did.toLowerCase();
@@ -168,14 +178,14 @@ class App {
     /**
      * Opens the public profile of any user in read only mode
      *
-     * @param {*} did
+     * @param {string} did
      * @example
      * let profile = app.openProfile(userDid);
      * console.log(profile.get("email"));
-     * @returns {DataStore} Datastore instance for the requested user profile
+     * @return {DataStore} Datastore instance for the requested user profile
      */
     static async openProfile(did, appName) {
-        let datastore = await App.openExternalDatastore("profile/public", did, {
+        const datastore = await App.openExternalDatastore("profile/public", did, {
             appName: appName || App.config.vaultAppName,
             permissions: {
                 read: "public",
@@ -184,7 +194,7 @@ class App {
             readOnly: true
         });
 
-        return new Profile(dataStore);
+        return new Profile(datastore);
     }
 
     /**
@@ -238,7 +248,8 @@ class App {
         // Build dataserver config, merging defaults and user defined config
         config = _.merge({
             isProfile: false,
-            serverUrl: dataserverUrl
+            serverUrl: dataserverUrl,
+            dbManager: this.dbManager
         }, config);
 
         // Build dataserver
@@ -258,7 +269,9 @@ App.Helpers = {
     vid: VidHelper,
     wallet: WalletHelper,
     trust: TrustHelper,
-    credentials: CredentialsHelper
+    credentials: CredentialsHelper,
+    schema: VeridaSchema,
+    encryption: Encryption
 };
 
 

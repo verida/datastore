@@ -12,7 +12,7 @@ class Database extends EventEmitter {
 
     /**
      * Create a new database.
-     * 
+     *
      * **Do not instantiate directly.**
      */
     constructor(dbName, did, appName, dataserver, config) {
@@ -28,10 +28,11 @@ class Database extends EventEmitter {
 
         // Signing user will be the logged in user
         this.signUser = config.signUser || config.user;
+        this.signData = config.signData === false ? false : true;
         this.signAppName = config.signAppName || this.appName;
         this.dataserver = dataserver;
 
-        this.config = config ? config : {};
+        this.config = _.merge({}, config);
         this.permissions = {};
 
         this.permissions = _.merge({
@@ -42,7 +43,6 @@ class Database extends EventEmitter {
         }, this.config.permissions ? this.config.permissions : {});
 
         this.readOnly = this.config.readOnly ? true : false;
-        this.syncToWallet = this.config.syncToWallet ? true : false;
 
         this._dbHash = null;
         this._db = null;
@@ -57,9 +57,7 @@ class Database extends EventEmitter {
         let text = [
             this.did,
             this.appName,
-            this.dbName,
-            this.permissions.read,
-            this.permissions.write
+            this.dbName
         ].join("/");
 
         let hash = crypto.createHash('md5').update(text).digest("hex");
@@ -71,7 +69,7 @@ class Database extends EventEmitter {
 
     /**
      * Save data to an application schema.
-     * 
+     *
      * @param {object} data Data to be saved. Will be validated against the schema associated with this Datastore.
      * @param {object} [options] Database options that will be passed through to [PouchDB.put()](https://pouchdb.com/api.html#create_document)
      * @fires Database#beforeInsert Event fired before inserting a new record
@@ -83,7 +81,7 @@ class Database extends EventEmitter {
      *  "firstName": "John",
      *  "lastName": "Doe"
      * });
-     * 
+     *
      * if (!result) {
      *  console.errors(datastore.errors);
      * } else {
@@ -97,14 +95,16 @@ class Database extends EventEmitter {
             throw "Unable to save. Read only.";
         }
 
-        let defaults = {};
+        let defaults = {
+            forceInsert: false
+        };
         options = _.merge(defaults, options);
 
         let insert = false;
 
         // Set inserted at if not defined
         // (Assuming it's not defined as we have an insert)
-        if (data._id === undefined) {
+        if (data._id === undefined || options.forceInsert) {
             insert = true;
         }
 
@@ -113,7 +113,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired before a new record is inserted.
-             * 
+             *
              * @event Database#beforeInsert
              * @param {object} data Data that was saved
              */
@@ -123,7 +123,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired before a new record is updated.
-             * 
+             *
              * @event Database#beforeUpdate
              * @param {object} data Data that was saved
              */
@@ -137,7 +137,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired after a new record is inserted.
-             * 
+             *
              * @event Database#afterInsert
              * @param {object} data Data that was saved
              */
@@ -147,7 +147,7 @@ class Database extends EventEmitter {
 
             /**
              * Fired after a new record is updated.
-             * 
+             *
              * @event Database#afterUpdate
              * @param {object} data Data that was saved
              */
@@ -159,7 +159,7 @@ class Database extends EventEmitter {
 
     /**
      * Get many rows from the database.
-     * 
+     *
      * @param {object} filter Optional query filter matching CouchDB find() syntax.
      * @param {object} options Options passed to CouchDB find().
      * @param {object} options.raw Returns the raw CouchDB result, otherwise just returns the documents
@@ -177,7 +177,7 @@ class Database extends EventEmitter {
 
         let raw = options.raw || false;
         delete options['raw'];
-        
+
         if (filter) {
             options.selector = _.merge(options.selector, filter);
         }
@@ -198,7 +198,7 @@ class Database extends EventEmitter {
         if (this.readOnly) {
             throw "Unable to delete. Read only.";
         }
-        
+
         let defaults = {};
         options = _.merge(defaults, options);
 
@@ -236,9 +236,10 @@ class Database extends EventEmitter {
         if (this.permissions.read == "owner" && this.permissions.write == "owner") {
             // Create encrypted database
             try {
-                let encryptionKey = await this.dataserver.getKey(this.user);
+                let encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
                 let remoteDsn = await this.dataserver.getDsn(this.user);
                 let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating owner database ("+this.dbName+") for "+this.did+": " + err.message);
@@ -252,36 +253,49 @@ class Database extends EventEmitter {
                 throw new Error("Error instantiating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
             }
         } else if (this.permissions.read == "users" || this.permissions.write == "users") {
-            // Create encrypted database with generated encryption key
             try {
-                let encryptionKey = this.config.encryptionKey; // TODO: Where and how to generate?
+                let encryptionKey = this.config.encryptionKey;
+                if (!encryptionKey && this.config.isOwner) {
+                    encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
+                }
+
                 let remoteDsn = await this.dataserver.getDsn(this.user);
                 if (!remoteDsn) {
-                    throw new Error("Unable to determine remote DSN")
+                    throw new Error("Unable to determine remote DSN");
                 }
+
                 let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
-                console.log(err);
-                throw new Error("Error instantiating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
+                console.error(err)
+                throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
             }
         }
         else {
-            throw "Unknown database permissions requested";
+            throw "Unable to create database or it doesn't exist";
         }
     }
 
     async _beforeInsert(data) {
-        data._id = uuidv1();
+        if (!data._id) {
+            data._id = uuidv1();
+        }
+
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
-        await this.signData(data);
+        
+        if (this.signData) {
+            await this._signData(data);
+        }
     }
 
     async _beforeUpdate(data) {
         data.modifiedAt = (new Date()).toISOString();
-        await this.signData(data);
+
+        if (this.signData) {
+            await this._signData(data);
+        }
     }
 
     _afterInsert(data, response) {}
@@ -291,7 +305,7 @@ class Database extends EventEmitter {
 
     /**
      * Get the underlying PouchDB instance associated with this database.
-     * 
+     *
      * @see {@link https://pouchdb.com/api.html#overview|PouchDB documentation}
      * @returns {PouchDB}
      */
@@ -302,10 +316,10 @@ class Database extends EventEmitter {
 
     /**
      * See PouchDB bug: https://github.com/pouchdb/pouchdb/issues/6399
-     * 
+     *
      * This method automatically detects any fields being sorted on and
      * adds them to an $and clause to ensure query indexes are used.
-     * 
+     *
      * Note: This still requires the appropriate index to exist for
      * sorting to work.
      */
@@ -320,7 +334,7 @@ class Database extends EventEmitter {
                     and.push(d);
                 }
             }
-            
+
             filter = {
                 $and: and
             }
@@ -331,11 +345,11 @@ class Database extends EventEmitter {
 
     /**
      * Sign data as the current user
-     * 
-     * @param {*} data 
+     *
+     * @param {*} data
      * @todo Think about signing data and versions / insertedAt etc.
      */
-    async signData(data) {
+    async _signData(data) {
         if (!this.signUser) {
             throw new Error("Unable to sign data. No signing user specified.");
         }
