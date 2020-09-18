@@ -3,6 +3,8 @@ import VidHelper from './vid';
 import DIDHelper from '@verida/did-helper';
 import Verida from '../app';
 
+const REQUEST_SCHEMA = 'https://schemas.verida.io/wallet/request/schema.json';
+
 /**
  * Very basic web3 wallet helper. Needs deprecating.
  */
@@ -59,28 +61,37 @@ class WalletHelper {
      * @param {string} appName Name of application to login to
      * @param {string} usernameOrDid Valid DID or a Verida username
      */
-    static async remoteRequest(did, requestData) {
-        // add an encryption key for the mobile app to encrypt the response with
-        requestData.responseKey = Encryption.randomKey();
+    async remoteRequest(did, requestData, cb) {
+        // Generate a random key pair for this communication
+        const keyPair = Encryption.randomKeyPair();
 
         // send the user a login request message to their "wallet_request" database
-        const remoteDatastore = Verida.openExternalDatastore("https://schemas.verida.io/wallet/request/schema.json", {
+        const remoteDatastore = await Verida.openExternalDatastore(REQUEST_SCHEMA, did, {
             permissions: {
-                read: 'owner',
+                read: 'public',
                 write: 'public'
-            }
+            },
+            signData: false
         });
 
-        // encrypt with the recipients public key
+        // Asym encrypt with the recipients public key
         const vidDoc = await VidHelper.getByDid(did, Verida.config.vaultAppName);
         const publicAsymKey = DIDHelper.getKeyBytes(vidDoc, 'asym');
-        const encrypted = Encryption.symEncrypt(requestData, publicAsymKey);
+        const sharedKey = Encryption.sharedKey(publicAsymKey, keyPair.secretKey);
+        const encrypted = Encryption.asymEncrypt(requestData, sharedKey);
         
-        // send request
+        // Send request to the recipient's Vault and include the public key for encrypting the response
         const request = {
-            content: encrypted
-        };
+            request: encrypted,
+            publicKey: Encryption.encodeBase64(keyPair.publicKey)
+        }
+
         const response = await remoteDatastore.save(request);
+        if (!response) {
+            console.error(remoteDatastore.errors);
+            throw new Error('Unable to save remote request');
+        }
+
         const requestId = response.id;
 
         // Watch the wallet request datastore for any updates to the originally
@@ -90,27 +101,36 @@ class WalletHelper {
         const db = await datastoreDb.getInstance();
         db.changes({
             since: 'now',
-            live: true
+            include_docs: true,
+            live: true,
+            doc_ids: [response.id]
         }).on('change', function(data) {
-            console.log("received wallet request data change");
-            console.log(data);
-            if (data._id == requestId) {
-                if (data.deleted) {
-                    // ignore deleted changes
+            const doc = data.doc
+
+            // Check this change relates to this request we're watching AND
+            // has a valid response
+            if (doc._id == requestId && doc.response) {
+                if (doc.response) {
+                    // Decrypt the response
+                    const response = Encryption.asymDecrypt(doc.response, sharedKey)
+                    
+                    // Trigger the registered callback with the response data
+                    cb(requestId, response)
+
+                    // @todo: Delete the request?
                     return;
                 }
+            } else {
+                console.log("not found")
             }
+
+            
         }).on('error', function(err) {
-            console.log("Error watching for wallet request changes");
+            console.log("Error watching for wallet request database changes");
             console.log(err);
         })
 
-        // mobile app is watching "wallet_request" database and identifies a new request
-        // decrypts request
-        // adds request to "wallet_request_history"
-        // responds with response or denies request
-        // if accept, then sign consent for requested application
-        // encrypt response message using supplied encryption key
+        return requestId
     }
 
 }
