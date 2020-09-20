@@ -128,7 +128,7 @@ class DataServer {
         let db = new Database(dbName, did, this.appName, this, config);
         await db._init();
 
-        if (config.saveDatabase && db._originalDb) {
+        if (config.saveDatabase && db._originalDb && this.dbManager) {
             this.dbManager.saveDb(dbName, did, this.appName, config.permissions, db._originalDb.encryptionKey);
         }
 

@@ -248,8 +248,7 @@ class App {
         // Build dataserver config, merging defaults and user defined config
         config = _.merge({
             isProfile: false,
-            serverUrl: dataserverUrl,
-            dbManager: this.dbManager
+            serverUrl: dataserverUrl
         }, config);
 
         // Build dataserver
