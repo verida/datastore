@@ -27,18 +27,21 @@ class EncryptedDatabase {
         this.dataserver = dataserver;
         this.did = did;
         this.permissions = permissions;
-        this.encryptionKey = encryptionKey;
         this.remoteDsn = remoteDsn;
+        this.encryptionKey = encryptionKey;
+
+        // Automatically convert encryption key to a Buffer if it's a hex string
+        if (typeof(this.encryptionKey) == 'string') {
+            this.encryptionKey = Buffer.from(encryptionKey.slice(2), 'hex');
+        }
     }
 
     async _init() {
         this._localDbEncrypted = new PouchDB(this.dbName);
         this._localDb = new PouchDBCrypt(this.dbName);
         
-        let encryptionKey = Buffer.from(this.encryptionKey.slice(2), 'hex');
-        
         this._localDb.crypto("", {
-            "key": encryptionKey,
+            "key": this.encryptionKey,
             cb: function(err) {
                 if (err) {
                     console.error('Unable to connect to local DB');

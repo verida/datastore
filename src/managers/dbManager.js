@@ -9,6 +9,15 @@ class DbManager {
         this._dbStore = null;
     }
 
+    /**
+     * 
+     * @param {*} dbName 
+     * @param {*} did 
+     * @param {*} appName 
+     * @param {*} permissions 
+     * @param {*} encryptionKey Buffer representing the encryption key
+     * @param {*} options 
+     */
     async saveDb(dbName, did, appName, permissions, encryptionKey, options) {
         await this.init();
 
@@ -19,6 +28,7 @@ class DbManager {
         }, options);
 
         let id = this.buildDbId(dbName, did, appName);
+        let encryptionKeyString = '0x' + Buffer.from(encryptionKey).toString('hex');
 
         let dbData = {
             _id: id,
@@ -27,7 +37,7 @@ class DbManager {
             applicationName: appName,
             permissions: permissions,
             encryptionKey: {
-                key: encryptionKey,
+                key: encryptionKeyString,
                 type: options.key.type
             }
         };
@@ -75,7 +85,7 @@ class DbManager {
             return;
         }
         
-        this._dbStore = await this._app.openDatastore('storage/database', {
+        this._dbStore = await this._app.openDatastore('https://schemas.verida.io/storage/database/schema.json', {
             saveDatabase: false
         });
     }
