@@ -38,8 +38,8 @@ class Database extends EventEmitter {
         this.permissions = _.merge({
             read: "owner",
             write: "owner",
-            readUsers: [],
-            writeUsers: []
+            readList: [],
+            writeList: []
         }, this.config.permissions ? this.config.permissions : {});
 
         this.readOnly = this.config.readOnly ? true : false;
@@ -271,6 +271,18 @@ class Database extends EventEmitter {
         else {
             throw "Unable to create database or it doesn't exist";
         }
+    }
+
+    /**
+     * Update the users that can access the database
+     */
+    async updateUsers(readList, writeList) {
+        await this._init();
+
+        this.permissions.readList = readList;
+        this.permissions.writeList = writeList;
+
+        return this._originalDb.updateUsers(readList, writeList);
     }
 
     async _beforeInsert(data) {

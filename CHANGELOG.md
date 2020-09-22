@@ -1,3 +1,8 @@
+Upcoming
+--------------------
+
+- Support updateing the read / write list for a user database
+
 2020-09-13 (0.6.1)
 --------------------
 

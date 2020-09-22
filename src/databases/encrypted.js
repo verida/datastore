@@ -81,15 +81,31 @@ class EncryptedDatabase {
     }
 
     async createDb() {
-        let options = {
+        const options = {
             permissions: this.permissions
         };
 
-        let client = await this.dataserver.getClient();
+        const client = await this.dataserver.getClient();
         try {
             await client.createDatabase(this.did, this.dbName, options);
             // There's an odd timing issue that needs a deeper investigation
             await Utils.sleep(1000);
+        } catch (err) {
+            throw new Error("User doesn't exist or unable to create user database");
+        }
+    }
+
+    async updateUsers(readList, writeList) {
+        this.permissions.readList = readList;
+        this.permissions.writeList = writeList;
+
+        const options = {
+            permissions: this.permissions
+        };
+
+        const client = await this.dataserver.getClient();
+        try {
+            await client.updateDatabase(this.did, this.dbName, options);
         } catch (err) {
             throw new Error("User doesn't exist or unable to create user database");
         }
