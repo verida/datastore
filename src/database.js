@@ -238,7 +238,7 @@ class Database extends EventEmitter {
             try {
                 let encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
                 let remoteDsn = await this.dataserver.getDsn(this.user);
-                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(this.dbName, dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
@@ -247,7 +247,7 @@ class Database extends EventEmitter {
         } else if (this.permissions.read == "public") {
             // Create non-encrypted database
             try {
-                let db = new PublicDatabase(dbHashName, this.dataserver, this.did, this.permissions, this.config.isOwner);
+                let db = new PublicDatabase(this.dbName, dbHashName, this.dataserver, this.did, this.permissions, this.config.isOwner);
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
@@ -260,7 +260,7 @@ class Database extends EventEmitter {
                 }
 
                 let remoteDsn = await this.dataserver.getDsn(this.user);
-                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(this.dbName, dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
