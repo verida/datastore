@@ -10,7 +10,8 @@ class Inbox extends EventEmitter {
 
         this._init = false;
 
-        // TODO: Implement on new message event
+        // Maximum length of inbox items to retain
+        this._maxItems = 50;
     }
 
     async processAll() {
@@ -88,6 +89,7 @@ class Inbox extends EventEmitter {
             throw err;
         }
 
+        await this._gc();
         this.emit("newMessage", inboxEntry);
     }
 
@@ -154,6 +156,29 @@ class Inbox extends EventEmitter {
         await this.init();
 
         return this._privateInbox;
+    }
+
+    /**
+     * Garbage collection. Remove inbox items past the max limit.
+     */
+    async _gc() {
+        await this.init();
+        const privateInbox = this._privateInbox;
+        
+        const items = await privateInbox.getMany({
+            read: true                  // Only delete read inbox items
+        }, {
+            skip: this._maxItems,
+            sort: [{ sentAt: 'desc' }]  // Delete oldest first
+        });
+
+        if (items.length) {
+            console.log("Deleting " + items.length + " old inbox items");
+            items.forEach(async (item) =>  {
+                console.log(item)
+                await privateInbox.delete(item)
+            });
+        }
     }
 
 }
