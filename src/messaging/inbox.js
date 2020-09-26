@@ -96,17 +96,21 @@ class Inbox extends EventEmitter {
         let inbox = this;
 
         let db = await this._publicInbox.getDb();
-        db = await db.getInstance();
-        db.changes({
+        let dbInstance = await db.getInstance();
+        dbInstance.changes({
             since: 'now',
             live: true
-        }).on('change', function(info) {
+        }).on('change', async function(info) {
             if (info.deleted) {
                 // ignore deleted changes
                 return;
             }
 
-            inbox.processAll();
+            const inboxItem = await db.get(info.id, {
+                rev: info.changes[0].rev
+            });
+
+            await inbox.processItem(inboxItem);
         }).on('error', function(err) {
             console.log("Error watching for inbox changes");
             console.log(err);
