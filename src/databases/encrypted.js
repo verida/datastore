@@ -83,9 +83,13 @@ class EncryptedDatabase {
             })
             .on("complete", function(info) {
                 // Commence two-way, continuous, retrivable sync
-                parent.sync = PouchDB.sync(this._localDbEncrypted, this._remoteDbEncrypted, {
+                parent.sync = PouchDB.sync(parent._localDbEncrypted, parent._remoteDbEncrypted, {
                     live: true,
-                    retry: true
+                    retry: true,
+                    // Dont sync design docs
+                    filter: function(doc) {
+                        return doc._id.indexOf('_design') !== 0;
+                    } 
                 }).on("error", function(err) {
                     console.error("Unknown error occurred syncing with remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
                     console.error(err);
@@ -121,7 +125,7 @@ class EncryptedDatabase {
 
         const client = await this.dataserver.getClient();
         try {
-            await client.updateDatabase(this.did, this.dbName, options);
+            return client.updateDatabase(this.did, this.dbName, options);
         } catch (err) {
             throw new Error("User doesn't exist or unable to create user database");
         }
