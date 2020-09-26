@@ -172,10 +172,8 @@ class Inbox extends EventEmitter {
             sort: [{ sentAt: 'desc' }]  // Delete oldest first
         });
 
-        if (items.length) {
-            console.log("Deleting " + items.length + " old inbox items");
+        if (items && items.length) {
             items.forEach(async (item) =>  {
-                console.log(item)
                 await privateInbox.delete(item)
             });
         }
