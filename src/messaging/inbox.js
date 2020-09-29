@@ -134,14 +134,14 @@ class Inbox extends EventEmitter {
             throw "Verida application isn't connected";
         }
 
-        this._publicInbox = await this._app.openDatastore("inbox/item", {
+        this._publicInbox = await this._app.openDatastore("https://schemas.verida.io/inbox/item/schema.json", {
             permissions: {
                 read: "public",
                 write: "public"
             }
         });
         
-        this._privateInbox = await this._app.openDatastore("inbox/entry", {
+        this._privateInbox = await this._app.openDatastore("https://schemas.verida.io/inbox/entry/schema.json", {
             permissions: {
                 read: "owner",
                 write: "owner"
