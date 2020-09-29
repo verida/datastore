@@ -115,6 +115,7 @@ class Database extends EventEmitter {
             const existingDoc = await this.get(data._id);
             if (existingDoc) {
                 data._rev = existingDoc._rev;
+                insert = false;
             }
         }
 
