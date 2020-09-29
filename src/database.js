@@ -96,7 +96,8 @@ class Database extends EventEmitter {
         }
 
         let defaults = {
-            forceInsert: false
+            forceInsert: false,
+            forceUpdate: false
         };
         options = _.merge(defaults, options);
 
@@ -106,6 +107,15 @@ class Database extends EventEmitter {
         // (Assuming it's not defined as we have an insert)
         if (data._id === undefined || options.forceInsert) {
             insert = true;
+        }
+
+        // If a record exists with the given _id, do an update instead
+        // of attempting to insert which will result in a document conflict
+        if (options.forceUpdate && data._id !== undefined && data._rev === undefined) {
+            const existingDoc = await this.get(data._id);
+            if (existingDoc) {
+                data._rev = existingDoc._rev;
+            }
         }
 
         if (insert) {
