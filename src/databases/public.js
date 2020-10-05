@@ -51,10 +51,6 @@ class PublicDatabase {
                     await this.createDb();
                 }
                 else {
-                    if (info.error) {
-                        console.error(info);
-                    }
-
                     throw new Error("Public database not found: " + parent.dbHumanName);
                 }
             }
@@ -63,7 +59,6 @@ class PublicDatabase {
                 await this.createDb();
             }
             else {
-                console.error(err);
                 throw new Error("Public database not found: " + parent.dbHumanName);
             }
         }
