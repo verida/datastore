@@ -96,8 +96,8 @@ class Database extends EventEmitter {
         }
 
         let defaults = {
-            forceInsert: false,
-            forceUpdate: false
+            forceInsert: false, // Force inserting a record (will throw exception if it already exists)
+            forceUpdate: false  // Force updating record if it already exists
         };
         options = _.merge(defaults, options);
 
@@ -112,10 +112,17 @@ class Database extends EventEmitter {
         // If a record exists with the given _id, do an update instead
         // of attempting to insert which will result in a document conflict
         if (options.forceUpdate && data._id !== undefined && data._rev === undefined) {
-            const existingDoc = await this.get(data._id);
-            if (existingDoc) {
-                data._rev = existingDoc._rev;
-                insert = false;
+            try {
+                const existingDoc = await this.get(data._id);
+                if (existingDoc) {
+                    data._rev = existingDoc._rev;
+                    insert = false;
+                }
+            } catch (err) {
+                // Record may not exist, which is fine
+                if (err.name != "not_found") {
+                    throw err
+                }
             }
         }
 
