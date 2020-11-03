@@ -1,6 +1,6 @@
 {
   "name": "@verida/datastore",
-  "version": "0.5.1",
+  "version": "0.6.1",
   "description": "Verida Datastore",
   "main": "dist/app.js",
   "author": "Verida",
@@ -11,8 +11,8 @@
     "serve-docs": "~/.npm-global/bin/docsify serve docs",
     "build": "./node_modules/.bin/babel src -d dist",
     "preinstall": "npm install --ignore-scripts",
-    "prepublish": "npm run build",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -21,8 +21,9 @@
   },
   "dependencies": {
     "@tradle/react-native-http": "^2.0.0",
-    "@verida/did-helper": "^0.5.1",
-    "@verida/wallet-utils": "https://github.com/verida/wallet-utils.git",
+    "@verida/did-helper": "^0.6.0",
+    "@verida/encryption-utils": "^0.2.1",
+    "@verida/wallet-utils": "^1.2.0",
     "assert": "^1.1.1",
     "axios": "^0.19.2",
     "browserify-zlib": "^0.1.4",
@@ -36,7 +37,7 @@
     "did-resolver": "^1.1.0",
     "dns.js": "^1.0.1",
     "domain-browser": "^1.1.1",
-    "ethers": "^5.0.7",
+    "ethers": "^5.0.9",
     "events": "^1.0.0",
     "https-browserify": "0.0.1",
     "json-schema-ref-parser": "^7.1.2",

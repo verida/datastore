@@ -1,4 +1,6 @@
 /*eslint no-console: "off"*/
+
+import '../shim';
 import Config from './config';
 import ServerUser from "./user/server";
 import VeridaSchema from "./schema";
@@ -9,8 +11,8 @@ import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import TrustHelper from './helpers/trust';
 import CredentialsHelper from './helpers/credentials';
-import EncryptionHelper from './helpers/encryption';
-import Profile from './profile';
+import StaticHelper from './helpers/static';
+import Encryption from '@verida/encryption-utils';
 import DbManager from './managers/dbManager';
 import ProfileManager from './managers/profileManager';
 
@@ -44,16 +46,16 @@ class App {
         });
 
         this._isConnected = false;
-    }
 
-    /**
-     * Override the default config
-     *
-     * @param {*} config
-     */
-    static setConfig(config) {
-        App.config = _.merge({}, App.config, config);
-        App.config.server = App.config.servers[App.config.environment];
+        this.Helpers = {
+            vid: VidHelper,
+            wallet: WalletHelper,
+            trust: TrustHelper,
+            credentials: CredentialsHelper,
+            schema: VeridaSchema,
+            encryption: Encryption
+        };
+
     }
 
     /**
@@ -94,6 +96,8 @@ class App {
     /**
      * Determine if a web session exists for a given DID (indicates they can be autologgedin)
      *
+     * @todo Deprecate and move into a helper
+     *
      * @param {string} did User's DID
      * @param {string} appName Application name
      */
@@ -131,126 +135,24 @@ class App {
         return this.dataserver.openDatabase(dbName, config);
     }
 
-    /**
-     * Open an application datastore owned by an external user
-     *
-     * @param {*} schemaName
-     * @param {*} did
-     * @param {*} config
-     */
-    static async openExternalDatastore(schemaName, did, config) {
-        did = did.toLowerCase();
-        let dataserver = await App.buildDataserver(did, {
-            appName: config.appName || App.config.appName
-        });
-
-        config.did = did;
-        return dataserver.openDatastore(schemaName, config);
+    async openExternalDatastore(schemaName, did, config) {
+        return StaticHelper.openExternalDatastore(schemaName, did, config)
     }
 
-    /**
-     * Open an application database owned by an external user
-     *
-     * @param {*} dbName
-     * @param {*} did
-     * @param {*} config
-     */
-    static async openExternalDatabase(dbName, did, config) {
-        did = did.toLowerCase();
-        let dataserver = await App.buildDataserver(did, {
-            appName: config.appName || App.config.appName
-        });
-
-        config.did = did;
-        return dataserver.openDatabase(dbName, config);
+    async openExternalDatabase(dbName, did, config) {
+        return StaticHelper.openExternalDatabase(dbName, did, config)
     }
 
-    /**
-     * Opens the public profile of any user in read only mode
-     *
-     * @param {*} did
-     * @example
-     * let profile = app.openProfile(userDid);
-     * console.log(profile.get("email"));
-     * @returns {DataStore} Datastore instance for the requested user profile
-     */
-    static async openProfile(did, appName) {
-        const datastore = await App.openExternalDatastore("profile/public", did, {
-            appName: appName || App.config.vaultAppName,
-            permissions: {
-                read: "public",
-                write: "owner"
-            },
-            readOnly: true
-        });
-
-        return new Profile(datastore);
+    async openProfile(did, appName) {
+        return StaticHelper.openProfile(did, appName)
     }
 
-    /**
-     * Get a JSON Schema object by name
-     *
-     * @param {string} schemaName That may be a name (ie: "social/contact") or a URL of a schema (ie: "https://test.com/schema.json")
-     * @returns {Schema}
-     */
-    static async getSchema(schemaName, returnSpec) {
-        if (!App.cache.schemas[schemaName]) {
-            App.cache.schemas[schemaName] = new VeridaSchema(schemaName);
-        }
-
-        if (returnSpec) {
-            return App.cache.schemas[schemaName].getSpecification();
-        }
-
-        return App.cache.schemas[schemaName];
+    async getSchema(schemaName, returnSpec) {
+        return StaticHelper.getSchema(schemaName, returnSpec)
     }
 
-    /**
-     * Build a dataserver connection to an external dataserver.
-     *
-     *
-     * @param {*} did
-     * @param {*} config
-     */
-    static async buildDataserver(did, config) {
-        did = did.toLowerCase();
-
-        config = _.merge({
-            appName: App.config.appName,
-            did: did
-        }, config);
-
-
-        if (App.cache.dataservers[did + ':' + config.appName]) {
-            return App.cache.dataservers[did + ':' + config.appName];
-        }
-
-        // Get user's VID to obtain their dataserver address
-        let vidDoc = await VidHelper.getByDid(did, config.appName);
-
-        if (!vidDoc) {
-            throw "Unable to locate application VID. User hasn't initialised this application? ("+did+" / "+config.appName+")";
-        }
-
-        let dataserverDoc = vidDoc.service.find(entry => entry.id.includes('dataserver'));
-        let dataserverUrl = dataserverDoc.serviceEndpoint;
-
-        // Build dataserver config, merging defaults and user defined config
-        config = _.merge({
-            isProfile: false,
-            serverUrl: dataserverUrl,
-            dbManager: this.dbManager
-        }, config);
-
-        // Build dataserver
-        let dataserver = new DataServer(config);
-        dataserver.loadExternal({
-            vid: vidDoc.id
-        });
-
-        // Cache and return dataserver
-        App.cache.dataservers[did + ':' + config.appName] = dataserver;
-        return App.cache.dataservers[did + ':' + config.appName];
+    async buildDataserver(did, config) {
+        return StaticHelper.buildDataserver(did, config)
     }
 
 }
@@ -261,19 +163,25 @@ App.Helpers = {
     trust: TrustHelper,
     credentials: CredentialsHelper,
     schema: VeridaSchema,
-    encryption: EncryptionHelper
+    encryption: Encryption
 };
-
 
 App.cache = {
     schemas: {},
     dataservers: {}
 };
+
+App.openExternalDatastore = StaticHelper.openExternalDatastore;
+App.openExternalDatabase = StaticHelper.openExternalDatabase;
+App.openProfile = StaticHelper.openProfile;
+App.getSchema = StaticHelper.getSchema;
+App.buildDataserver = StaticHelper.buildDataserver;
 
 App.config = Config;
-App.cache = {
-    schemas: {},
-    dataservers: {}
-};
+
+App.setConfig = function(config) {
+    App.config = _.merge({}, App.config, config);
+    App.config.server = App.config.servers[App.config.environment];
+}
 
 export default App;

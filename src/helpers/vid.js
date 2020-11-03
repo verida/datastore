@@ -9,7 +9,7 @@ class VidHelper {
     /**
      * Save a DID document
      *
-     * @todo: Replace with decentralised lookup
+     * @todo: Replace with decentralised DID management (ie: sidetree)
      */
     async save(did, appName, keyring, userDataserverUrl, signature) {
         let vid = this.getVidFromDid(did, appName);
@@ -63,7 +63,7 @@ class VidHelper {
 
     /**
      * Get a DID Document for the VID by DID and application name
-     * 
+     *
      * @param {*} did Blockchain DID (ie: did:ethr:0x...)
      * @param {*} appName Application name
      */
@@ -75,7 +75,7 @@ class VidHelper {
 
     /**
      * Get a DID Document representing the VID
-     * 
+     *
      * @param {string} vid VID to locate
      */
     async getByVid(vid) {
@@ -107,15 +107,15 @@ class VidHelper {
 
     /**
      * Convert a VID to the underlying DID and application name
-     * 
-     * @param {*} vid 
+     *
+     * @param {*} vid
      */
     async convertVid(vid) {
         const didDoc = await this.getByVid(vid);
         const applicationService = didDoc.service.find(entry => entry.type.includes("verida.Application"));
         const appName = applicationService.description;
         const did = await this.getDidFromVid(vid);
-        
+
         return {
             did: did,
             appName: appName
@@ -124,9 +124,9 @@ class VidHelper {
 
     /**
      * Construct a DID given a chain and address
-     * 
-     * @param {*} address 
-     * @param {*} chain 
+     *
+     * @param {*} address
+     * @param {*} chain
      */
     getDidFromAddress(address, chain) {
         chain = chain || "ethr";
@@ -135,7 +135,7 @@ class VidHelper {
 
     /**
      * Convert a username to a DID
-     * 
+     *
      */
     async getDidFromUsername(username) {
         if (usernameOrDid.match(/^did\:/)) {
@@ -148,10 +148,10 @@ class VidHelper {
     /**
      * Save a username for a given DID. Requires a valid signature signed
      * by the DID.
-     * 
-     * @param {*} username 
-     * @param {*} did 
-     * @param {*} signature 
+     *
+     * @param {*} username
+     * @param {*} did
+     * @param {*} signature
      */
     async commitUsername(username, did, signature) {
         return DIDHelper.commitUsername(username, did, signature, App.config.server.didServerUrl);

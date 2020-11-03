@@ -10,7 +10,8 @@ class Inbox extends EventEmitter {
 
         this._init = false;
 
-        // TODO: Implement on new message event
+        // Maximum length of inbox items to retain
+        this._maxItems = 50;
     }
 
     async processAll() {
@@ -88,6 +89,7 @@ class Inbox extends EventEmitter {
             throw err;
         }
 
+        await this._gc();
         this.emit("newMessage", inboxEntry);
     }
 
@@ -96,17 +98,21 @@ class Inbox extends EventEmitter {
         let inbox = this;
 
         let db = await this._publicInbox.getDb();
-        db = await db.getInstance();
-        db.changes({
+        let dbInstance = await db.getInstance();
+        dbInstance.changes({
             since: 'now',
             live: true
-        }).on('change', function(info) {
+        }).on('change', async function(info) {
             if (info.deleted) {
                 // ignore deleted changes
                 return;
             }
 
-            inbox.processAll();
+            const inboxItem = await db.get(info.id, {
+                rev: info.changes[0].rev
+            });
+
+            await inbox.processItem(inboxItem);
         }).on('error', function(err) {
             console.log("Error watching for inbox changes");
             console.log(err);
@@ -128,14 +134,14 @@ class Inbox extends EventEmitter {
             throw "Verida application isn't connected";
         }
 
-        this._publicInbox = await this._app.openDatastore("inbox/item", {
+        this._publicInbox = await this._app.openDatastore("https://schemas.verida.io/inbox/item/schema.json", {
             permissions: {
                 read: "public",
                 write: "public"
             }
         });
         
-        this._privateInbox = await this._app.openDatastore("inbox/entry", {
+        this._privateInbox = await this._app.openDatastore("https://schemas.verida.io/inbox/entry/schema.json", {
             permissions: {
                 read: "owner",
                 write: "owner"
@@ -150,6 +156,27 @@ class Inbox extends EventEmitter {
         await this.init();
 
         return this._privateInbox;
+    }
+
+    /**
+     * Garbage collection. Remove inbox items past the max limit.
+     */
+    async _gc() {
+        await this.init();
+        const privateInbox = this._privateInbox;
+        
+        const items = await privateInbox.getMany({
+            read: true                  // Only delete read inbox items
+        }, {
+            skip: this._maxItems,
+            sort: [{ sentAt: 'desc' }]  // Delete oldest first
+        });
+
+        if (items && items.length) {
+            items.forEach(async (item) =>  {
+                await privateInbox.delete(item)
+            });
+        }
     }
 
 }

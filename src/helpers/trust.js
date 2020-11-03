@@ -2,6 +2,9 @@ import _ from 'lodash';
 import didJWT from 'did-jwt';
 import Verida from '../app';
 
+/**
+ * Helper class to help with signatures and JWT's
+ */
 class Trust {
 
     /**
@@ -16,7 +19,8 @@ class Trust {
     /**
      * Get a list of the profiles that signed a piece of data
      * 
-     * @param {object} data 
+     * @param {object} data
+     * @return {array} Array of DID's that signed the given data
      */
     static async getSigners(data) {
         if (!data.signatures) {
@@ -33,6 +37,7 @@ class Trust {
     }
 
     /**
+     * Verify a signature
      * 
      * @param {object} data 
      * @param {string} did 

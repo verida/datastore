@@ -7,7 +7,8 @@ import Utils from "../utils";
 
 class PublicDatabase {
 
-    constructor(dbName, dataserver, did, permissions, isOwner) {
+    constructor(dbHumanName, dbName, dataserver, did, permissions, isOwner) {
+        this.dbHumanName = dbHumanName;
         this.dbName = dbName;
         this.dataserver = dataserver;
         this.did = did;
@@ -29,14 +30,15 @@ class PublicDatabase {
         }
 
         if (!dsn) {
-            throw "Unable to locate DSN for database ("+this.dbName+")";
+            throw "Unable to locate DSN for public database: " + this.dbHumanName;
         }
+
+        parent = this;
 
         this._remoteDb = new PouchDB(dsn + this.dbName, {
             cb: function(err) {
                 if (err) {
-                    console.error('Unable to connect to remote DB');
-                    console.error(err);
+                    throw new Error('Unable to connect to remote database: ' + parent.dbHumanName);
                 }
             },
             skip_setup: true,
@@ -50,16 +52,15 @@ class PublicDatabase {
                     await this.createDb();
                 }
                 else {
-                    throw new Error("Database not found");
+                    throw new Error("Public database not found: " + parent.dbHumanName);
                 }
             }
         } catch(err) {
-            console.log(err);
             if (this.isOwner) {
                 await this.createDb();
             }
             else {
-                throw new Error("Database not found");
+                throw new Error("Public database not found: " + parent.dbHumanName);
             }
         }
     }

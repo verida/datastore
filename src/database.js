@@ -28,6 +28,7 @@ class Database extends EventEmitter {
 
         // Signing user will be the logged in user
         this.signUser = config.signUser || config.user;
+        this.signData = config.signData === false ? false : true;
         this.signAppName = config.signAppName || this.appName;
         this.dataserver = dataserver;
 
@@ -37,8 +38,8 @@ class Database extends EventEmitter {
         this.permissions = _.merge({
             read: "owner",
             write: "owner",
-            readUsers: [],
-            writeUsers: []
+            readList: [],
+            writeList: []
         }, this.config.permissions ? this.config.permissions : {});
 
         this.readOnly = this.config.readOnly ? true : false;
@@ -95,7 +96,8 @@ class Database extends EventEmitter {
         }
 
         let defaults = {
-            forceInsert: false
+            forceInsert: false, // Force inserting a record (will throw exception if it already exists)
+            forceUpdate: false  // Force updating record if it already exists
         };
         options = _.merge(defaults, options);
 
@@ -105,6 +107,23 @@ class Database extends EventEmitter {
         // (Assuming it's not defined as we have an insert)
         if (data._id === undefined || options.forceInsert) {
             insert = true;
+        }
+
+        // If a record exists with the given _id, do an update instead
+        // of attempting to insert which will result in a document conflict
+        if (options.forceUpdate && data._id !== undefined && data._rev === undefined) {
+            try {
+                const existingDoc = await this.get(data._id);
+                if (existingDoc) {
+                    data._rev = existingDoc._rev;
+                    insert = false;
+                }
+            } catch (err) {
+                // Record may not exist, which is fine
+                if (err.name != "not_found") {
+                    throw err
+                }
+            }
         }
 
         if (insert) {
@@ -237,7 +256,7 @@ class Database extends EventEmitter {
             try {
                 let encryptionKey = await this.dataserver.getDbKey(this.user, dbHashName);
                 let remoteDsn = await this.dataserver.getDsn(this.user);
-                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(this.dbName, dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
@@ -246,7 +265,7 @@ class Database extends EventEmitter {
         } else if (this.permissions.read == "public") {
             // Create non-encrypted database
             try {
-                let db = new PublicDatabase(dbHashName, this.dataserver, this.did, this.permissions, this.config.isOwner);
+                let db = new PublicDatabase(this.dbName, dbHashName, this.dataserver, this.did, this.permissions, this.config.isOwner);
                 this._db = await db.getDb();
             } catch (err) {
                 throw new Error("Error creating public database ("+this.dbName+" / "+dbHashName+") for "+this.did+": " + err.message);
@@ -259,16 +278,29 @@ class Database extends EventEmitter {
                 }
 
                 let remoteDsn = await this.dataserver.getDsn(this.user);
-                let db = new EncryptedDatabase(dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
+                let db = new EncryptedDatabase(this.dbName, dbHashName, this.dataserver, encryptionKey, remoteDsn, this.did, this.permissions);
                 this._originalDb = db;
                 this._db = await db.getDb();
             } catch (err) {
+                console.error(err)
                 throw new Error("Error creating encrypted database ("+this.dbName+" for "+this.did+": " + err.message);
             }
         }
         else {
             throw "Unable to create database or it doesn't exist";
         }
+    }
+
+    /**
+     * Update the users that can access the database
+     */
+    async updateUsers(readList, writeList) {
+        await this._init();
+
+        this.permissions.readList = readList;
+        this.permissions.writeList = writeList;
+
+        return this._originalDb.updateUsers(readList, writeList);
     }
 
     async _beforeInsert(data) {
@@ -278,12 +310,18 @@ class Database extends EventEmitter {
 
         data.insertedAt = (new Date()).toISOString();
         data.modifiedAt = (new Date()).toISOString();
-        await this.signData(data);
+        
+        if (this.signData) {
+            await this._signData(data);
+        }
     }
 
     async _beforeUpdate(data) {
         data.modifiedAt = (new Date()).toISOString();
-        await this.signData(data);
+
+        if (this.signData) {
+            await this._signData(data);
+        }
     }
 
     _afterInsert(data, response) {}
@@ -337,7 +375,7 @@ class Database extends EventEmitter {
      * @param {*} data
      * @todo Think about signing data and versions / insertedAt etc.
      */
-    async signData(data) {
+    async _signData(data) {
         if (!this.signUser) {
             throw new Error("Unable to sign data. No signing user specified.");
         }
