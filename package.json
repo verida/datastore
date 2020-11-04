@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@tradle/react-native-http": "^2.0.0",
-    "@verida/did-helper": "^0.6.0",
+    "@verida/did-helper": "^0.6.1",
     "@verida/encryption-utils": "^0.2.1",
     "@verida/wallet-utils": "^1.2.0",
     "assert": "^1.1.1",
