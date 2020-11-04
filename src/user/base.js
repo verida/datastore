@@ -4,6 +4,7 @@ import App from '../app';
 const _ = require('lodash');
 import didJWT from 'did-jwt';
 import { ethers } from 'ethers';
+import { encodeBase64 } from "tweetnacl-util";
 
 class Base {
 
@@ -127,7 +128,8 @@ class Base {
 
         let userConfig = await this.getAppConfig(config.appName, true);
         let keyring = userConfig.keyring;
-        let signer = didJWT.SimpleSigner(keyring.signKey.private);
+        let privateKey = encodeBase64(keyring.signKey.privateBytes);
+        let signer = didJWT.NaclSigner(privateKey);
 
         let jwt = await didJWT.createJWT({
             aud: this.did,

@@ -21,6 +21,9 @@ if (typeof localStorage !== 'undefined') {
   localStorage.debug = isDev ? '*' : ''
 }
 
+if (typeof TextEncoder === 'undefined') global.TextEncoder = require('text-encoding-shim').TextEncoder
+if (typeof TextDecoder === 'undefined') global.TextDecoder = require('text-encoding-shim').TextDecoder
+
 // If using the crypto shim, uncomment the following line to ensure
 // crypto is loaded first, so it can populate global.crypto
 // require('crypto')

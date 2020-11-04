@@ -35,6 +35,15 @@ class Client {
         });
     }
 
+    async updateDatabase(did, databaseName, options) {
+        options = options ? options : {};
+        return this.getAxios(true).post(this._dataserver.serverUrl + "user/updateDatabase", {
+            did: did,
+            databaseName: databaseName,
+            options: options
+        });
+    }
+
     getAxios(includeAuth) {
         let config = {
             headers: {

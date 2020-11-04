@@ -3,10 +3,7 @@ import {
     VERIDA_APP_NAME,
     VERIDA_APP_HOST,
     VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
-    VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
-    VERIDA_SERVERS_CUSTOM_SCHEMAS_BASE_PATH,
-    VERIDA_SCHEMAS_CUSTOM_PATH,
-    VERIDA_SCHEMAS_BASE_PATH
+    VERIDA_SERVERS_CUSTOM_DID_SERVER_URL
 } from 'react-native-dotenv'
 
 const config = {
@@ -42,13 +39,13 @@ const config = {
         custom: {
             appServerUrl: VERIDA_SERVERS_CUSTOM_APP_SERVER_URL,
             didServerUrl: VERIDA_SERVERS_CUSTOM_DID_SERVER_URL,
-            baseSchemas: VERIDA_SERVERS_CUSTOM_SCHEMAS_BASE_PATH,
+            schemaPaths: {
+                '/': 'https://schemas.verida.io/'
+            }
         }
     },
     datastores: {},
-    customSchemasPath: VERIDA_SCHEMAS_CUSTOM_PATH,
-    baseSchemasPath: VERIDA_SCHEMAS_BASE_PATH,
-    vaultAppName: "Verida Vault"
+    vaultAppName: "Verida: Vault"
 };
 
 config.server = config.servers[config.environment];

@@ -2,7 +2,7 @@
 import Datastore from "../datastore";
 import _ from "lodash";
 import VidHelper from '../helpers/vid';
-import DIDHelper from '@verida/did-helper/src/DIDHelper';
+import DIDHelper from '@verida/did-helper';
 import didJWT from 'did-jwt';
 import { box, randomBytes } from "tweetnacl";
 import App from '../app';
@@ -156,7 +156,7 @@ class Outbox {
 
         // Build dataserver connecting to the recipient user's inbox
         let dataserver = await App.buildDataserver(did, config);
-        let inbox = new Datastore(dataserver, "inbox/item", did, config.appName, {
+        let inbox = new Datastore(dataserver, "https://schemas.verida.io/inbox/item/schema.json", did, config.appName, {
             permissions: {
                 read: "public",
                 write: "public"
@@ -174,7 +174,7 @@ class Outbox {
 
     async getOutboxDatastore() {
         if (!this._outboxDatastore) {
-            this._outboxDatastore = this._app.openDatastore("outbox/entry");
+            this._outboxDatastore = this._app.openDatastore("https://schemas.verida.io/outbox/entry/schema.json");
         }
 
         return this._outboxDatastore;

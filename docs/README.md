@@ -1,6 +1,6 @@
 # Welcome to Verida Datastore
 
-!>Verida Datastore is currently Alpha and in active development. This is a preview release for developers to provide early feedback. Do **not** expect any data saved to be retained, unless you run your own dataserver. API's and data schemas are **highly** likely to change before an initial release.
+!>Verida Datastore is under development. This is a preview release for developers to provide early feedback. Do **not** expect any data saved to be retained on the testnet, unless you run your own dataserver. API's and data schemas will possibly change before mainnet is launched.
 
 ## Quick links
 
@@ -8,6 +8,7 @@ Learn:
 
 - [Quick Start](/#quick-start)
 - [Guide](/guide)
+- [Sandbox](https://sandbox.datastore.verida.io)
 - [Architecture](/architecture)
 - [API Docs](http://apidocs.datastore.verida.io/)
 
@@ -30,6 +31,12 @@ Verida Datastore provides an easy to use library that abstracts the complexities
 Applications can store unstructured data, but are encouraged to use the built-in data schemas pre-defined by Verida (or develop their own custom schemas). This ensures all applications built using Verida Datastore can interoperate together with data of a particular type created in one application available in all other applications that support that data type.
 
 The Verida Datastore is the first component in a broader ecosystem of open source tools being developed by Verida.
+
+## Sandbox
+
+A sandbox has been created so you can easily play with the Verida Datastore library within your browser.
+
+Open [Verida Datastore Sandbox](https://sandbox.datastore.verida.io).
 
 ## Quick Start
 
@@ -137,6 +144,6 @@ console.log(contacts);
 
 Your application has an `inbox`, where other applications and other users can send encrypted messages to users. Your application can listen to new inbox messages and handle them as appropriate.
 
-This effectively creates a secure Peer-to-Peer communication channel between all users.
+This effectively creates a secure Peer-to-Peer communication channel between all users and applications.
 
 !>Example coming soon
