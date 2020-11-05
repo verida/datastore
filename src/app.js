@@ -32,6 +32,8 @@ class App {
      * myApp.connect(true);
      */
     constructor(config) {
+        this.appName = config.appName ? config.appName : App.config.appName;
+
         if (process.browser) {
             this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
         } else {
@@ -46,7 +48,8 @@ class App {
         this.dataserver = new DataServer({
             datastores: config.datastores,
             serverUrl: this.user.serverUrl,
-            dbManager: this.dbManager
+            dbManager: this.dbManager,
+            appName: this.appName
         });
 
         this._isConnected = false;
