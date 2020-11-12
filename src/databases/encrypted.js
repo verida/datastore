@@ -61,8 +61,7 @@ class EncryptedDatabase {
         });
 
         this._remoteDbEncrypted = new PouchDB(this.remoteDsn + this.dbName, {
-            skip_setup: true,
-            adapter: 'asyncstorage'
+            skip_setup: true
         });
 
         try {

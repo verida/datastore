@@ -41,8 +41,7 @@ class PublicDatabase {
                     throw new Error('Unable to connect to remote database: ' + parent.dbHumanName);
                 }
             },
-            skip_setup: true,
-            adapter: 'asyncstorage'
+            skip_setup: true
         });
 
         try {
