@@ -59,13 +59,18 @@ class EncryptedDatabase {
         
         try {
             let info = await this._remoteDbEncrypted.info();
+      
             if (info.error && info.error == "not_found") {
-                // Database wasn't found, so attempt to create it
+                // Remote dabase wasn't found, so attempt to create it
                 await this.createDb();
             }
-        } catch(err) {
-            throw new Error('Unknown error occurred attempting to get information about remote encrypted database');
-            //await this.createDb();
+        } catch (err) {
+            if (err.error && err.error == "not_found") {
+                // Remote database wasn't found, so attempt to create it
+                await this.createDb();
+            } else {
+                throw new Error('Unknown error occurred attempting to get information about remote encrypted database');
+            }
         }
 
         const parent = this;
