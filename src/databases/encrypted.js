@@ -1,18 +1,30 @@
 /*eslint no-console: "off"*/
 
-import PouchDBCrypt from 'pouchdb-react-native';
-import PouchDB from 'pouchdb-react-native';
+import PouchDB from '@craftzdog/pouchdb-core-react-native';
+import PouchDBCrypt from '@craftzdog/pouchdb-core-react-native';
+import HttpPouch from 'pouchdb-adapter-http';
+import replication from '@craftzdog/pouchdb-replication-react-native';
+import mapreduce from 'pouchdb-mapreduce';
 import PouchDBFind from 'pouchdb-find';
+import SQLite from 'react-native-sqlite-2'
+import SQLiteAdapterFactory from 'pouchdb-adapter-react-native-sqlite';
+const SQLiteAdapter = SQLiteAdapterFactory(SQLite);
+const CryptoPouch = require('crypto-pouch');
 import Utils from "../utils";
 
-PouchDBCrypt.plugin(PouchDBFind);
-PouchDB.plugin(PouchDBFind);
+PouchDB
+  .plugin(HttpPouch)
+  .plugin(replication)
+  .plugin(mapreduce)
+  .plugin(PouchDBFind)
+  .plugin(SQLiteAdapter);
 
-const CryptoPouch = require('crypto-pouch');
-PouchDBCrypt.plugin(CryptoPouch);
-
-const adapter = require('pouchdb-adapter-asyncstorage');
-PouchDB.plugin(adapter);
+PouchDBCrypt
+  .plugin(HttpPouch)
+  .plugin(replication)
+  .plugin(mapreduce)
+  .plugin(PouchDBFind)
+  .plugin(CryptoPouch);
 
 class EncryptedDatabase {
 
@@ -45,10 +57,10 @@ class EncryptedDatabase {
 
     async _init() {
         this._localDbEncrypted = new PouchDB(this.dbName, {
-            adapter: 'asyncstorage'
+            adapter: 'react-native-sqlite'
         });
         this._localDb = new PouchDBCrypt(this.dbName, {
-            adapter: 'asyncstorage'
+            adapter: 'react-native-sqlite'
         });
 
         this._localDb.crypto("", {

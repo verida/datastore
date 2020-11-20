@@ -1,9 +1,17 @@
 /*eslint no-console: "off"*/
 
-import PouchDB from 'pouchdb-react-native';
+import PouchDB from '@craftzdog/pouchdb-core-react-native';
+import HttpPouch from 'pouchdb-adapter-http';
+import replication from '@craftzdog/pouchdb-replication-react-native';
+import mapreduce from 'pouchdb-mapreduce';
 import PouchDBFind from 'pouchdb-find';
-PouchDB.plugin(PouchDBFind);
 import Utils from "../utils";
+
+PouchDB
+  .plugin(HttpPouch)
+  .plugin(replication)
+  .plugin(mapreduce)
+  .plugin(PouchDBFind);
 
 class PublicDatabase {
 
