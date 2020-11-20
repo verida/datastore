@@ -39,7 +39,7 @@ class Base {
             vidDoc = await VidHelper.save(this.did, appName, keyring, this.serverUrl, signature);
         }
 
-        return vidDoc.id;
+        return String(vidDoc.id);
     }
 
     async getAppConfig(appName, force, signature) {
