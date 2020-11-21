@@ -82,6 +82,8 @@ class EncryptedDatabase {
             if (info.error && info.error == "not_found") {
                 // Remote dabase wasn't found, so attempt to create it
                 await this.createDb();
+            } else {
+                throw new Error('Unknown error occurred attempting to get information about remote encrypted database');
             }
         } catch (err) {
             if (err.error && err.error == "not_found") {

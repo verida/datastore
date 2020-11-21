@@ -40,7 +40,7 @@ class Outbox {
         };
         config = _.merge(defaults, config);
 
-        let sendingAppName = App.config.appName;
+        let sendingAppName = this._app.appName;
         let receivingAppName = config.appName;
 
         this.validateData(type, data);
@@ -164,7 +164,7 @@ class Outbox {
             isOwner: false,
             // Sign data as this user and application
             signUser: this._app.user,
-            signAppName: App.config.appName
+            signAppName: this._app.appName
         });
 
         this._inboxes[key] = inbox;

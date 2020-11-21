@@ -32,6 +32,7 @@ class App {
      * myApp.connect(true);
      */
     constructor(config) {
+        this.appName = config.appName ? config.appName : App.config.appName;
         this.user = new ServerUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.privateKey);
 
         this.outbox = new Outbox(this);
@@ -42,7 +43,8 @@ class App {
         this.dataserver = new DataServer({
             datastores: config.datastores,
             serverUrl: this.user.serverUrl,
-            dbManager: this.dbManager
+            dbManager: this.dbManager,
+            appName: this.appName
         });
 
         this._isConnected = false;

@@ -1,7 +1,18 @@
-Upcoming
+
+2020-11-08 (0.6.2)
 --------------------
 
-- Support updateing the read / write list for a user database
+- Enable saving without signing
+- Support updating the read / write list for a user database
+- Fix: dbManager being incorrectly referenced for external databases
+- Ensure databases only sync after replication has been completed
+- Fix: Inbox issue with items that come in quick succession
+- Support inbox garbage collection
+- Fix: Don't syn design documents
+- Support forcing a database update when calling `save()`
+- Fix: Make `user.createDidJwt` properly use Nacl signer
+- Refactor to support both instance and static methods
+- Support setting appName within a verida datastore instance
 
 2020-09-13 (0.6.1)
 --------------------
