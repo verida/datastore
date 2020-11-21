@@ -1,18 +1,30 @@
 /*eslint no-console: "off"*/
 
-import PouchDBCrypt from 'pouchdb-react-native';
-import PouchDB from 'pouchdb-react-native';
+import PouchDB from '@craftzdog/pouchdb-core-react-native';
+import PouchDBCrypt from '@craftzdog/pouchdb-core-react-native';
+import HttpPouch from 'pouchdb-adapter-http';
+import replication from '@craftzdog/pouchdb-replication-react-native';
+import mapreduce from 'pouchdb-mapreduce';
 import PouchDBFind from 'pouchdb-find';
+import SQLite from 'react-native-sqlite-2'
+import SQLiteAdapterFactory from 'pouchdb-adapter-react-native-sqlite';
+const SQLiteAdapter = SQLiteAdapterFactory(SQLite);
+const CryptoPouch = require('crypto-pouch');
 import Utils from "../utils";
 
-PouchDBCrypt.plugin(PouchDBFind);
-PouchDB.plugin(PouchDBFind);
+PouchDB
+  .plugin(HttpPouch)
+  .plugin(replication)
+  .plugin(mapreduce)
+  .plugin(PouchDBFind)
+  .plugin(SQLiteAdapter);
 
-const CryptoPouch = require('crypto-pouch');
-PouchDBCrypt.plugin(CryptoPouch);
-
-const adapter = require('pouchdb-adapter-asyncstorage');
-PouchDB.plugin(adapter);
+PouchDBCrypt
+  .plugin(HttpPouch)
+  .plugin(replication)
+  .plugin(mapreduce)
+  .plugin(PouchDBFind)
+  .plugin(CryptoPouch);
 
 class EncryptedDatabase {
 
@@ -45,10 +57,10 @@ class EncryptedDatabase {
 
     async _init() {
         this._localDbEncrypted = new PouchDB(this.dbName, {
-            adapter: 'asyncstorage'
+            adapter: 'react-native-sqlite'
         });
         this._localDb = new PouchDBCrypt(this.dbName, {
-            adapter: 'asyncstorage'
+            adapter: 'react-native-sqlite'
         });
 
         this._localDb.crypto("", {
@@ -80,22 +92,25 @@ class EncryptedDatabase {
             }
         }
 
-        const parent = this;
+        const humanName = this.dbHumanName;
+        const remoteDsn = this.remoteDsn;
+        const _localDbEncrypted = this._localDbEncrypted;
+        const _remoteDbEncrypted = this._remoteDbEncrypted;
 
         // Do a once off sync to ensure the local database pulls all data from remote server
         // before commencing live syncronisation between the two databases
         await this._localDbEncrypted.replicate.from(this._remoteDbEncrypted)
             .on("error", function(err) {
-                console.error("Unknown error occurred with replication snapshot from remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                console.error("Unknown error occurred with replication snapshot from remote database: " + humanName + " (" + remoteDsn +")");
                 console.error(err);
             })
             .on("denied", function(err) {
-                console.error("Permission denied with replication snapshot from remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                console.error("Permission denied with replication snapshot from remote database: " + humanName + " (" + remoteDsn +")");
                 console.error(err);
             })
             .on("complete", function(info) {
                 // Commence two-way, continuous, retrivable sync
-                parent.sync = PouchDB.sync(parent._localDbEncrypted, parent._remoteDbEncrypted, {
+                parent.sync = PouchDB.sync(_localDbEncrypted, _remoteDbEncrypted, {
                     live: true,
                     retry: true,
                     // Dont sync design docs
@@ -103,10 +118,10 @@ class EncryptedDatabase {
                         return doc._id.indexOf('_design') !== 0;
                     }
                 }).on("error", function(err) {
-                    console.error("Unknown error occurred syncing with remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                    console.error("Unknown error occurred syncing with remote database: " + humanName + " (" + remoteDsn +")");
                     console.error(err);
                 }).on("denied", function(err) {
-                    console.error("Permission denied to sync with remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                    console.error("Permission denied to sync with remote database: " + humanName + " (" + remoteDsn +")");
                     console.error(err);
                 });
             });

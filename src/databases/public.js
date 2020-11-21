@@ -1,9 +1,17 @@
 /*eslint no-console: "off"*/
 
-import PouchDB from 'pouchdb-react-native';
+import PouchDB from '@craftzdog/pouchdb-core-react-native';
+import HttpPouch from 'pouchdb-adapter-http';
+import replication from '@craftzdog/pouchdb-replication-react-native';
+import mapreduce from 'pouchdb-mapreduce';
 import PouchDBFind from 'pouchdb-find';
-PouchDB.plugin(PouchDBFind);
 import Utils from "../utils";
+
+PouchDB
+  .plugin(HttpPouch)
+  .plugin(replication)
+  .plugin(mapreduce)
+  .plugin(PouchDBFind);
 
 class PublicDatabase {
 
@@ -29,16 +37,16 @@ class PublicDatabase {
             dsn = publicCreds.dsn;
         }
 
+        let humanName = this.dbHumanName
+
         if (!dsn) {
             throw "Unable to locate DSN for public database: " + this.dbHumanName;
         }
 
-        parent = this;
-
         this._remoteDb = new PouchDB(dsn + this.dbName, {
             cb: function(err) {
                 if (err) {
-                    throw new Error('Unable to connect to remote database: ' + parent.dbHumanName);
+                    throw new Error('Unable to connect to remote database: ' + humanName);
                 }
             },
             skip_setup: true
@@ -51,7 +59,7 @@ class PublicDatabase {
                     await this.createDb();
                 }
                 else {
-                    throw new Error("Public database not found: " + parent.dbHumanName);
+                    throw new Error("Public database not found: " + humanName);
                 }
             }
         } catch(err) {
@@ -59,7 +67,7 @@ class PublicDatabase {
                 await this.createDb();
             }
             else {
-                throw new Error("Public database not found: " + parent.dbHumanName);
+                throw new Error("Public database not found: " + humanName);
             }
         }
     }
