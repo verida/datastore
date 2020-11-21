@@ -92,22 +92,25 @@ class EncryptedDatabase {
             }
         }
 
-        const parent = this;
+        const humanName = this.dbHumanName;
+        const remoteDsn = this.remoteDsn;
+        const _localDbEncrypted = this._localDbEncrypted;
+        const _remoteDbEncrypted = this._remoteDbEncrypted;
 
         // Do a once off sync to ensure the local database pulls all data from remote server
         // before commencing live syncronisation between the two databases
         await this._localDbEncrypted.replicate.from(this._remoteDbEncrypted)
             .on("error", function(err) {
-                console.error("Unknown error occurred with replication snapshot from remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                console.error("Unknown error occurred with replication snapshot from remote database: " + humanName + " (" + remoteDsn +")");
                 console.error(err);
             })
             .on("denied", function(err) {
-                console.error("Permission denied with replication snapshot from remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                console.error("Permission denied with replication snapshot from remote database: " + humanName + " (" + remoteDsn +")");
                 console.error(err);
             })
             .on("complete", function(info) {
                 // Commence two-way, continuous, retrivable sync
-                parent.sync = PouchDB.sync(parent._localDbEncrypted, parent._remoteDbEncrypted, {
+                parent.sync = PouchDB.sync(_localDbEncrypted, _remoteDbEncrypted, {
                     live: true,
                     retry: true,
                     // Dont sync design docs
@@ -115,10 +118,10 @@ class EncryptedDatabase {
                         return doc._id.indexOf('_design') !== 0;
                     }
                 }).on("error", function(err) {
-                    console.error("Unknown error occurred syncing with remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                    console.error("Unknown error occurred syncing with remote database: " + humanName + " (" + remoteDsn +")");
                     console.error(err);
                 }).on("denied", function(err) {
-                    console.error("Permission denied to sync with remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
+                    console.error("Permission denied to sync with remote database: " + humanName + " (" + remoteDsn +")");
                     console.error(err);
                 });
             });
