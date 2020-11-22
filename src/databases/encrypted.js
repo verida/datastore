@@ -24,6 +24,7 @@ PouchDBCrypt
   .plugin(replication)
   .plugin(mapreduce)
   .plugin(PouchDBFind)
+  .plugin(SQLiteAdapter)
   .plugin(CryptoPouch);
 
 class EncryptedDatabase {
@@ -82,8 +83,6 @@ class EncryptedDatabase {
             if (info.error && info.error == "not_found") {
                 // Remote dabase wasn't found, so attempt to create it
                 await this.createDb();
-            } else {
-                throw new Error('Unknown error occurred attempting to get information about remote encrypted database');
             }
         } catch (err) {
             if (err.error && err.error == "not_found") {
@@ -98,6 +97,7 @@ class EncryptedDatabase {
         const remoteDsn = this.remoteDsn;
         const _localDbEncrypted = this._localDbEncrypted;
         const _remoteDbEncrypted = this._remoteDbEncrypted;
+        const parent = this;
 
         // Do a once off sync to ensure the local database pulls all data from remote server
         // before commencing live syncronisation between the two databases
