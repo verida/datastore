@@ -2,7 +2,7 @@
 
 import PouchDB from '@craftzdog/pouchdb-core-react-native';
 import HttpPouch from 'pouchdb-adapter-http';
-import replication from '@craftzdog/pouchdb-replication-react-native';
+import replication from '@verida/pouchdb-replication-react-native';
 import mapreduce from 'pouchdb-mapreduce';
 import PouchDBFind from 'pouchdb-find';
 import Utils from "../utils";
