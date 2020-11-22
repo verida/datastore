@@ -153,22 +153,6 @@ class DataStore {
         return this._dataserver;
     }
 
-    /**
-     * Bind to changes to this datastore
-     * 
-     * @param {functino} cb Callback function that fires when new data is received
-     */
-    async changes(cb) {
-        const db = await this.getDb();
-        const dbInstance = await db.getInstance();
-        dbInstance.changes({
-            since: 'now',
-            live: true
-        }).on('change', async function(info) {
-            cb(info);
-        });
-    }
-
     async _init() {
         if (this._db) {
             return;
