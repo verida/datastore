@@ -97,7 +97,7 @@ class App {
      * Determine if the current application instnace is connected
      */
     isConnected() {
-        return await this._isConnected;
+        return this._isConnected;
     }
 
     /**
