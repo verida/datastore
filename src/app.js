@@ -34,10 +34,10 @@ class App {
     constructor(config) {
         this.appName = config.appName ? config.appName : App.config.appName;
 
-        if (process.browser) {
-            this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
-        } else {
+        if (config.privateKey) {
             this.user = new ServerUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.privateKey);
+        } else {
+            this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
         }
 
         this.outbox = new Outbox(this);

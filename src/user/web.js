@@ -20,7 +20,7 @@ class WebUser extends Base {
         super(chain, address, appServerUrl);
 
         if (!web3Provider) {
-            throw new Error("No web3 provider specified for server user");
+            throw new Error("No web3 provider specified for web user");
         }
 
         this.web3Provider = new Web3(web3Provider);
