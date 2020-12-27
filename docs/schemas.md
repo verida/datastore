@@ -54,7 +54,8 @@ There is a **very** basic `social/contact` schema provided in the core schemas:
 ```
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "schemas/social/contact/schema.json",
+    "$id": "https://schemas.verida.io/social/contact/schema.json",
+    "name": "https://schemas.verida.io/social/contact",
     "title": "Contact",
     "titlePlural": "Contacts",
     "description": "A record of a contact",
@@ -67,8 +68,30 @@ There is a **very** basic `social/contact` schema provided in the core schemas:
             "name": ["lastName", "firstName"]
         }
     },
+    "appearance": {
+        "style": {
+            "color": "#FD4F64",
+            "icon": "http://www.myschemas.com/myicon.svg",
+        },
+        "nameField": "name",
+        "summaryField": "summary"
+    },
+    "layouts": {
+        "create": [
+            "firstName",
+            "lastName",
+            "email",
+            "mobile",
+            "did"
+        ],
+        "view": [
+            "name",
+            "email",
+            "did"
+        ]
+    }
     "allOf": [
-        {"$ref": "/schemas/base/schema.json"},
+        {"$ref": "https://schemas.verida.io/schemas/base/schema.json"},
         {
             "properties": {
                 "firstName": {
@@ -113,8 +136,8 @@ Here's an example custom schema for a note:
 ```
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "/general/note/schema.json",
-    "name": "general/note",
+    "$id": "https://<your host>/general/note/schema.json",
+    "name": "https://<your host>/general/note",
     "title": "Note",
     "description": "A simple text note",
     "type": "object",
@@ -125,7 +148,7 @@ Here's an example custom schema for a note:
         }
     },
     "allOf": [
-        {"$ref": "https://schemas.testnet.verida.io/core/base/schema.json"},
+        {"$ref": "https://<your host>/core/base/schema.json"},
         {
             "properties": {
                 "title": {
@@ -152,12 +175,10 @@ Here's an example custom schema for a note:
   }
 ```
 
-By default, the Verida Datastore looks in `/schemas/custom/` for any custom schemas. In this case, make the file available at `http://<your host>/schemas/custom/general/note/schema.json`.
-
-You can then open a new datastore using this schema with:
+You can then host your schema at `https://<your host>/general/note/schema.json` and open a datastore using your schema with:
 
 ```
-let datastore = app.openDatastore('general/note')
+let datastore = app.openDatastore('https://<your host>/general/note/schema.json')
 ```
 
 ## Versioning
