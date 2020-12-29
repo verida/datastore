@@ -1,3 +1,12 @@
+2020-11-39 (0.6.3)
+--------------------
+
+- Fix: Force VID to be a string
+- Fix: Don't make _isConnected call connect(), just return state variable
+- Fix: Allow private key instantiation to work on web
+- Fix: Invalid error message if no web3 provider provided
+- Fix: Create database if it doesn't exist
+
 
 2020-11-08 (0.6.2)
 --------------------

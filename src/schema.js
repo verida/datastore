@@ -120,9 +120,27 @@ class Schema {
         return this._schemaJson;
     }
 
-    async getIcon() {
-        let path = await this.getPath();
-        return path.replace("schema.json","icon.svg");
+    async getAppearance() {
+        const schemaJson = await this.getSpecification()
+        let appearance = schemaJson.appearance
+        if (appearance.style && appearance.style.icon) {
+            let icon = schemaJson.appearance.style.icon
+            if (icon.substring(0,2) == './') {
+                // support relative icon path
+                const path = await this.getPath();
+                icon = path.replace("schema.json",icon.substring(2));
+            }
+            if (icon.substring(0,1) == '/') {
+                // support absolute icon path
+                const path = await this.getPath();
+                const rootPathParts = path.match(/^(https?:\/\/[^\/]*)/)
+                icon = rootPathParts[0] + '/' + icon.substring(1);
+            }
+
+            schemaJson.appearance.style.icon = icon
+        }
+        
+        return appearance
     }
 
     /**
