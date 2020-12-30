@@ -95,47 +95,46 @@ class Inbox extends EventEmitter {
 
     async watch() {
         await this.init();
-        let inbox = this;
-    
-        // Setup watching for new inbox items in the public inbox
-        let db = await this._publicInbox.getDb();
-        let dbInstance = await db.getInstance();
+        let inbox = this; // Setup watching for new inbox items in the public inbox
+
+        const publicDb = await this._publicInbox.getDb();
+        let dbInstance = await publicDb.getInstance();
         dbInstance.changes({
             since: 'now',
             live: true
-        }).on('change', async function(info) {
+        }).on('change', async function (info) {
             if (info.deleted) {
-                // ignore deleted changes
-                return;
+            // ignore deleted changes
+            return;
             }
-    
-            const inboxItem = await db.get(info.id, {
-                rev: info.changes[0].rev
+
+            const inboxItem = await publicDb.get(info.id, {
+            rev: info.changes[0].rev
             });
-    
             await inbox.processItem(inboxItem);
-        }).on('error', function(err) {
-            console.log("Error watching for public inbox changes");
-            console.log(err);
-        })
-    
-        // Setup watching for any changes to the local private inbox (ie: marking an item as read)
-        db = await this._privateInbox.getDb();
-        dbInstance = await db.getInstance();
+        }).on('denied', function(err) {
+            console.error('Inbox sync denied')
+            console.error(err)
+        }).on('error', function (err) {
+            console.error("Error watching for public inbox changes");
+            console.error(err);
+        }); // Setup watching for any changes to the local private inbox (ie: marking an item as read)
+
+        const privateDb = await this._privateInbox.getDb();
+        dbInstance = await privateDb.getInstance();
         dbInstance.changes({
             since: 'now',
             live: true
-        }).on('change', async function(info) {
-            const inboxItem = await db.get(info.id, {
-                rev: info.changes[0].rev
+        }).on('change', async function (info) {
+            const inboxItem = await privateDb.get(info.id, {
+            rev: info.changes[0].rev
             });
-    
             inbox.emit("inboxChange", inboxItem);
-        }).on('error', function(err) {
+        }).on('error', function (err) {
             console.log("Error watching for private inbox changes");
             console.log(err);
-        })
-      }
+        });
+    }
 
     /**
      * Initialise the inbox manager
