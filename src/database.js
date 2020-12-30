@@ -200,13 +200,9 @@ class Database extends EventEmitter {
             options.selector = _.merge(options.selector, filter);
         }
 
-        try {
-            let docs = await this._db.find(options);
-            if (docs) {
-                return raw ? docs : docs.docs;
-            }
-        } catch (err) {
-            console.log(err);
+        let docs = await this._db.find(options);
+        if (docs) {
+            return raw ? docs : docs.docs;
         }
 
         return;
