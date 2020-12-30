@@ -45,20 +45,9 @@ class Schema {
         }, options);
 
         this.ajv = new Ajv(options.ajv);
-    }
-
-    async init() {
-        this.path = await this._resolvePath(this.path);
-        this._specification = await $RefParser.dereference(this.path, {
-            resolve: { http: resolver }
-        });
-        let spec = await resolveAllOf(this._specification);
-        this.name = spec.name;
-
-        this._schemaJson = null;
-        this._finalPath = null;
-        this._specification = null;
-        this._validate = null;
+        for (let s in options.metaSchemas) {
+            this.ajv.addMetaSchema(options.metaSchemas[s]);
+        }
     }
 
     /**
