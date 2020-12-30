@@ -5,6 +5,8 @@ import VidHelper from "./vid";
 import DataServer from '../dataserver';
 const _ = require('lodash');
 
+const profileCache = {}
+
 export default class StaticHelper {
 
     /**
@@ -44,7 +46,10 @@ export default class StaticHelper {
     }
 
     /**
-     * Opens the public profile of any user in read only mode
+     * Opens the public profile of any user in read only mode.
+     * 
+     * Supports caching and returns a promise if its the first time trying to
+     * fetch the profile
      *
      * @param {string} did
      * @example
@@ -53,16 +58,31 @@ export default class StaticHelper {
      * @return {DataStore} Datastore instance for the requested user profile
      */
     static async openProfile(did, appName) {
-        const datastore = await App.openExternalDatastore("profile/public", did, {
-            appName: appName || App.config.vaultAppName,
-            permissions: {
-                read: "public",
-                write: "owner"
-            },
-            readOnly: true
+        if (profileCache[did]) {
+            return profileCache[did];
+        }
+    
+        const promise = new Promise(async (resolve, reject) => {
+          try {
+            const datastore = await App.openExternalDatastore("profile/public", did, {
+                appName: appName || App.config.vaultAppName,
+                permissions: {
+                    read: "public",
+                    write: "owner"
+                },
+                readOnly: true
+            });
+    
+            profileCache[did] = new Profile(datastore);
+            resolve(profileCache[did]);
+    
+          } catch (err) {
+            reject(err)
+          }
         });
-
-        return new Profile(datastore);
+    
+        profileCache[did] = promise;
+        return profileCache[did];
     }
 
     /**

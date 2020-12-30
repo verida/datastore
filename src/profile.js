@@ -15,6 +15,7 @@ class Profile {
      */
     constructor(datastore) {
         this._store = datastore;
+        this._cache = []
     }
 
     /**
@@ -62,8 +63,13 @@ class Profile {
      * @param {object} [customFilter] Database query filter to restrict the results passed through to [PouchDB.find()](https://pouchdb.com/api.html#query_index)
      * @param {object} [options] Database options that will be passed through to [PouchDB.find()](https://pouchdb.com/api.html#query_index)
      */
-    async getMany(filter, options) {
-        return this._store.getMany(filter, options);
+    async getMany(filter, options, cache=true) {
+        if (this._cache) {
+            return this._cache
+        }
+
+        this._cache = await this._store.getMany(filter, options);
+        return this._cache;
     }
 
 }

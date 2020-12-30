@@ -19,6 +19,8 @@ const resolver = {
     }
 };
 
+const jsonCache = {};
+
 class Schema {
 
     /**
@@ -193,15 +195,22 @@ class Schema {
      * @param {*} uri 
      */
     static async loadJson(uri) {
-        uri = await Schema.resolvePath(uri);
-        let request = await axios.get(uri, {
+        if (jsonCache[uri]) {
+          return jsonCache[uri];
+        }
+    
+        jsonCache[uri] = new Promise(async (resolve, reject) => {
+          uri = await Schema.resolvePath(uri);
+          let request = await axios.get(uri, {
             responseType: 'json'
+          }); // @todo: check valid uri
+    
+          let json = await request.data;
+          resolve(json)
         });
-
-        // @todo: check valid uri
-        let json = await request.data;
-        return json;
-    }
+    
+        return jsonCache[uri]
+      }
 
 }
 
