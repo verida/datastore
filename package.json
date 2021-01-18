@@ -35,7 +35,7 @@
   "dependencies": {
     "@verida/did-helper": "^0.6.0",
     "@verida/encryption-utils": "^0.2.1",
-    "@verida/wallet-utils": "^1.2.0",
+    "@verida/wallet-utils": "^1.2.1",
     "ajv": "^6.12.6",
     "axios": "^0.19.2",
     "crypto-pouch": "git+https://github.com/tahpot/crypto-pouch.git",
