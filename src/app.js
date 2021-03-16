@@ -73,7 +73,7 @@ class App {
      */
     async connect(force) {
         if (this._isConnected && force) {
-            throw "Application datastore is already connected";
+            throw new Error("Application datastore is already connected");
         }
 
         let connected = await this.dataserver.connect(this.user, force);

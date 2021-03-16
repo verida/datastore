@@ -18,7 +18,7 @@ class Base {
         this.chain = chain;
         this.address = address;
         this.serverUrl = serverUrl;
-        this.did = VidHelper.getDidFromAddress(address, chain);
+        this.did = address ? VidHelper.getDidFromAddress(address, chain) : null;
 
         this.appConfigs = {};
         this.signatures = {};
@@ -44,6 +44,7 @@ class Base {
 
     async getAppConfig(appName, force, signature) {
         appName = appName || App.config.appName;
+        
         // Load from in memory cache
         if (this.appConfigs[appName]) {
             return this.appConfigs[appName];

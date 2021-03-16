@@ -1,4 +1,3 @@
-const Web3 = require('web3');
 import App from '../app';
 import Base from './base';
 import store from 'store';
@@ -23,11 +22,11 @@ class WebUser extends Base {
             throw new Error("No web3 provider specified for web user");
         }
 
-        this.web3Provider = new Web3(web3Provider);
+        this.web3Provider = web3Provider;
     }
 
     async _requestSignature(signMessage) {
-        return this.web3Provider.eth.personal.sign(signMessage, this.address);
+        return this.web3Provider.sign(signMessage, this.address);
     }
 
     saveToSession(appName) {

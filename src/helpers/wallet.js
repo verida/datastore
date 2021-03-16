@@ -1,7 +1,10 @@
-import Encryption from "@verida/encryption-utils";
+/*import Encryption from "@verida/encryption-utils";
 import VidHelper from './vid';
 import DIDHelper from '@verida/did-helper';
-import Verida from '../app';
+import Verida from '../app';*/
+import NearHelper from '../helpers/near';
+import Web3ProviderHelper from '../helpers/web3provider'
+const Web3 = require('web3');
 
 const REQUEST_SCHEMA = 'https://schemas.verida.io/wallet/request/schema.json';
 
@@ -13,47 +16,47 @@ class WalletHelper {
     /**
      * Helper to connect a wallet.
      */
-    async connectWeb3(chain) {
-        let web3Provider;
-        if (chain == 'ethr') {
-            if (window.ethereum) {
-                // Modern dapp browsers...
-                web3Provider = window.ethereum;
-                try {
-                    // Request account access
-                    await window.ethereum.enable();
-                } catch (error) {
-                    // User denied account access...
-                    throw Error("User denied account access");
-                }
-            }
-            else if (window.web3) {
-                // Legacy dapp browsers...
-                web3Provider = window.web3.currentProvider;
-            }
-            else {
-                // If no injected web3 instance is detected throw an exception
-                throw Error("Unable to locate Ethereum");
-            }
-
-            return web3Provider;
-        }
-    }
-
-    /**
-     * Helper to get the current address for a wallet.
-     * 
-     * @param {*} chain 
-     */
-    /*eslint no-console: "off"*/
-    async getAddress(chain) {
-        let address;
-
+    async connectWeb3(chain, config) {
         switch (chain) {
             case 'ethr':
-                address = await window.ethereum.enable();
-                return address.toString();
+                let web3Provider;
+                if (window.ethereum) {
+                    // Modern dapp browsers...
+                    web3Provider = window.ethereum;
+                    try {
+                        // Request account access
+                        await window.ethereum.enable();
+                    } catch (error) {
+                        // User denied account access...
+                        throw Error("User denied account access");
+                    }
+                }
+                else if (window.web3) {
+                    // Legacy dapp browsers...
+                    web3Provider = window.web3.currentProvider;
+                }
+                else {
+                    // If no injected web3 instance is detected throw an exception
+                    throw Error("Unable to locate Ethereum");
+                }
+
+                const ethWeb3Provider = new Web3(web3Provider);
+                this.web3Provider = new Web3ProviderHelper('ethr', ethWeb3Provider)
+                break;
+            case 'near':
+                const near = new NearHelper({
+                    contractName: config.contractName
+                });
+
+                this.web3Provider = new Web3ProviderHelper('near', near, config);
+                break;
         }
+
+        if (this.web3Provider) {
+            return this.web3Provider;
+        }
+
+        throw new Error(`Invalid chain specified (${chain})`);
     }
 
     /**
@@ -61,7 +64,7 @@ class WalletHelper {
      * @param {string} appName Name of application to login to
      * @param {string} usernameOrDid Valid DID or a Verida username
      */
-    async remoteRequest(did, requestData, cb) {
+    /*async remoteRequest(did, requestData, cb) {
         // Generate a random key pair for this communication
         const keyPair = Encryption.randomKeyPair();
 
@@ -131,7 +134,7 @@ class WalletHelper {
         })
 
         return requestId
-    }
+    }*/
 
 }
 
