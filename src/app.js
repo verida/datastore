@@ -2,6 +2,7 @@
 
 import Config from './config';
 import WebUser from "./user/web";
+import VaultUser from "./user/vault";
 import ServerUser from "./user/server";
 import VeridaSchema from "./schema";
 import DataServer from './dataserver';
@@ -34,9 +35,22 @@ class App {
     constructor(config) {
         this.appName = config.appName ? config.appName : App.config.appName;
 
+        if (config.did) {
+            const didParts = config.did.split(':')
+            if (didParts.length != 3) {
+                throw new Error('Invalid DID specified')
+            }
+
+            config.chain = didParts[1]
+            config.address = didParts[2]
+        }
+
         if (config.privateKey) {
             this.user = new ServerUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.privateKey);
-        } else {
+        } else if (config.signature) {
+            this.user = new VaultUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.signature, this.appName);
+        }
+        else {
             this.user = new WebUser(config.chain, config.address, config.appServerUrl || App.config.server.appServerUrl, config.web3Provider);
         }
 
