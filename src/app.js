@@ -7,7 +7,6 @@ import VeridaSchema from "./schema";
 import DataServer from './dataserver';
 import Inbox from "./messaging/inbox";
 import Outbox from "./messaging/outbox";
-import WalletHelper from "./helpers/wallet";
 import VidHelper from "./helpers/vid";
 import TrustHelper from './helpers/trust';
 import CredentialsHelper from './helpers/credentials';
@@ -61,7 +60,6 @@ class App {
 
         this.Helpers = {
             vid: VidHelper,
-            wallet: WalletHelper,
             trust: TrustHelper,
             credentials: CredentialsHelper,
             schema: VeridaSchema,
@@ -171,7 +169,6 @@ class App {
 
 App.Helpers = {
     vid: VidHelper,
-    wallet: WalletHelper,
     trust: TrustHelper,
     credentials: CredentialsHelper,
     schema: VeridaSchema,
