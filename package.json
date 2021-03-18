@@ -33,9 +33,9 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.7.0",
+    "@verida/did-helper": "^0.7.1",
     "@verida/encryption-utils": "^0.2.1",
-    "@verida/wallet-utils": "^1.3.0",
+    "@verida/wallet-utils": "^1.3.1",
     "ajv": "^6.12.6",
     "axios": "^0.19.2",
     "bs58": "^4.0.1",

@@ -1,5 +1,6 @@
 import utils from '@verida/wallet-utils';
 import Base from './base';
+const bs58 = require('bs58');
 
 class ServerUser extends Base {
   /**
