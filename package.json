@@ -22,7 +22,7 @@
   "dependencies": {
     "@craftzdog/pouchdb-core-react-native": "^7.0.0",
     "@tradle/react-native-http": "^2.0.0",
-    "@verida/did-helper": "^0.6.1",
+    "@verida/did-helper": "^0.7.0",
     "@verida/encryption-utils": "^0.2.1",
     "@verida/pouchdb-replication-react-native": "^7.0.0-prerelease",
     "@verida/wallet-utils": "^1.3.0",
