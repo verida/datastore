@@ -33,7 +33,7 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.6.0",
+    "@verida/did-helper": "^0.7.0",
     "@verida/encryption-utils": "^0.2.1",
     "@verida/wallet-utils": "^1.3.0",
     "ajv": "^6.12.6",
