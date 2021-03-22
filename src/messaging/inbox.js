@@ -116,8 +116,8 @@ class Inbox extends EventEmitter {
             console.error('Inbox sync denied')
             console.error(err)
         }).on('error', function (err) {
-            console.error("Error watching for public inbox changes");
-            console.error(err);
+            //console.error("Error watching for public inbox changes");
+            // This often happens when changing networks, so don't log
         }); // Setup watching for any changes to the local private inbox (ie: marking an item as read)
 
         const privateDb = await this._privateInbox.getDb();
