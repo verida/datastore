@@ -1,4 +1,16 @@
-2020-11-39 (0.6.3)
+
+2021-03-23 (0.7.0)
+--------------------
+
+- Feature: Add NEAR support
+- Feature: Add Vault based login support via QR code
+- Feature: Add basic profile caching
+- Feature: Add support for inbox `inboxChange` event
+- Feature: Improve schema docs
+- Fix: Sync issue caused by multiple events
+- Fix: Don't log inbox sync errors
+
+2020-11-29 (0.6.3)
 --------------------
 
 - Fix: Force VID to be a string

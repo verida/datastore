@@ -1,6 +1,6 @@
 {
   "name": "@verida/datastore",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Verida Datastore",
   "main": "lib/app.js",
   "author": "Verida",
