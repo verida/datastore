@@ -63,8 +63,8 @@ class Profile {
      * @param {object} [customFilter] Database query filter to restrict the results passed through to [PouchDB.find()](https://pouchdb.com/api.html#query_index)
      * @param {object} [options] Database options that will be passed through to [PouchDB.find()](https://pouchdb.com/api.html#query_index)
      */
-    async getMany(filter, options, cache=true) {
-        if (this._cache) {
+    async getMany(filter, options, useCache=true) {
+        if (useCache && this._cache.length) {
             return this._cache
         }
 
