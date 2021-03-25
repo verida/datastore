@@ -116,7 +116,7 @@ class ProfileManager {
         return
       }
   
-      this._store = await this._app.openDatastore('profile/public', {
+      this._store = await this._app.openDatastore('https://schemas.verida.io/profile/public/schema.json', {
         permissions: {
           read: 'public',
           write: 'owner'
