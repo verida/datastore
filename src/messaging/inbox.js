@@ -98,7 +98,7 @@ class Inbox extends EventEmitter {
         let inbox = this; // Setup watching for new inbox items in the public inbox
 
         const publicDb = await this._publicInbox.getDb();
-        let dbInstance = await publicDb.getInstance();
+        const dbInstance = await publicDb.getInstance();
         dbInstance.changes({
             since: 'now',
             live: true
@@ -116,12 +116,17 @@ class Inbox extends EventEmitter {
             console.error('Inbox sync denied')
             console.error(err)
         }).on('error', function (err) {
-            console.error("Error watching for public inbox changes");
-            console.error(err);
+            //console.error("Error watching for public inbox changes");
+            // This often happens when changing networks, so don't log
         }); // Setup watching for any changes to the local private inbox (ie: marking an item as read)
 
+        await this.watchPrivateChanges();
+    }
+
+    async watchPrivateChanges() {
+        let inbox = this;
         const privateDb = await this._privateInbox.getDb();
-        dbInstance = await privateDb.getInstance();
+        const dbInstance = await privateDb.getInstance();
         dbInstance.changes({
             since: 'now',
             live: true
@@ -133,6 +138,10 @@ class Inbox extends EventEmitter {
         }).on('error', function (err) {
             console.log("Error watching for private inbox changes");
             console.log(err);
+            setTimeout(() => {
+                console.log('retrying to establish inbox connection')
+                inbox.watchPrivateChanges()
+            }, 10000)
         });
     }
 

@@ -64,7 +64,7 @@ export default class StaticHelper {
     
         const promise = new Promise(async (resolve, reject) => {
           try {
-            const datastore = await App.openExternalDatastore("profile/public", did, {
+            const datastore = await App.openExternalDatastore("https://schemas.verida.io/profile/public/schema.json", did, {
                 appName: appName || App.config.vaultAppName,
                 permissions: {
                     read: "public",
