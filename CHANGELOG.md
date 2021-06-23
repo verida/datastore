@@ -1,4 +1,11 @@
 
+2021-06-23 (0.7.1)
+--------------------
+
+- Fix schema references to be absolute
+- Fix cache checks on public profile data
+- Fix inbox retry on error
+
 2021-03-23 (0.7.0)
 --------------------
 
