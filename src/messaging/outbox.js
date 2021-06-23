@@ -87,7 +87,7 @@ class Outbox {
         // the user's private vault
         let appUserConfig = await this._app.user.getAppConfig();
         let keyring = appUserConfig.keyring;
-        let signer = didJWT.SimpleSigner(keyring.signKey.private);
+        let signer = await didJWT.EdDSASigner(keyring.signKey.private);
         let userVid = await this._app.user.getAppVid(sendingAppName);
 
         let jwt = await didJWT.createJWT({
@@ -98,7 +98,7 @@ class Outbox {
             veridaApp: sendingAppName,
             insertedAt: (new Date()).toISOString()
         }, {
-            alg: 'ES256K-R',
+            alg: 'Ed25519',
             issuer: this._app.user.did,
             signer
         });
