@@ -1,16 +1,14 @@
 
 
-2021-06-23 (0.7.2)
---------------------
-
-- Update `@verida/did-helper` and specify `did-jwt@4.4.0` to resolve dependency issues
-
-2021-06-23 (0.7.1)
+2021-06-23 (0.7.3)
 --------------------
 
 - Fix schema references to be absolute
 - Fix cache checks on public profile data
 - Fix inbox retry on error
+- Fix documentation relating to opening databases / datastores with custom permissions
+- Update `@verida/did-helper` and `did-jwt` to `@4.9.0`
+- Specify correct signing algorithm in message DID-JWTs
 
 2021-03-23 (0.7.0)
 --------------------
