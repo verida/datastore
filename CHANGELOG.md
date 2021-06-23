@@ -1,4 +1,10 @@
 
+
+2021-06-23 (0.7.2)
+--------------------
+
+- Update `@verida/did-helper` and specify `did-jwt@4.4.0` to resolve dependency issues
+
 2021-06-23 (0.7.1)
 --------------------
 

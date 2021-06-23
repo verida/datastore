@@ -1,6 +1,6 @@
 {
   "name": "@verida/datastore",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Verida Datastore",
   "main": "lib/app.js",
   "author": "Verida",
@@ -33,7 +33,7 @@
     }
   },
   "dependencies": {
-    "@verida/did-helper": "^0.7.1",
+    "@verida/did-helper": "^0.7.2",
     "@verida/encryption-utils": "^0.2.1",
     "@verida/wallet-utils": "^1.3.1",
     "ajv": "^6.12.6",
