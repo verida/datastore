@@ -172,18 +172,33 @@ Here are some real world examples:
 Permissions are specified when opening a `database` or `datastore`:
 
 ```
-const permissions = {
+let permissions = {
   read: 'owner',
   write: 'owner'
 }
 
-// Open a database
-const privateDb = await app.openDatabase('private/data', app.user.did, {
+// Open a database for the current user
+const privateDb = await app.openDatabase('private/data', {
   permissions: permissions
 });
 
 // Open a datastore
-const healthNotes = await app.openDatastore('health/note', app.user.did, {
+const healthNotes = await app.openDatastore('health/note', {
+  permissions: permissions
+});
+
+permissions = {
+  read: 'public',
+  write: 'owner'
+}
+
+// Open a database for another user (assuming you have access)
+const publicDb = await app.openDatabase('public/data', externalDid, {
+  permissions: permissions
+});
+
+// Open a datastore for another user (assuming you have access)
+const publicDatastore = await app.openDatabase('public/data', externalDid, {
   permissions: permissions
 });
 ```
