@@ -109,7 +109,7 @@ console.log(items);
 
 It's also possible to create public databases and connect to other user's public database. We are also working on permissioned databases where the database owner can control who has read or write access.
 
-?>See [Data Permissions](/Guide.html#Database-Permissions)
+?>See [Data Permissions](/data?id=permissions)
 
 ### Open a Datastore
 
