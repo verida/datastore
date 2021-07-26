@@ -93,30 +93,23 @@ console.log(results);
 
 #### Pagination
 
-The underlying database is based on CouchDB which doesn't provide a way to count the total number of results. Instead it uses a `bookmark` property that can be used to fetch the next page of results.
+When dealing with hundreds or thousands of records in a single database, proper pagination allows you to offer a manageable scope of records to your users. The `allDocs()` method does not provide a parameter for this kind of filtered search by default. Instead, it returns all the docs, as the name implies. 
 
-This can be used as follows:
+However, we can set a pagination limit to the number of results that are returned. The `limit` parameter allows us to fetch and display a set of documents from the database. This can be used as follows:
 
 ```
-let filter = {
-  organization: 'Google'
-};
+// Configure our page size (10) and start position (lastId), then sort documents by name 
 
-// Configure our page size (20), start position (0) and request to return the
-// raw result set, which will provide us with a `bookmark` we can use to fetch
-// the next page of results.
-let options = {
-  limit: 20,
-  raw: true
-};
-
-let page1 = contactsDs.getMany(filter, options);
-console.log(page1.docs);
-
-// Request the next 
-options.bookmark = page1.bookmark;
-let page2 = contactsDs.getMany(filter, options);
+let lastId = null
+const currentPageResults = await datastore.getMany({
+  _id: {$gt: lastId}
+}, {
+  limit: 10,
+  sort:['name']
+})
 ```
+
+As illustrated above, we only get 10 documents back, which are the first 10 documents sorted by name. We can continue paginating by using the last value as our next starting point. At any given point in time, we will only have 10 documents stored in the memory, which is great for performance.
 
 ### Saving
 
