@@ -33,7 +33,7 @@ class PublicDatabase {
             throw "Unable to locate DSN for public database: " + this.dbHumanName;
         }
 
-        parent = this;
+        const parent = this;
         
         this._remoteDb = new PouchDB(dsn + this.dbName, {
             cb: function(err) {

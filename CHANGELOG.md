@@ -1,4 +1,9 @@
 
+2021-07-29 (0.7.4)
+--------------------
+
+- Fix issues caused by NEAR support, if running in NodeJs
+- Fix missing `const`
 
 2021-06-23 (0.7.3)
 --------------------

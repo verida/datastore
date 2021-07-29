@@ -1,15 +1,18 @@
 const nearAPI = require('near-api-js');
 const _ = require('lodash');
 
-if (!window.nearAPI)
-    window.nearAPI = nearAPI;
-
 class NearHelper {
 
     constructor(config) {
         if (this.wallet) {
             return;
         }
+
+        // Only inject nearAPI into window if window exists (indicating we are
+        // in a web context). Only inject in the constructor which indicates
+        // NEAR needs initializing
+        if (typeof(window) != 'undefined' && !window.nearAPI)
+            window.nearAPI = nearAPI;
 
         config = _.merge({
             networkId: 'default',
