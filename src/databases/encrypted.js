@@ -33,6 +33,7 @@ class EncryptedDatabase {
         
         // PouchDB sync object
         this.sync = null;
+        this.syncError = null;
 
         // Automatically convert encryption key to a Buffer if it's a hex string
         if (typeof(this.encryptionKey) == 'string') {
@@ -41,9 +42,14 @@ class EncryptedDatabase {
     }
 
     async _init() {
+        if (this.sync) {
+            // Do nothing as the object is initialised already.
+            return;
+        }
+
         this._localDbEncrypted = new PouchDB(this.dbName);
         this._localDb = new PouchDBCrypt(this.dbName);
-        
+
         this._localDb.crypto("", {
             "key": this.encryptionKey,
             cb: function(err) {
@@ -96,6 +102,7 @@ class EncryptedDatabase {
                         return doc._id.indexOf('_design') !== 0;
                     } 
                 }).on("error", function(err) {
+                    parent.syncError = err
                     console.error("Unknown error occurred syncing with remote database: " + parent.dbHumanName + " (" + parent.remoteDsn +")");
                     console.error(err);
                 }).on("denied", function(err) {
