@@ -1,4 +1,9 @@
 
+2021-09-07 (0.7.5)
+--------------------
+
+- Fix encryption issue. Force specific `crypto-pouch` version.
+
 2021-07-29 (0.7.4)
 --------------------
 
